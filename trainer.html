@@ -64,11 +64,13 @@
 
     function showDashboard(){loginScreen.classList.remove('active');dashboard.classList.add('active');}
     function showLogin(){dashboard.classList.remove('active');loginScreen.classList.add('active');}
-    function escapeHtml(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));}
+    function escapeHtml(v=''){return String(v).replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','\"':'&quot;'}[c]));}
 
     async function loadTrainer(userId){
-      const {data:profile,error}=await db.from('profiles').select('*').eq('id',userId).single();
-      if(error || profile?.role!=='trainer') throw new Error('This account is not configured as a trainer.');
+      const {data,error}=await db.rpc('get_current_profile');
+      const profile=Array.isArray(data)?data[0]:data;
+      if(error) throw new Error('Unable to read your trainer profile.');
+      if(!profile || profile.id!==userId || String(profile.role).toLowerCase()!=='trainer') throw new Error('This account is not configured as a trainer.');
       currentProfile=profile;
       document.getElementById('trainerWelcome').textContent=`Welcome, ${profile.full_name || 'Trainer'}`;
       document.getElementById('trainerHeader').textContent=`${profile.full_name || 'Trainer'} · Trainer`;
