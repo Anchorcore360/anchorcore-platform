@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RRTA Portal</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .portal-choice-wrap{min-height:calc(100vh - 82px);display:grid;place-items:center;padding:34px;background:linear-gradient(135deg,#f6f7f8 0%,#eceff1 100%)}
+    .portal-choice-card{width:min(760px,100%);background:#fff;padding:36px;border-radius:16px;box-shadow:0 18px 55px rgba(20,30,40,.12);border-top:5px solid var(--red)}
+    .portal-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:26px}
+    .portal-choice{display:block;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:24px;background:#fff;transition:.15s ease}
+    .portal-choice:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(20,30,40,.09);border-color:#c8ced3}
+    .portal-choice h2{margin:6px 0 8px}.portal-choice p{color:var(--muted);margin:0 0 18px;line-height:1.5}
+    .portal-choice .btn{display:inline-block}
+    @media(max-width:700px){.portal-choice-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="header-inner"><img src="rrta-logo.png" class="brand-logo" alt="Rapid Response Training Academy"></div></header>
+  <main class="portal-choice-wrap">
+    <section class="portal-choice-card">
+      <div class="eyebrow">Rapid Response Training Academy</div>
+      <h1>Choose your portal</h1>
+      <p class="lead">Learners and trainers use separate secure areas, powered by the same training database.</p>
+      <div class="portal-choice-grid">
+        <a class="portal-choice" href="learner.html">
+          <div class="eyebrow">Learner</div>
+          <h2>Learner Portal</h2>
+          <p>View assigned learning, complete assessments and access your training record.</p>
+          <span class="btn primary">Learner login</span>
+        </a>
+        <a class="portal-choice" href="trainer.html">
+          <div class="eyebrow">Trainer / Assessor</div>
+          <h2>Trainer Portal</h2>
+          <p>Manage learners, assign training and review learner assessment activity.</p>
+          <span class="btn dark">Trainer login</span>
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
