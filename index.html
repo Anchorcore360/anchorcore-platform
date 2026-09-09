@@ -7,8 +7,10 @@
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
+
 <body>
 <div id="app">
+
   <header class="site-header">
     <div class="header-inner">
       <img src="rrta-logo.png" class="brand-logo" alt="Rapid Response Training Academy">
@@ -20,255 +22,1054 @@
   <main id="screen-login" class="screen active">
     <section class="login-wrap">
       <div class="login-card">
+
         <div class="eyebrow">Rapid Response Training Academy</div>
         <h1>Learning Portal</h1>
-        <p class="lead">Sign in to access your assigned learning or manage learner assessments.</p>
+
+        <p class="lead">
+          Sign in to access your assigned learning or manage learner assessments.
+        </p>
 
         <form id="loginForm">
-          <label>Email address
-            <input id="loginEmail" type="email" autocomplete="username" required>
+
+          <label>
+            Email address
+            <input
+              id="loginEmail"
+              type="email"
+              autocomplete="username"
+              required
+            >
           </label>
-          <label>Password
-            <input id="loginPassword" type="password" autocomplete="current-password" required>
+
+          <label>
+            Password
+            <input
+              id="loginPassword"
+              type="password"
+              autocomplete="current-password"
+              required
+            >
           </label>
-          <button class="btn primary full" type="submit">Sign in</button>
-          <p id="loginError" class="error hidden">Email or password not recognised.</p>
+
+          <button class="btn primary full" type="submit">
+            Sign in
+          </button>
+
+          <p id="loginError" class="error hidden">
+            Email or password not recognised.
+          </p>
+
         </form>
 
         <div class="demo-box">
+
           <strong>Prototype demo logins</strong>
+
           <div class="demo-account">
             <span>Trainer / Assessor</span>
             <code>trainer@rrta.demo</code>
             <code>Trainer123!</code>
-            <button type="button" class="text-btn" data-demo="trainer">Use trainer login</button>
+            <button
+              type="button"
+              class="text-btn"
+              data-demo="trainer"
+            >
+              Use trainer login
+            </button>
           </div>
+
           <div class="demo-account">
             <span>Learner — John Smith</span>
             <code>john.smith@rrta.demo</code>
             <code>Learner123!</code>
-            <button type="button" class="text-btn" data-demo="learner">Use learner login</button>
+            <button
+              type="button"
+              class="text-btn"
+              data-demo="learner"
+            >
+              Use learner login
+            </button>
           </div>
+
         </div>
+
       </div>
     </section>
   </main>
 
+
   <!-- TRAINER DASHBOARD -->
   <main id="screen-trainer" class="screen">
+
     <div class="portal-shell">
+
       <aside class="sidebar">
-        <div class="sidebar-title">Trainer / Assessor</div>
-        <button class="side-link active" data-trainer-view="overview">Overview</button>
-        <button class="side-link" data-trainer-view="learners">Learners</button>
-        <button class="side-link" data-trainer-view="courses">Courses</button>
-        <button class="side-link" data-trainer-view="results">Results</button>
-        <button class="side-link" data-action="logout">Sign out</button>
+
+        <div class="sidebar-title">
+          Trainer / Assessor
+        </div>
+
+        <button
+          class="side-link active"
+          data-trainer-view="overview"
+        >
+          Overview
+        </button>
+
+        <button
+          class="side-link"
+          data-trainer-view="learners"
+        >
+          Learners
+        </button>
+
+        <button
+          class="side-link"
+          data-trainer-view="courses"
+        >
+          Courses
+        </button>
+
+        <button
+          class="side-link"
+          data-trainer-view="results"
+        >
+          Results
+        </button>
+
+        <button
+          class="side-link"
+          data-action="logout"
+        >
+          Sign out
+        </button>
+
       </aside>
+
+
       <section class="portal-content">
-        <div id="trainer-overview" class="trainer-view active">
+
+        <!-- OVERVIEW -->
+
+        <div
+          id="trainer-overview"
+          class="trainer-view active"
+        >
+
           <div class="page-head">
-            <div><div class="eyebrow">Trainer Dashboard</div><h1>Good morning</h1><p>Assign learning and keep track of assessment activity.</p></div>
-            <button class="btn primary" id="quickAssignBtn">Assign learning</button>
+
+            <div>
+              <div class="eyebrow">
+                Trainer Dashboard
+              </div>
+
+              <h1>Good morning</h1>
+
+              <p>
+                Assign learning and keep track of assessment activity.
+              </p>
+            </div>
+
+            <button
+              class="btn primary"
+              id="quickAssignBtn"
+            >
+              Assign learning
+            </button>
+
           </div>
-          <div class="stat-grid" id="trainerStats"></div>
+
+
+          <div
+            class="stat-grid"
+            id="trainerStats"
+          ></div>
+
+
           <div class="grid-2">
+
             <article class="panel">
-              <div class="panel-head"><h2>Recent learner activity</h2></div>
+
+              <div class="panel-head">
+                <h2>Recent learner activity</h2>
+              </div>
+
               <div id="recentActivity"></div>
+
             </article>
+
+
             <article class="panel">
-              <div class="panel-head"><h2>Course catalogue</h2></div>
+
+              <div class="panel-head">
+                <h2>Course catalogue</h2>
+              </div>
+
+
               <div class="mini-course active-course">
-                <span class="course-icon">CS</span><div><strong>Customer Service & Professional Conduct</strong><small>Face-to-face · Assessment live</small></div>
+
+                <span class="course-icon">
+                  CS
+                </span>
+
+                <div>
+                  <strong>
+                    Customer Service & Professional Conduct
+                  </strong>
+
+                  <small>
+                    Face-to-face · Assessment live
+                  </small>
+                </div>
+
               </div>
+
+
               <div class="mini-course muted-course">
-                <span class="course-icon">RF</span><div><strong>RF Awareness</strong><small>In development</small></div>
+
+                <span class="course-icon">
+                  RF
+                </span>
+
+                <div>
+                  <strong>
+                    RF Awareness
+                  </strong>
+
+                  <small>
+                    In development
+                  </small>
+                </div>
+
               </div>
+
+
               <div class="mini-course muted-course">
-                <span class="course-icon">ST</span><div><strong>Safe Loading & Towing</strong><small>In development</small></div>
+
+                <span class="course-icon">
+                  ST
+                </span>
+
+                <div>
+                  <strong>
+                    Safe Loading & Towing
+                  </strong>
+
+                  <small>
+                    In development
+                  </small>
+                </div>
+
               </div>
+
             </article>
+
           </div>
+
         </div>
 
-        <div id="trainer-learners" class="trainer-view">
+
+        <!-- LEARNERS -->
+
+        <div
+          id="trainer-learners"
+          class="trainer-view"
+        >
+
           <div class="page-head">
-            <div><div class="eyebrow">Learners</div><h1>Manage learners</h1><p>Assign only the learning each operative needs.</p></div>
-            <button class="btn secondary" id="demoAddLearnerBtn">+ Add learner</button>
+
+            <div>
+
+              <div class="eyebrow">
+                Learners
+              </div>
+
+              <h1>
+                Manage learners
+              </h1>
+
+              <p>
+                Assign only the learning each operative needs.
+              </p>
+
+            </div>
+
+            <button
+              class="btn secondary"
+              id="demoAddLearnerBtn"
+            >
+              + Add learner
+            </button>
+
           </div>
+
+
           <article class="panel">
+
             <div id="learnersTable"></div>
+
           </article>
+
         </div>
 
-        <div id="trainer-courses" class="trainer-view">
-          <div class="page-head"><div><div class="eyebrow">Courses</div><h1>Course catalogue</h1><p>Trainer resources and assessment controls.</p></div></div>
-          <div class="course-admin-grid">
-            <article class="course-admin-card">
-              <div class="course-top">
-                <span class="status live">LIVE</span>
-                <span class="delivery">Face-to-face</span>
+
+        <!-- COURSES -->
+
+        <div
+          id="trainer-courses"
+          class="trainer-view"
+        >
+
+          <div class="page-head">
+
+            <div>
+
+              <div class="eyebrow">
+                Courses
               </div>
-              <h2>Customer Service & Professional Conduct</h2>
-              <p>Two-hour, scenario-led field engineer course with a 20-question randomised summative assessment.</p>
-              <div class="course-facts"><span>60-question bank</span><span>20 min assessment</span><span>80% pass mark</span></div>
-              <h3>Trainer Resources</h3>
-              <div class="resource-list">
-                <a href="resources/Customer-Service-and-Professional-Conduct-Course.pptx" download>Course PowerPoint <b>Download</b></a>
-                <a href="resources/RRTA-Customer-Service-Scheme-of-Work.docx" download>Scheme of Work <b>Download</b></a>
-                <a href="resources/RRTA-Customer-Service-Course-Specification.docx" download>Course Specification <b>Download</b></a>
-                <a href="resources/RRTA-60-Question-Bank.pdf" target="_blank">Question Bank <b>Open</b></a>
-                <a href="resources/RRTA-60-Question-Bank-ANSWER-COPY.pdf" target="_blank">Assessor Answer Copy <b>Open</b></a>
-              </div>
-            </article>
-            <article class="course-admin-card coming">
-              <span class="status development">IN DEVELOPMENT</span>
-              <h2>RF Awareness</h2>
-              <p>Course shell ready for your content and assessment bank.</p>
-            </article>
-            <article class="course-admin-card coming">
-              <span class="status development">IN DEVELOPMENT</span>
-              <h2>Safe Loading & Towing</h2>
-              <p>Course shell ready for your content and assessment bank.</p>
-            </article>
+
+              <h1>
+                Course catalogue
+              </h1>
+
+              <p>
+                Trainer resources and assessment controls.
+              </p>
+
+            </div>
+
           </div>
+
+
+          <div class="course-admin-grid">
+
+
+            <article class="course-admin-card">
+
+              <div class="course-top">
+
+                <span class="status live">
+                  LIVE
+                </span>
+
+                <span class="delivery">
+                  Face-to-face
+                </span>
+
+              </div>
+
+
+              <h2>
+                Customer Service & Professional Conduct
+              </h2>
+
+
+              <p>
+                Two-hour, scenario-led field engineer course with a
+                20-question randomised summative assessment.
+              </p>
+
+
+              <div class="course-facts">
+
+                <span>
+                  60-question bank
+                </span>
+
+                <span>
+                  20 min assessment
+                </span>
+
+                <span>
+                  80% pass mark
+                </span>
+
+              </div>
+
+
+              <h3>
+                Trainer Resources
+              </h3>
+
+
+              <div class="resource-list">
+
+                <a
+                  href="resources/Customer-Service-and-Professional-Conduct-Course.pptx"
+                  download
+                >
+                  Course PowerPoint
+                  <b>Download</b>
+                </a>
+
+
+                <a
+                  href="resources/RRTA-Customer-Service-Scheme-of-Work.docx"
+                  download
+                >
+                  Scheme of Work
+                  <b>Download</b>
+                </a>
+
+
+                <a
+                  href="resources/RRTA-Customer-Service-Course-Specification.docx"
+                  download
+                >
+                  Course Specification
+                  <b>Download</b>
+                </a>
+
+
+                <a
+                  href="resources/RRTA-60-Question-Bank.pdf"
+                  target="_blank"
+                >
+                  Question Bank
+                  <b>Open</b>
+                </a>
+
+
+                <a
+                  href="resources/RRTA-60-Question-Bank-ANSWER-COPY.pdf"
+                  target="_blank"
+                >
+                  Assessor Answer Copy
+                  <b>Open</b>
+                </a>
+
+              </div>
+
+            </article>
+
+
+            <article class="course-admin-card coming">
+
+              <span class="status development">
+                IN DEVELOPMENT
+              </span>
+
+              <h2>
+                RF Awareness
+              </h2>
+
+              <p>
+                Course shell ready for your content and assessment bank.
+              </p>
+
+            </article>
+
+
+            <article class="course-admin-card coming">
+
+              <span class="status development">
+                IN DEVELOPMENT
+              </span>
+
+              <h2>
+                Safe Loading & Towing
+              </h2>
+
+              <p>
+                Course shell ready for your content and assessment bank.
+              </p>
+
+            </article>
+
+
+          </div>
+
         </div>
 
-        <div id="trainer-results" class="trainer-view">
-          <div class="page-head"><div><div class="eyebrow">Assessment Records</div><h1>Results</h1><p>Prototype records stored in this browser for the demonstration.</p></div></div>
-          <article class="panel"><div id="resultsTable"></div></article>
+
+        <!-- RESULTS -->
+
+        <div
+          id="trainer-results"
+          class="trainer-view"
+        >
+
+          <div class="page-head">
+
+            <div>
+
+              <div class="eyebrow">
+                Assessment Records
+              </div>
+
+              <h1>
+                Results
+              </h1>
+
+              <p>
+                Prototype records stored in this browser for the demonstration.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <article class="panel">
+
+            <div id="resultsTable"></div>
+
+          </article>
+
         </div>
+
+
       </section>
+
     </div>
+
   </main>
+
 
   <!-- LEARNER DASHBOARD -->
-  <main id="screen-learner" class="screen">
+
+  <main
+    id="screen-learner"
+    class="screen"
+  >
+
     <div class="learner-shell">
+
       <div class="learner-top">
-        <div><div class="eyebrow">My Learning</div><h1 id="learnerWelcome">Welcome</h1><p>Only learning assigned to you by your trainer will appear here.</p></div>
-        <button class="btn secondary" data-action="logout">Sign out</button>
+
+        <div>
+
+          <div class="eyebrow">
+            My Learning
+          </div>
+
+          <h1 id="learnerWelcome">
+            Welcome
+          </h1>
+
+          <p>
+            Only learning assigned to you by your trainer will appear here.
+          </p>
+
+        </div>
+
+        <button
+          class="btn secondary"
+          data-action="logout"
+        >
+          Sign out
+        </button>
+
       </div>
+
+
       <div id="learnerDashboard"></div>
+
     </div>
+
   </main>
+
 
   <!-- COURSE DETAIL -->
-  <main id="screen-course" class="screen">
+
+  <main
+    id="screen-course"
+    class="screen"
+  >
+
     <div class="learner-shell narrow">
-      <button class="back-btn" id="backToLearning">← Back to My Learning</button>
+
+      <button
+        class="back-btn"
+        id="backToLearning"
+      >
+        ← Back to My Learning
+      </button>
+
+
       <article class="course-detail">
-        <span class="status live">ASSIGNED</span>
-        <div class="eyebrow">Face-to-Face Course</div>
-        <h1>Customer Service & Professional Conduct</h1>
-        <p class="lead">This course is delivered face-to-face by a Rapid Response Training Academy trainer. Your online area provides the course overview and summative assessment.</p>
-        <div class="journey"><span>ARRIVE</span><i>→</i><span>CHECK</span><i>→</i><span>AGREE</span><i>→</i><span>PROTECT</span><i>→</i><span>COMMUNICATE</span><i>→</i><span>COMPLETE</span></div>
-        <div class="grid-2">
-          <div class="info-card"><b>Assessment</b><span>20 random questions from a 60-question bank</span></div>
-          <div class="info-card"><b>Pass mark</b><span>80% — minimum 16/20</span></div>
-          <div class="info-card"><b>Time allowed</b><span>20 minutes</span></div>
-          <div class="info-card"><b>Assessment conditions</b><span>Complete independently without coaching</span></div>
+
+        <span class="status live">
+          ASSIGNED
+        </span>
+
+        <div class="eyebrow">
+          Face-to-Face Course
         </div>
+
+        <h1>
+          Customer Service & Professional Conduct
+        </h1>
+
+
+        <p class="lead">
+          This course is delivered face-to-face by a Rapid Response
+          Training Academy trainer. Your online area provides the course
+          overview and summative assessment.
+        </p>
+
+
+        <div class="journey">
+
+          <span>ARRIVE</span>
+          <i>→</i>
+
+          <span>CHECK</span>
+          <i>→</i>
+
+          <span>AGREE</span>
+          <i>→</i>
+
+          <span>PROTECT</span>
+          <i>→</i>
+
+          <span>COMMUNICATE</span>
+          <i>→</i>
+
+          <span>COMPLETE</span>
+
+        </div>
+
+
+        <div class="grid-2">
+
+          <div class="info-card">
+
+            <b>
+              Assessment
+            </b>
+
+            <span>
+              20 random questions from a 60-question bank
+            </span>
+
+          </div>
+
+
+          <div class="info-card">
+
+            <b>
+              Pass mark
+            </b>
+
+            <span>
+              80% — minimum 16/20
+            </span>
+
+          </div>
+
+
+          <div class="info-card">
+
+            <b>
+              Time allowed
+            </b>
+
+            <span>
+              20 minutes
+            </span>
+
+          </div>
+
+
+          <div class="info-card">
+
+            <b>
+              Assessment conditions
+            </b>
+
+            <span>
+              Complete independently without coaching
+            </span>
+
+          </div>
+
+        </div>
+
+
         <div id="courseAction"></div>
+
       </article>
+
     </div>
+
   </main>
+
 
   <!-- ASSESSMENT INTRO -->
-  <main id="screen-assessment-intro" class="screen">
+
+  <main
+    id="screen-assessment-intro"
+    class="screen"
+  >
+
     <div class="assessment-shell">
+
       <article class="assessment-intro">
-        <div class="eyebrow">Summative Assessment</div>
-        <h1>Customer Service & Professional Conduct</h1>
-        <p>You have completed the face-to-face session covering professional arrival, pre-work checks, customer agreement, protection of people/property/privacy, communication and professional completion.</p>
+
+        <div class="eyebrow">
+          Summative Assessment
+        </div>
+
+        <h1>
+          Customer Service & Professional Conduct
+        </h1>
+
+
+        <p>
+          You have completed the face-to-face session covering
+          professional arrival, pre-work checks, customer agreement,
+          protection of people/property/privacy, communication and
+          professional completion.
+        </p>
+
+
         <div class="assessment-rules">
-          <div><b>20</b><span>Random questions</span></div>
-          <div><b>20</b><span>Minutes</span></div>
-          <div><b>80%</b><span>Pass mark</span></div>
+
+          <div>
+            <b>20</b>
+            <span>Random questions</span>
+          </div>
+
+          <div>
+            <b>20</b>
+            <span>Minutes</span>
+          </div>
+
+          <div>
+            <b>80%</b>
+            <span>Pass mark</span>
+          </div>
+
         </div>
+
+
         <ul>
-          <li>Answer every question.</li>
-          <li>Select one answer for each question.</li>
-          <li>Complete the assessment independently.</li>
-          <li>Correct answers are not displayed after submission.</li>
+
+          <li>
+            Answer every question.
+          </li>
+
+          <li>
+            Select one answer for each question.
+          </li>
+
+          <li>
+            Complete the assessment independently.
+          </li>
+
+          <li>
+            Correct answers are not displayed after submission.
+          </li>
+
         </ul>
-        <label class="check-row"><input id="assessmentDeclaration" type="checkbox"> I confirm I will complete this assessment independently and submit my own answers.</label>
+
+
+        <label class="check-row">
+
+          <input
+            id="assessmentDeclaration"
+            type="checkbox"
+          >
+
+          I confirm I will complete this assessment independently
+          and submit my own answers.
+
+        </label>
+
+
         <div class="button-row">
-          <button class="btn secondary" id="cancelAssessment">Cancel</button>
-          <button class="btn primary" id="beginAssessment" disabled>Begin assessment</button>
+
+          <button
+            class="btn secondary"
+            id="cancelAssessment"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="btn primary"
+            id="beginAssessment"
+            disabled
+          >
+            Begin assessment
+          </button>
+
         </div>
+
       </article>
+
     </div>
+
   </main>
+
 
   <!-- TEST -->
-  <main id="screen-test" class="screen">
+
+  <main
+    id="screen-test"
+    class="screen"
+  >
+
     <div class="test-shell">
+
       <div class="test-top">
-        <div><div id="progressText" class="eyebrow">Question 1 of 20</div><div class="progress-track"><div id="progressBar"></div></div></div>
-        <div id="timer" class="timer">20:00</div>
-      </div>
-      <article class="question-card">
-        <h1 id="questionText"></h1>
-        <div id="scenarioImageWrap" class="scenario-image-wrap hidden"><img id="scenarioImage" alt="Question scenario"></div>
-        <div id="answerList" class="answer-list"></div>
-        <div class="test-actions">
-          <button id="prevQuestion" class="btn secondary">Previous</button>
-          <button id="nextQuestion" class="btn primary">Next</button>
+
+        <div>
+
+          <div
+            id="progressText"
+            class="eyebrow"
+          >
+            Question 1 of 20
+          </div>
+
+          <div class="progress-track">
+
+            <div id="progressBar"></div>
+
+          </div>
+
         </div>
+
+
+        <div
+          id="timer"
+          class="timer"
+        >
+          20:00
+        </div>
+
+      </div>
+
+
+      <article class="question-card">
+
+        <h1 id="questionText"></h1>
+
+
+        <div
+          id="scenarioImageWrap"
+          class="scenario-image-wrap hidden"
+        >
+
+          <img
+            id="scenarioImage"
+            alt="Question scenario"
+          >
+
+        </div>
+
+
+        <div
+          id="answerList"
+          class="answer-list"
+        ></div>
+
+
+        <div class="test-actions">
+
+          <button
+            id="prevQuestion"
+            class="btn secondary"
+          >
+            Previous
+          </button>
+
+          <button
+            id="nextQuestion"
+            class="btn primary"
+          >
+            Next
+          </button>
+
+        </div>
+
       </article>
+
     </div>
+
   </main>
+
 
   <!-- REVIEW -->
-  <main id="screen-review" class="screen">
+
+  <main
+    id="screen-review"
+    class="screen"
+  >
+
     <div class="assessment-shell">
+
       <article class="panel">
-        <div class="eyebrow">Review</div>
-        <h1>Check your answers</h1>
-        <p id="reviewSummary"></p>
-        <div id="reviewGrid" class="review-grid"></div>
-        <div class="button-row">
-          <button id="returnToQuestion" class="btn secondary">Return to questions</button>
-          <button id="submitAssessment" class="btn primary">Submit assessment</button>
+
+        <div class="eyebrow">
+          Review
         </div>
+
+        <h1>
+          Check your answers
+        </h1>
+
+
+        <p id="reviewSummary"></p>
+
+
+        <div
+          id="reviewGrid"
+          class="review-grid"
+        ></div>
+
+
+        <div class="button-row">
+
+          <button
+            id="returnToQuestion"
+            class="btn secondary"
+          >
+            Return to questions
+          </button>
+
+          <button
+            id="submitAssessment"
+            class="btn primary"
+          >
+            Submit assessment
+          </button>
+
+        </div>
+
       </article>
+
     </div>
+
   </main>
+
 
   <!-- RESULT -->
-  <main id="screen-result" class="screen">
+
+  <main
+    id="screen-result"
+    class="screen"
+  >
+
     <div class="assessment-shell">
-      <article id="resultCard" class="result-card">
-        <div id="resultBadge" class="result-badge"></div>
+
+      <article
+        id="resultCard"
+        class="result-card"
+      >
+
+        <div
+          id="resultBadge"
+          class="result-badge"
+        ></div>
+
         <h1 id="resultHeading"></h1>
+
         <p id="resultLearner"></p>
-        <div class="big-score" id="resultScore"></div>
+
+        <div
+          class="big-score"
+          id="resultScore"
+        ></div>
+
         <p id="resultMessage"></p>
+
+
         <div class="button-row">
-          <button id="downloadRecord" class="btn secondary">Download assessment record</button>
-          <button id="downloadCertificate" class="btn primary">Download certificate</button>
-          <button id="finishResult" class="btn dark">Return to My Learning</button>
+
+          <button
+            id="downloadRecord"
+            class="btn secondary"
+          >
+            Download assessment record
+          </button>
+
+          <button
+            id="downloadCertificate"
+            class="btn primary"
+          >
+            Download certificate
+          </button>
+
+          <button
+            id="finishResult"
+            class="btn dark"
+          >
+            Return to My Learning
+          </button>
+
         </div>
+
       </article>
+
     </div>
+
   </main>
 
+
   <!-- ASSIGN MODAL -->
-  <div id="assignModal" class="modal hidden">
+
+  <div
+    id="assignModal"
+    class="modal hidden"
+  >
+
     <div class="modal-card">
-      <button id="closeAssignModal" class="modal-close">×</button>
-      <div class="eyebrow">Assign Learning</div>
-      <h2>Customer Service & Professional Conduct</h2>
-      <label>Learner
+
+      <button
+        id="closeAssignModal"
+        class="modal-close"
+      >
+        ×
+      </button>
+
+
+      <div class="eyebrow">
+        Assign Learning
+      </div>
+
+      <h2>
+        Customer Service & Professional Conduct
+      </h2>
+
+
+      <label>
+
+        Learner
+
         <select id="assignLearner"></select>
+
       </label>
-      <button id="confirmAssign" class="btn primary full">Assign to learner</button>
-      <p class="muted">For this prototype, assignments are saved in this browser so you can switch roles and demonstrate the workflow.</p>
+
+
+      <button
+        id="confirmAssign"
+        class="btn primary full"
+      >
+        Assign to learner
+      </button>
+
+
+      <p class="muted">
+        For this prototype, assignments are saved in this browser
+        so you can switch roles and demonstrate the workflow.
+      </p>
+
     </div>
+
   </div>
+
 </div>
+
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- YOUR EXISTING PORTAL JAVASCRIPT -->
 <script src="app.js"></script>
+
 </body>
 </html>
