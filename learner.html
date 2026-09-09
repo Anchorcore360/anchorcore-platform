@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learner Portal | RRTA</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header"><div class="header-inner"><img src="rrta-logo.png" class="brand-logo" alt="Rapid Response Training Academy"></div></header>
+  <main class="screen active">
+    <section class="login-wrap">
+      <div class="login-card">
+        <div class="eyebrow">Rapid Response Training Academy</div>
+        <h1>Learner Portal</h1>
+        <p class="lead">Sign in to view your assigned learning and assessments.</p>
+        <form id="learnerLoginForm">
+          <label>Email address<input id="learnerEmail" type="email" autocomplete="username" required></label>
+          <label>Password<input id="learnerPassword" type="password" autocomplete="current-password" required></label>
+          <button class="btn primary full" type="submit">Sign in to Learner Portal</button>
+          <p id="learnerError" class="error hidden">Email or password not recognised.</p>
+        </form>
+        <p style="margin-top:20px"><a class="text-btn" href="portal.html">← Back to portal choice</a></p>
+      </div>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const db = window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
+    const form=document.getElementById('learnerLoginForm');
+    const errorBox=document.getElementById('learnerError');
+    form.addEventListener('submit',async(e)=>{
+      e.preventDefault(); errorBox.classList.add('hidden');
+      const email=document.getElementById('learnerEmail').value.trim().toLowerCase();
+      const password=document.getElementById('learnerPassword').value;
+      const {data,error}=await db.auth.signInWithPassword({email,password});
+      if(error){errorBox.classList.remove('hidden');return;}
+      const {data:profile,error:profileError}=await db.from('profiles').select('role').eq('id',data.user.id).single();
+      if(profileError || profile?.role!=='learner'){
+        await db.auth.signOut();
+        errorBox.textContent='This account is not configured as a learner.';
+        errorBox.classList.remove('hidden');
+        return;
+      }
+      window.location.href='index.html';
+    });
+  </script>
+</body>
+</html>
