@@ -1,0 +1,33 @@
+name: Fix learner photo upload button
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-learner-photo-button.yml'
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore profile and use compact upload icon
+        run: |
+          git show 68e1fafcd371e4794e5073abc9c2d58209c53d3e:learner-profile.html > learner-profile.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('learner-profile.html')
+          s=p.read_text()
+          s=s.replace('.photo-upload-btn{position:absolute;left:8px;right:8px;bottom:8px;border:0;border-radius:8px;padding:8px 9px;background:rgba(24,31,40,.92);color:#fff;font-weight:800;cursor:pointer;font-size:12px}', '.photo-upload-btn{position:absolute;right:7px;bottom:7px;width:32px;height:32px;border:1px solid #d8dde4;border-radius:8px;padding:0;background:rgba(255,255,255,.94);color:#182028;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}.photo-upload-btn:hover{background:#fff}.photo-upload-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}')
+          icon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M5 13v6h14v-6"></path></svg>'
+          s=s.replace('<button class="photo-upload-btn" id="photoUploadBtn">Upload photo</button>', f'<button class="photo-upload-btn" id="photoUploadBtn" title="Upload photo" aria-label="Upload photo">{icon}</button>')
+          s=s.replace("document.getElementById('photoUploadBtn').textContent='Change photo';", "document.getElementById('photoUploadBtn').title='Change photo';document.getElementById('photoUploadBtn').setAttribute('aria-label','Change photo');")
+          s=s.replace("document.getElementById('photoUploadBtn').textContent='Upload photo'", "document.getElementById('photoUploadBtn').title='Upload photo';document.getElementById('photoUploadBtn').setAttribute('aria-label','Upload photo')")
+          p.write_text(s)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add learner-profile.html
+          git commit -m "Use compact upload icon on learner photo"
+          git push
