@@ -1,0 +1,41 @@
+name: Update accreditation status badges
+on:
+  push:
+    paths:
+      - '.github/workflows/update-accreditation-status-badges.yml'
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update learner profile status badges
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('learner-profile.html')
+          s=p.read_text()
+          css=".accreditation-status{display:inline-flex;align-items:center;justify-content:center;min-width:74px;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800;white-space:nowrap}.accreditation-status.valid{background:#e8f6ed;color:#176b37;border:1px solid #bfe3ca}.accreditation-status.expiring{background:#fff6d8;color:#8a6100;border:1px solid #f1d77b}.accreditation-status.expired{background:#fdebec;color:#b42318;border:1px solid #f2b8bc}"
+          s=s.replace('.btn.small{padding:8px 11px;font-size:13px}', '.btn.small{padding:8px 11px;font-size:13px}'+css)
+          anchor="const record=(title,meta,right='',menu='')=>`<div class=\"record\"><div><strong>${esc(title)}</strong><small>${meta}</small></div><div style=\"display:flex;align-items:flex-start;gap:10px\">${right?`<strong>${esc(right)}</strong>`:''}${menu}</div></div>`;"
+          insert=anchor+"\nfunction accreditationStatus(expiry){if(!expiry)return {label:'Valid',cls:'valid'};const today=new Date();today.setHours(0,0,0,0);const end=new Date(expiry+'T00:00:00');const days=Math.ceil((end-today)/86400000);if(days<0)return {label:'Expired',cls:'expired'};if(days<=30)return {label:'Expiring',cls:'expiring'};return {label:'Valid',cls:'valid'}}\nfunction accreditationBadge(expiry){const s=accreditationStatus(expiry);return `<span class=\"accreditation-status ${s.cls}\">${s.label}</span>`}"
+          if anchor not in s: raise SystemExit('record anchor not found')
+          s=s.replace(anchor,insert)
+          old="return record(a.accreditation_name||'Accreditation',`${esc(a.awarding_body||'Awarding body not recorded')} · Issued ${fmt(a.issue_date)} · Expires ${fmt(a.expiry_date)}${link}`,a.status||'',actions('accreditation',a.id))"
+          new="return record(a.accreditation_name||'Accreditation',`${esc(a.awarding_body||'Awarding body not recorded')} · Issued ${fmt(a.issue_date)} · Expires ${fmt(a.expiry_date)}${link}`,accreditationBadge(a.expiry_date),actions('accreditation',a.id))"
+          if old not in s: raise SystemExit('accreditation render anchor not found')
+          s=s.replace(old,new)
+          s=s.replace('<label>Status<select name=\"status\"><option value=\"current\">Current</option><option value=\"expiring\">Expiring</option><option value=\"expired\">Expired</option></select></label>','')
+          s=s.replace("status:f.get('status'),issue_date:f.get('issue')||null,expiry_date:f.get('expiry')||null", "status:accreditationStatus(f.get('expiry')||null).label.toLowerCase(),issue_date:f.get('issue')||null,expiry_date:f.get('expiry')||null")
+          p.write_text(s)
+          PY
+      - name: Remove one-time workflow
+        run: rm .github/workflows/update-accreditation-status-badges.yml
+      - name: Commit changes
+        run: |
+          git config user.name "Anchorcore360"
+          git config user.email "anchorcore360@outlook.com"
+          git add learner-profile.html .github/workflows/update-accreditation-status-badges.yml
+          git commit -m "Add automatic accreditation status badges"
+          git push
