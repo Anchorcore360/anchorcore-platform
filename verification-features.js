@@ -18,8 +18,10 @@ async function renderVerificationQr(){
   const url=verificationUrl();
   if(!slot||!url)return;
   await loadScriptOnce('https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js','QRCode');
-  slot.innerHTML='<div id="liveQr" style="background:#fff;padding:7px;border:1px solid #d7dde3;border-radius:8px"></div><strong style="margin-top:8px">Live accreditation check</strong><small>Scan to verify current records</small>';
-  new QRCode(document.getElementById('liveQr'),{text:url,width:86,height:86,correctLevel:QRCode.CorrectLevel.M});
+  slot.innerHTML='<div id="liveQr" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#fff"></div>';
+  slot.style.padding='10px';
+  slot.style.overflow='hidden';
+  new QRCode(document.getElementById('liveQr'),{text:url,width:118,height:118,correctLevel:QRCode.CorrectLevel.M});
 }
 
 function ensureVerificationActions(){
