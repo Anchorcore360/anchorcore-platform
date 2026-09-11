@@ -1,0 +1,31 @@
+name: Add Compliance navigation
+on:
+  push:
+    paths:
+      - '.github/workflows/add-compliance-nav.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Add Compliance tile to trainer sidebar
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('trainer.html')
+          s=p.read_text()
+          marker='<div class="sidebar-section-label">Account</div>'
+          if 'href="compliance.html"' not in s:
+              link='<a class="side-link" href="compliance.html"><span class="side-icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span>Compliance</span></a>'
+              s=s.replace(marker,link+marker,1)
+              p.write_text(s)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add trainer.html
+          git diff --cached --quiet || git commit -m "Add Compliance to trainer sidebar"
+          git push
