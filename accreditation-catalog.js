@@ -33,6 +33,13 @@ function findExistingCatalogItem(existing){
   return accreditationCatalog.find(x=>String(x.module_code).toLowerCase()===String(existing.accreditation_name||'').toLowerCase())||null;
 }
 
+function accreditationDbStatus(expiry){
+  const state=accreditationStatus(expiry);
+  if(state.cls==='expired')return 'expired';
+  if(state.cls==='expiring')return 'expiring';
+  return 'current';
+}
+
 openAccModal=async function(existing=null){
   try{await loadAccreditationCatalog();}
   catch(err){alert(err.message||'Unable to load accreditation catalogue.');return;}
@@ -57,11 +64,13 @@ openAccModal=async function(existing=null){
     const selected=accreditationCatalog.find(x=>Number(x.id)===catalogId);
     if(!selected)throw new Error('Please select an accreditation or course from the catalogue.');
     let path=existing?.certificate_url||null;
+    let uploadedNewFile=false;
     const file=f.get('file');
     if(file&&file.size){
       path=`${learnerId}/accreditations/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
       const {error}=await db.storage.from('learner-documents').upload(path,file);
       if(error)throw error;
+      uploadedNewFile=true;
     }
     const payload={
       learner_id:learnerId,
@@ -69,14 +78,17 @@ openAccModal=async function(existing=null){
       accreditation_name:selected.module_code,
       awarding_body:f.get('awarding').trim()||null,
       certificate_number:f.get('number').trim()||null,
-      status:accreditationStatus(f.get('expiry')||null).label.toLowerCase(),
+      status:accreditationDbStatus(f.get('expiry')||null),
       issue_date:f.get('issue')||null,
       expiry_date:f.get('expiry')||null,
       certificate_url:path
     };
     const q=existing?db.from('accreditations').update(payload).eq('id',existing.id):db.from('accreditations').insert(payload);
     const {error}=await q;
-    if(error)throw error;
+    if(error){
+      if(uploadedNewFile&&path)await db.storage.from('learner-documents').remove([path]);
+      throw error;
+    }
   });
 
   const select=document.getElementById('catalogSelect');
