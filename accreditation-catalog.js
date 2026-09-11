@@ -96,5 +96,6 @@ openAccModal=async function(existing=null){
   updateDescription();
 };
 
-// The original page wires the Add accreditation button before this enhancement loads.
 document.querySelectorAll('[data-open-modal="accreditation"]').forEach(btn=>btn.onclick=()=>openAccModal());
+
+// NOPS catalogue integration enabled.
