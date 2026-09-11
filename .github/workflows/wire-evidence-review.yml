@@ -1,0 +1,43 @@
+name: Wire Evidence Review UI
+on:
+  push:
+    branches: [fullscreen-preview]
+    paths:
+      - 'learner-evidence-requests.js'
+      - 'trainer-evidence-link.js'
+      - '.github/workflows/wire-evidence-review.yml'
+permissions:
+  contents: write
+jobs:
+  wire:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fullscreen-preview
+      - name: Add script includes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('learner-dashboard.html')
+          s=p.read_text()
+          tag='<script src="learner-evidence-requests.js"></script>'
+          if tag not in s:
+              s=s.replace('</body></html>',tag+'</body></html>')
+              p.write_text(s)
+          p=Path('trainer.html')
+          s=p.read_text()
+          tag='<script src="trainer-evidence-link.js"></script>'
+          if tag not in s:
+              s=s.replace('</body>\n</html>',tag+'\n</body>\n</html>') if '</body>\n</html>' in s else s.replace('</body></html>',tag+'</body></html>')
+              p.write_text(s)
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add learner-dashboard.html trainer.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Wire learner evidence submissions and trainer evidence review"
+          git push origin fullscreen-preview
