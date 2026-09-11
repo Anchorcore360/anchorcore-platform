@@ -1,11 +1,25 @@
 (function(){
-  function addLink(){
-    const compliance=[...document.querySelectorAll('#trainerDashboardScreen .sidebar a.side-link')].find(a=>a.textContent.trim()==='Compliance');
-    if(!compliance||document.querySelector('#trainerDashboardScreen .sidebar a[href="evidence-review.html"]'))return;
-    const link=document.createElement('a');
-    link.className='side-link';link.href='evidence-review.html';
-    link.innerHTML='<span class="side-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h5M8 16h3"/><path d="m15 16 2 2 4-5"/></svg></span><span>Evidence Review</span>';
-    compliance.insertAdjacentElement('afterend',link);
+  async function pendingCount(){
+    try{
+      const [a,b]=await Promise.all([
+        db.from('profile_change_requests').select('id',{count:'exact',head:true}).eq('status','pending'),
+        db.from('evidence_review_requests').select('id',{count:'exact',head:true}).eq('status','pending')
+      ]);
+      return (a.count||0)+(b.count||0);
+    }catch(_){return 0}
   }
-  document.addEventListener('DOMContentLoaded',addLink);setTimeout(addLink,300);
+  async function addLink(){
+    const compliance=[...document.querySelectorAll('#trainerDashboardScreen .sidebar a.side-link')].find(a=>a.textContent.trim()==='Compliance');
+    if(!compliance)return;
+    document.querySelector('#trainerDashboardScreen .sidebar a[href="evidence-review.html"]')?.remove();
+    let link=document.querySelector('#trainerDashboardScreen .sidebar a[href="requests-review.html"]');
+    if(!link){
+      link=document.createElement('a');link.className='side-link';link.href='requests-review.html';
+      link.innerHTML='<span class="side-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h5M8 16h3"/><path d="m15 16 2 2 4-5"/></svg></span><span>Reviews &amp; Requests</span><span data-request-count style="margin-left:auto;display:none;min-width:20px;height:20px;border-radius:999px;background:#b20d1c;color:#fff;font-size:11px;font-weight:900;align-items:center;justify-content:center;padding:0 6px"></span>';
+      compliance.insertAdjacentElement('afterend',link);
+    }
+    const n=await pendingCount();const badge=link.querySelector('[data-request-count]');
+    if(badge){badge.textContent=n;badge.style.display=n?'inline-flex':'none'}
+  }
+  document.addEventListener('DOMContentLoaded',addLink);setTimeout(addLink,500);
 })();
