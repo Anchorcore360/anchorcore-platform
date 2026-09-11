@@ -1,0 +1,31 @@
+name: Add accreditation catalogue UI
+on:
+  push:
+    branches: [fullscreen-preview]
+    paths: ['accreditation-catalog.js']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fullscreen-preview
+      - name: Add catalogue script to learner profile
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('learner-profile.html')
+          s=p.read_text()
+          if 'accreditation-catalog.js' not in s:
+              s=s.replace('<script src="profile-managers.js"></script>', '<script src="profile-managers.js"></script>\n<script src="accreditation-catalog.js"></script>')
+              p.write_text(s)
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add learner-profile.html
+          git diff --cached --quiet || git commit -m "Enable NOPS accreditation catalogue on learner profile"
+          git push origin fullscreen-preview
