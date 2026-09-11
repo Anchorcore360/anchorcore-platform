@@ -36,4 +36,5 @@ document.getElementById('newRoleBtn').onclick=async()=>{const division=prompt('D
 document.getElementById('newItemBtn').onclick=async()=>{const name=prompt('Compliance item / course name:');if(!name)return;const category=prompt('Category:', 'Courses');if(!category)return;const years=prompt('Default validity in years (leave blank if none):','3');const n=years?Number(years):null;const {error}=await db.from('compliance_items').insert({name:name.trim(),category:category.trim(),default_validity_years:Number.isFinite(n)?n:null,active:true});if(error)return tell(error.message,true);await loadAll();tell('Compliance item added.')};
 (async()=>{try{if(await requireTrainer())await loadAll()}catch(e){document.querySelector('.portal-content').innerHTML=`<div class="error">${esc(e.message||'Unable to load compliance area.')}</div>`}})();
 </script>
+<script src="compliance-menu.js"></script>
 </body></html>
