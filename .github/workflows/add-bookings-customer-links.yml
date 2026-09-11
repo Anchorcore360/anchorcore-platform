@@ -1,0 +1,42 @@
+name: Wire booking customer links
+on:
+  push:
+    branches: [fullscreen-preview]
+    paths:
+      - 'bookings-enhancements.js'
+      - 'trainer-bookings-nav.js'
+      - 'external-customers.html'
+      - '.github/workflows/add-bookings-customer-links.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fullscreen-preview
+      - name: Patch booking and trainer pages
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('bookings.html'); s=p.read_text()
+          tag='<script src="bookings-enhancements.js"></script>'
+          if tag not in s:
+              s=s.replace('</body></html>',tag+'\n</body></html>')
+          s=s.replace("source:'manual'","source:'manual',...window.rrtaBookingLinkData('rq')")
+          s=s.replace("notes:document.getElementById('bkNotes').value.trim()","notes:document.getElementById('bkNotes').value.trim(),...window.rrtaBookingLinkData('bk')")
+          s=s.replace("status:'provisional',notes:r.notes","status:'provisional',notes:r.notes,booking_type:r.booking_type||'external',external_customer_id:r.external_customer_id||null,external_contact_id:r.external_contact_id||null")
+          p.write_text(s)
+          t=Path('trainer.html'); x=t.read_text(); tag2='<script src="trainer-bookings-nav.js"></script>'
+          if tag2 not in x:
+              x=x.replace('</body></html>',tag2+'\n</body></html>')
+          t.write_text(x)
+          PY
+      - name: Commit patched navigation
+        run: |
+          git config user.name "Anchorcore360"
+          git config user.email "anchorcore360@outlook.com"
+          git add bookings.html trainer.html
+          git diff --cached --quiet || git commit -m "Link bookings to external customers and add submenu"
+          git push
