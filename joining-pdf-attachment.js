@@ -1,0 +1,15 @@
+(function(){
+  const wait=()=>new Promise(resolve=>{const tick=()=>{try{if(typeof template!=='undefined'&&template&&typeof booking!=='undefined'&&booking)return resolve()}catch(e){}setTimeout(tick,120)};tick()});
+  function makeValues(){const p=(people||[]).find(x=>x.id===attendee.value)||(people||[])[0];return values(p)}
+  function documentText(){const v=makeValues();const source=template.document_body_template||template.body_template||'';return replaceAll(source,v)}
+  function fileName(){const code=(course?.course_code||'Course').replace(/[^a-zA-Z0-9_-]+/g,'_');const person=((people||[]).find(x=>x.id===attendee.value)?.attendee_name||'Delegate').replace(/[^a-zA-Z0-9_-]+/g,'_');return `${code}_Joining_Instructions_${person}.pdf`}
+  function addParagraph(doc,text,y,options={}){const width=170;const lines=doc.splitTextToSize(text,width);const lineHeight=options.lineHeight||5.5;for(const line of lines){if(y>278){doc.addPage();y=18}doc.text(line,20,y);y+=lineHeight}return y}
+  function buildPdf(){if(!window.jspdf?.jsPDF)throw new Error('PDF generator is still loading.');const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});let y=18;doc.setFont('helvetica','bold');doc.setFontSize(16);doc.text('Rapid Response Training Academy',20,y);y+=8;doc.setFontSize(13);doc.text('Delegate Joining Instructions',20,y);y+=8;doc.setFont('helvetica','normal');doc.setFontSize(10);doc.text(`Booking reference: ${booking.booking_reference||''}`,20,y);y+=6;const p=(people||[]).find(x=>x.id===attendee.value)||(people||[])[0];if(p?.attendee_name){doc.text(`Delegate: ${p.attendee_name}`,20,y);y+=8}else y+=2;const blocks=documentText().split(/\n\s*\n/);for(const block of blocks){const clean=block.trim();if(!clean)continue;const isHeading=/^[A-Z0-9 &/()-]{5,}$/.test(clean)&&clean.length<80;doc.setFont('helvetica',isHeading?'bold':'normal');doc.setFontSize(isHeading?11:10);y=addParagraph(doc,clean,y,{lineHeight:isHeading?6:5.3});y+=isHeading?2.5:4}return doc}
+  async function init(){await wait();const panel=document.querySelector('main.wrap section.panel:nth-of-type(3)');if(!panel||document.getElementById('pdfAttachmentBox'))return;const box=document.createElement('div');box.id='pdfAttachmentBox';box.className='notice';box.style.marginBottom='14px';box.innerHTML='<strong>PDF attachment</strong><br><span id="pdfAttachmentName">A personalised joining-instructions PDF will be attached when email sending is enabled.</span><div style="margin-top:10px"><button type="button" class="btn secondary" id="downloadJoiningPdf">Download / check PDF</button></div>';
+    const actions=panel.querySelector('.actions');panel.insertBefore(box,actions?.nextSibling||panel.firstChild);
+    function updateName(){const el=document.getElementById('pdfAttachmentName');if(el)el.textContent=`${fileName()} — this is the PDF that will be attached to the email once sending is enabled.`}
+    updateName();attendee?.addEventListener('change',updateName);
+    document.getElementById('downloadJoiningPdf').onclick=()=>{try{const doc=buildPdf();doc.save(fileName())}catch(e){alert(e.message||'Unable to create PDF.')}};
+  }
+  init().catch(()=>{});
+})();
