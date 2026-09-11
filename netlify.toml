@@ -6,6 +6,11 @@
   to = "/portal.html"
   status = 302
 
+[[redirects]]
+  from = "/learner-profile.html"
+  to = "/learner-profile-v2.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
