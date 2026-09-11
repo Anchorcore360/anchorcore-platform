@@ -1,0 +1,35 @@
+name: Add RRTA course catalogue
+on:
+  push:
+    branches: [fullscreen-preview]
+    paths:
+      - 'course-catalogue.js'
+      - 'course-detail.html'
+      - '.github/workflows/add-course-catalogue.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fullscreen-preview
+      - name: Add course catalogue script to trainer portal
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('trainer.html')
+          s=p.read_text()
+          tag='<script src="course-catalogue.js"></script>'
+          if tag not in s:
+              s=s.replace('</body></html>', tag+'\n</body></html>')
+          p.write_text(s)
+          PY
+      - name: Commit patched trainer portal
+        run: |
+          git config user.name "Anchorcore360"
+          git config user.email "anchorcore360@outlook.com"
+          git add trainer.html
+          git diff --cached --quiet || git commit -m "Wire dynamic RRTA course catalogue"
+          git push
