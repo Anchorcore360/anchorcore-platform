@@ -15,12 +15,12 @@
         <h1>Learner Portal</h1>
         <p class="lead">Sign in to view your assigned learning and assessments.</p>
         <form id="learnerLoginForm">
-          <label>Email address<input id="learnerEmail" type="email" autocomplete="username" required></label>
+          <label>Email Address<input id="learnerEmail" type="email" autocomplete="username" required></label>
           <label>Password<input id="learnerPassword" type="password" autocomplete="current-password" required></label>
-          <button class="btn primary full" type="submit">Sign in to Learner Portal</button>
+          <button class="btn primary full" type="submit">Sign In To Learner Portal</button>
           <p id="learnerError" class="error hidden">Email or password not recognised.</p>
         </form>
-        <p style="margin-top:20px"><a class="text-btn" href="portal.html">← Back to portal choice</a></p>
+        <p style="margin-top:20px"><a class="text-btn" href="portal.html">← Back To Portal Choice</a></p>
       </div>
     </section>
   </main>
@@ -34,7 +34,7 @@
       const email=document.getElementById('learnerEmail').value.trim().toLowerCase();
       const password=document.getElementById('learnerPassword').value;
       const {data,error}=await db.auth.signInWithPassword({email,password});
-      if(error){errorBox.classList.remove('hidden');return;}
+      if(error){errorBox.textContent=error.message||'Email or password not recognised.';errorBox.classList.remove('hidden');return;}
       const {data:profile,error:profileError}=await db.from('profiles').select('role').eq('id',data.user.id).single();
       if(profileError || profile?.role!=='learner'){
         await db.auth.signOut();
@@ -42,8 +42,9 @@
         errorBox.classList.remove('hidden');
         return;
       }
-      window.location.href='index.html';
+      window.location.href='learner-dashboard.html';
     });
+    (async()=>{const{data}=await db.auth.getUser();if(data?.user){const{data:p}=await db.from('profiles').select('role').eq('id',data.user.id).maybeSingle();if(p?.role==='learner')window.location.href='learner-dashboard.html'}})();
   </script>
 </body>
 </html>
