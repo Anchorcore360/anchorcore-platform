@@ -1,0 +1,35 @@
+name: Add learner compliance snapshot
+on:
+  push:
+    branches: [fullscreen-preview]
+    paths:
+      - 'compliance-profile.js'
+      - 'learner-compliance.html'
+      - '.github/workflows/add-compliance-snapshot.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fullscreen-preview
+      - name: Add compliance script to learner profile
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('learner-profile.html')
+          s=p.read_text()
+          tag='<script src="compliance-profile.js"></script>'
+          if tag not in s:
+              s=s.replace('</body></html>', tag+'\n</body></html>')
+          p.write_text(s)
+          PY
+      - name: Commit patched learner profile
+        run: |
+          git config user.name "Anchorcore360"
+          git config user.email "anchorcore360@outlook.com"
+          git add learner-profile.html
+          git diff --cached --quiet || git commit -m "Wire learner compliance snapshot"
+          git push
