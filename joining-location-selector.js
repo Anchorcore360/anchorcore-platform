@@ -106,4 +106,13 @@
     });
   }
   initLocationSelector().catch(()=>{});
+
+  function loadPdfTools(){
+    if(window.jspdf?.jsPDF){const s=document.createElement('script');s.src='joining-pdf-attachment.js';document.body.appendChild(s);return;}
+    const lib=document.createElement('script');
+    lib.src='https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+    lib.onload=()=>{const s=document.createElement('script');s.src='joining-pdf-attachment.js';document.body.appendChild(s)};
+    document.head.appendChild(lib);
+  }
+  loadPdfTools();
 })();
