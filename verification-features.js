@@ -13,6 +13,24 @@ function loadScriptOnce(src,globalName){
   });
 }
 
+async function generateQrDataUrl(text,size=220){
+  await loadScriptOnce('https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js','QRCode');
+  const holder=document.createElement('div');
+  holder.style.cssText='position:fixed;left:-10000px;top:-10000px;width:'+size+'px;height:'+size+'px;background:#fff';
+  document.body.appendChild(holder);
+  try{
+    new QRCode(holder,{text,width:size,height:size,correctLevel:QRCode.CorrectLevel.M});
+    await new Promise(resolve=>setTimeout(resolve,60));
+    const canvas=holder.querySelector('canvas');
+    if(canvas)return canvas.toDataURL('image/png');
+    const img=holder.querySelector('img');
+    if(img?.src)return img.src;
+    throw new Error('QR code could not be rendered.');
+  }finally{
+    holder.remove();
+  }
+}
+
 async function renderVerificationQr(){
   const slot=document.querySelector('.qr-slot');
   const url=verificationUrl();
@@ -73,25 +91,25 @@ async function downloadAccreditationPdf(){
   const url=verificationUrl();
   if(!url)return alert('Verification link is not available for this learner.');
   await loadScriptOnce('https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js');
-  await loadScriptOnce('https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js','QRCode');
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({unit:'mm',format:'a4'});
   const name=[learner.forename,learner.surname].filter(Boolean).join(' ')||learner.full_name||'Operative';
   const current=accreditations.filter(a=>accreditationStatus(a.expiry_date).cls!=='expired');
 
-  // Header / branding
   doc.setFillColor(255,255,255);doc.rect(0,0,210,297,'F');
   try{const logo=await imageUrlToDataUrl(`${location.origin}/rrta-logo.png`);if(logo)doc.addImage(logo,'PNG',14,10,32,15);}catch(_e){}
   doc.setDrawColor(157,11,26);doc.setLineWidth(1);doc.line(0,30,210,30);
   doc.setFontSize(8);doc.setTextColor(102,112,123);doc.text('ACCREDITATION VERIFICATION RECORD',196,18,{align:'right'});
 
-  // Identity block
   let photoData=null;
   if(learner.photo_path){try{const photoUrl=await signed('learner-photos',learner.photo_path);if(photoUrl)photoData=await imageUrlToDataUrl(photoUrl);}catch(_e){}}
   if(photoData){try{doc.addImage(photoData,'JPEG',16,40,29,35);}catch(_e){try{doc.addImage(photoData,'PNG',16,40,29,35);}catch(_e2){}}}
   else{doc.setFillColor(246,247,248);doc.roundedRect(16,40,29,35,2,2,'F');doc.setFontSize(8);doc.setTextColor(115,125,135);doc.text('Photo',30.5,58,{align:'center'});}
 
-  try{const qrData=await window.QRCode.toDataURL(url,{width:220,margin:1});doc.addImage(qrData,'PNG',16,78,29,29);}catch(_e){}
+  try{
+    const qrData=await generateQrDataUrl(url,240);
+    doc.addImage(qrData,'PNG',16,78,29,29);
+  }catch(_e){}
 
   doc.setTextColor(123,23,35);doc.setFontSize(8);doc.setFont(undefined,'bold');doc.text('OPERATIVE DETAILS',55,42);
   const details=[
@@ -110,7 +128,6 @@ async function downloadAccreditationPdf(){
   doc.setFontSize(7.5);doc.setTextColor(102,112,123);doc.text(`Generated ${new Date().toLocaleString('en-GB')}`,92,dy+1);
   doc.setFont(undefined,'normal');
 
-  // Accreditation table title
   const tableY=118;
   doc.setFillColor(230,243,246);doc.rect(14,tableY,182,10,'F');
   doc.setFont(undefined,'bold');doc.setFontSize(9);doc.setTextColor(31,41,51);doc.text('All Certifications',105,124.5,{align:'center'});
