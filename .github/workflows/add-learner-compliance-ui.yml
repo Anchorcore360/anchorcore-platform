@@ -1,0 +1,36 @@
+name: Add Learner Compliance UI
+on:
+  push:
+    branches: [fullscreen-preview]
+    paths:
+      - '.github/workflows/add-learner-compliance-ui.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fullscreen-preview
+      - name: Add compliance enhancement script
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('learner-dashboard.html')
+          s=p.read_text()
+          tag='<script src="learner-compliance-ui.js?v=20260911-1"></script>'
+          if tag not in s:
+              s=s.replace('</body>',tag+'</body>')
+              p.write_text(s)
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add learner-dashboard.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Load learner compliance charts and qualification grid"
+            git push origin fullscreen-preview
+          fi
