@@ -1,0 +1,37 @@
+name: Wire joining instructions UI
+on:
+  push:
+    branches: [fullscreen-preview]
+    paths:
+      - 'course-joining-template-link.js'
+      - 'booked-courses-joining.js'
+      - 'joining-template.html'
+      - 'joining-instructions-preview.html'
+      - '.github/workflows/wire-joining-instructions.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fullscreen-preview
+      - name: Wire course template link
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('course-detail.html')
+          s=p.read_text()
+          tag='<script src="course-joining-template-link.js"></script>'
+          if tag not in s:
+              s=s.replace('</body></html>',tag+'</body></html>')
+          p.write_text(s)
+          PY
+      - name: Commit wiring
+        run: |
+          git config user.name "Anchorcore360"
+          git config user.email "anchorcore360@outlook.com"
+          git add course-detail.html
+          git diff --cached --quiet || git commit -m "Wire joining instruction template into course file"
+          git push
