@@ -18,6 +18,11 @@ function managerMeta(id){
   if(!p)return '';
   return [p.job_title,p.employee_number?`Employee ${p.employee_number}`:''].filter(Boolean).join(' · ');
 }
+function formatDob(value){
+  if(!value)return '—';
+  const [y,m,d]=String(value).split('-');
+  return y&&m&&d?`${d}/${m}/${y}`:value;
+}
 function ensureManagerPanel(){
   let panel=document.getElementById('managerPanel');
   if(panel)return panel;
@@ -39,6 +44,19 @@ function renderManagers(){
   const items=[['Primary manager',learner.manager_1_id],['Second manager',learner.manager_2_id],['Third manager',learner.manager_3_id]];
   grid.innerHTML=items.map(([label,id])=>`<div class="manager-card"><span>${esc(label)}</span><strong class="${id?'':'manager-none'}">${esc(managerDisplayName(id))}</strong>${id&&managerMeta(id)?`<small>${esc(managerMeta(id))}</small>`:''}</div>`).join('');
 }
+function renderDateOfBirth(){
+  const grid=document.getElementById('detailsGrid');
+  if(!grid)return;
+  let card=document.getElementById('dateOfBirthDetail');
+  if(!card){
+    card=document.createElement('div');
+    card.className='detail';
+    card.id='dateOfBirthDetail';
+    const employeeCard=[...grid.querySelectorAll('.detail')].find(x=>(x.querySelector('span')?.textContent||'').trim().toLowerCase()==='employee number');
+    if(employeeCard)employeeCard.insertAdjacentElement('afterend',card);else grid.appendChild(card);
+  }
+  card.innerHTML=`<span>Date of birth</span><strong>${esc(formatDob(learner.date_of_birth))}</strong>`;
+}
 function markCompactDetails(){
   document.querySelectorAll('#detailsGrid .detail').forEach(card=>{
     const label=(card.querySelector('span')?.textContent||'').trim().toLowerCase();
@@ -49,6 +67,7 @@ function markCompactDetails(){
 const originalRender=render;
 render=async function(){
   await originalRender();
+  renderDateOfBirth();
   markCompactDetails();
   renderManagers();
 };
@@ -70,6 +89,7 @@ openProfileModal=function(){
   modal('Edit learner profile',`<div class="form-grid">
     <label>Forename<input name="forename" required value="${esc(learner.forename||'')}"></label>
     <label>Surname<input name="surname" required value="${esc(learner.surname||'')}"></label>
+    <label>Date of birth<input name="date_of_birth" type="date" value="${esc(learner.date_of_birth||'')}"></label>
     <label>Email<input name="email" type="email" value="${esc(learner.email||'')}"></label>
     <label>Employee number<input name="employee_number" value="${esc(learner.employee_number||'')}"></label>
     <label>Job title<input name="job_title" value="${esc(learner.job_title||'')}"></label>
@@ -87,6 +107,7 @@ openProfileModal=function(){
     if(new Set(chosen).size!==chosen.length)throw new Error('Please choose a different person for each manager position.');
     const {error}=await db.from('profiles').update({
       forename,surname,full_name:`${forename} ${surname}`.trim(),
+      date_of_birth:f.get('date_of_birth')||null,
       email:f.get('email').trim().toLowerCase()||null,
       employee_number:f.get('employee_number').trim()||null,
       job_title:f.get('job_title').trim()||null,
@@ -99,7 +120,6 @@ openProfileModal=function(){
   });
 };
 
-// Existing buttons were wired before this enhancement loaded, so point them at the enhanced editor.
 const rewireProfileEditors=()=>{
   const top=document.getElementById('editProfileBtn');
   const details=document.getElementById('editProfileBtn2');
