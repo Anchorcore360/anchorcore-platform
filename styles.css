@@ -19,3 +19,18 @@ button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!impo
 .modal{position:fixed;inset:0;background:rgba(12,17,22,.63);display:grid;place-items:center;padding:20px;z-index:50}.modal-card{width:min(440px,100%);background:#fff;border-radius:14px;padding:25px;position:relative}.modal-close{position:absolute;right:15px;top:10px;background:none;border:0;font-size:28px}
 @media(max-width:950px){.stat-grid{grid-template-columns:repeat(2,1fr)}.grid-2,.course-admin-grid{grid-template-columns:1fr}.portal-shell{grid-template-columns:1fr}.sidebar{display:flex;gap:6px;overflow:auto;padding:10px}.sidebar-title{display:none}.side-link{width:auto;white-space:nowrap}.learning-grid{grid-template-columns:1fr}}
 @media(max-width:640px){.site-header{height:68px}.brand-logo{height:48px}.header-inner{padding:7px 14px}.portal-content{padding:20px 15px}.page-head,.learner-top{display:block}.page-head .btn,.learner-top .btn{margin-top:12px}.stat-grid{grid-template-columns:1fr 1fr}.assessment-rules{grid-template-columns:1fr 1fr 1fr}.journey{justify-content:flex-start}.review-grid{grid-template-columns:repeat(5,1fr)}.button-row .btn{width:100%}.test-actions .btn{width:48%}.question-card,.assessment-intro,.course-detail{padding:20px}.big-score{font-size:44px}}
+
+/* Desktop full-screen preview */
+@media(min-width:951px){
+  .header-inner{width:100%;max-width:none;padding-left:36px;padding-right:36px}
+  .portal-shell{grid-template-columns:250px minmax(0,1fr)}
+  .portal-content{max-width:none;margin:0;padding:32px 40px 48px}
+  .stat-grid{gap:18px}
+  .grid-2{grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);gap:20px}
+  .course-admin-grid{grid-template-columns:minmax(0,2fr) minmax(280px,1fr) minmax(280px,1fr);gap:20px}
+  .panel,.stat,.course-admin-card{border-radius:10px}
+}
+@media(min-width:1450px){
+  .header-inner{padding-left:48px;padding-right:48px}
+  .portal-content{padding-left:48px;padding-right:48px}
+}
