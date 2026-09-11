@@ -65,4 +65,5 @@ document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click
 (async()=>{try{await requireTrainer();await refresh()}catch(err){document.getElementById('profileApp').classList.add('hidden');const box=document.getElementById('profileError');box.textContent=err.message||'Unable to load learner profile.';box.classList.remove('hidden')}})();
 </script>
 <script src="profile-managers.js"></script>
+<script src="accreditation-catalog.js"></script>
 </body></html>
