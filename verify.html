@@ -6,7 +6,7 @@
 <title>Accreditation Verification | RRTA</title>
 <link rel="stylesheet" href="styles.css">
 <style>
-body{background:#f4f6f7;color:#1f2933}.verify-shell{max-width:1320px;margin:0 auto;padding:28px 28px 60px}.verify-card{background:#fff;border:1px solid #dbe1e6;border-radius:14px;overflow:hidden}.person-area{display:grid;grid-template-columns:190px 1fr;gap:34px;padding:28px 30px}.identity-side{text-align:center}.person-photo{width:126px;height:150px;object-fit:cover;border-radius:8px;border:1px solid #cfd6dc;background:#f6f7f8;display:block;margin:0 auto 12px}.photo-placeholder{width:126px;height:150px;border-radius:8px;border:1px dashed #c4cbd2;background:#f6f7f8;margin:0 auto 12px;display:grid;place-items:center;color:#737d87;font-size:13px}.qr-box{width:112px;height:112px;margin:8px auto 0;background:#fff;padding:5px;border:1px solid #d9dee3}.qr-box canvas,.qr-box img{width:100%!important;height:100%!important}.details-title{font-size:13px;font-weight:800;color:#7b1723;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}.details-grid{display:grid;grid-template-columns:160px minmax(220px,1fr);gap:13px 24px;max-width:650px;align-items:center}.details-grid dt{font-weight:750;color:#596573}.details-grid dd{margin:0;color:#28323c}.status-active{color:#168343;font-weight:800}.status-archived{color:#b42318;font-weight:800}.toolbar{display:flex;gap:18px;align-items:center;flex-wrap:wrap;border-top:1px solid #e3e7eb;border-bottom:1px solid #e3e7eb;padding:16px 30px;background:#fafbfc}.toolbar label{font-size:13px;font-weight:750;display:flex;align-items:center;gap:8px}.toolbar select{min-width:190px;padding:8px 10px;border:1px solid #cfd6dc;border-radius:7px;background:#fff}.table-wrap{padding:0 30px 30px}.table-title{text-align:center;background:#e6f3f6;padding:12px;font-weight:800;margin-top:22px}.verify-table{width:100%;border-collapse:collapse}.verify-table th,.verify-table td{padding:12px 10px;border-bottom:1px solid #dde3e8;text-align:left;font-size:13px;vertical-align:middle}.verify-table th{font-size:11px;text-transform:uppercase;color:#66727e;font-weight:800;background:#fff}.verify-table td.status-cell{font-weight:800;text-align:center}.status-cell.valid{background:#e7f6ed;color:#17733d}.status-cell.expiring{background:#fff3cd;color:#8a6400}.status-cell.expired{background:#fde7e9;color:#a51d2a}.view-btn{border:0;background:none;color:#1672b8;font-weight:750;text-decoration:underline;cursor:pointer;padding:4px}.view-btn:disabled{color:#9aa3ab;text-decoration:none;cursor:default}.error-box{padding:14px;border-radius:9px;background:#fdebec;color:#9b1c28;margin-top:16px}.muted{color:#66727e}.live-note{display:flex;justify-content:flex-end;padding:12px 30px 0}.live-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;background:#e8f6ed;color:#176b37;font-size:11px;font-weight:850}.hidden{display:none!important}@media(max-width:780px){.verify-shell{padding:16px}.person-area{grid-template-columns:1fr}.details-grid{grid-template-columns:1fr}.details-grid dt{margin-top:6px}.toolbar{padding:14px 18px}.table-wrap{padding:0 18px 24px;overflow:auto}.verify-table{min-width:850px}}
+body{background:#f4f6f7;color:#1f2933}.verify-shell{max-width:1320px;margin:0 auto;padding:28px 28px 60px}.verify-card{background:#fff;border:1px solid #dbe1e6;border-radius:14px;overflow:hidden}.person-area{display:grid;grid-template-columns:190px 1fr;gap:34px;padding:28px 30px}.identity-side{text-align:center}.person-photo{width:126px;height:150px;object-fit:cover;border-radius:8px;border:1px solid #cfd6dc;background:#f6f7f8;display:block;margin:0 auto 12px}.photo-placeholder{width:126px;height:150px;border-radius:8px;border:1px dashed #c4cbd2;background:#f6f7f8;margin:0 auto 12px;display:grid;place-items:center;color:#737d87;font-size:13px}.qr-box{width:112px;height:112px;margin:8px auto 0;background:#fff;padding:5px;border:1px solid #d9dee3}.qr-box canvas,.qr-box img{width:100%!important;height:100%!important}.details-title{font-size:13px;font-weight:800;color:#7b1723;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}.details-grid{display:grid;grid-template-columns:160px minmax(220px,1fr);gap:13px 24px;max-width:650px;align-items:center}.details-grid dt{font-weight:750;color:#596573}.details-grid dd{margin:0;color:#28323c}.status-active{color:#168343;font-weight:800}.status-archived{color:#b42318;font-weight:800}.toolbar{display:flex;gap:18px;align-items:center;flex-wrap:wrap;border-top:1px solid #e3e7eb;border-bottom:1px solid #e3e7eb;padding:16px 30px;background:#fafbfc}.toolbar label{font-size:13px;font-weight:750;display:flex;align-items:center;gap:8px}.toolbar select{min-width:190px;padding:8px 10px;border:1px solid #cfd6dc;border-radius:7px;background:#fff}.table-wrap{padding:0 30px 30px}.table-title{text-align:center;background:#e6f3f6;padding:12px;font-weight:800;margin-top:22px}.verify-table{width:100%;border-collapse:collapse}.verify-table th,.verify-table td{padding:12px 10px;border-bottom:1px solid #dde3e8;text-align:left;font-size:13px;vertical-align:middle}.verify-table th{font-size:11px;text-transform:uppercase;color:#66727e;font-weight:800;background:#fff}.verify-table td.status-cell{font-weight:800;text-align:center}.status-cell.valid{background:#e7f6ed;color:#17733d}.status-cell.expiring{background:#fff3cd;color:#8a6400}.status-cell.expired{background:#fde7e9;color:#a51d2a}.view-btn{display:inline-block;color:#1672b8;font-weight:750;text-decoration:underline;padding:4px}.error-box{padding:14px;border-radius:9px;background:#fdebec;color:#9b1c28;margin-top:16px}.muted{color:#66727e}.live-note{display:flex;justify-content:flex-end;padding:12px 30px 0}.live-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;background:#e8f6ed;color:#176b37;font-size:11px;font-weight:850}.hidden{display:none!important}@media(max-width:780px){.verify-shell{padding:16px}.person-area{grid-template-columns:1fr}.details-grid{grid-template-columns:1fr}.details-grid dt{margin-top:6px}.toolbar{padding:14px 18px}.table-wrap{padding:0 18px 24px;overflow:auto}.verify-table{min-width:850px}}
 </style>
 </head>
 <body>
@@ -38,44 +38,28 @@ body{background:#f4f6f7;color:#1f2933}.verify-shell{max-width:1320px;margin:0 au
     </div>
     <div class="table-wrap">
       <div class="table-title">All Certifications</div>
-      <div id="records"></div>
+      <div id="records"><div class="empty">Loading accreditation record…</div></div>
     </div>
   </section>
   <div id="verifyError" class="error-box hidden"></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
 const token=new URLSearchParams(location.search).get('t');
 const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const fmt=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-GB'):'—';
-
-async function signedAsset(body){
-  const {data,error}=await db.functions.invoke('verification-evidence',{body});
-  if(error||data?.error)throw new Error(data?.error||error?.message||'Unable to open file.');
-  return data.url;
-}
-async function openEvidence(id){
-  try{const url=await signedAsset({token,accreditation_id:id});window.open(url,'_blank','noopener');}
-  catch(e){alert(e.message||'Unable to open certificate.');}
-}
-async function loadPhoto(hasPhoto){
-  if(!hasPhoto)return;
-  try{const url=await signedAsset({token,type:'photo'});document.getElementById('photoWrap').innerHTML=`<img class="person-photo" src="${url}" alt="Operative photo">`;}
-  catch(_e){}
-}
-function fillRoleFilter(p){
-  const sel=document.getElementById('roleFilter');
-  const roles=[p.primary_job_role,p.secondary_job_role].filter(Boolean);
-  sel.innerHTML='<option value="all">All certifications</option>'+roles.map(r=>`<option value="${esc(r)}">${esc(r)}</option>`).join('');
-}
-async function load(){
+const assetBase='https://qgbpotjqggeodxqcwkgj.supabase.co/functions/v1/verification-asset';
+function assetUrl(type,id=''){const u=new URL(assetBase);u.searchParams.set('token',token||'');u.searchParams.set('type',type);if(id!=='')u.searchParams.set('accreditation_id',id);return u.toString()}
+function renderQr(){const el=document.getElementById('qrCode');el.innerHTML='';try{new QRCode(el,{text:location.href,width:102,height:102,correctLevel:QRCode.CorrectLevel.M});}catch(e){el.innerHTML='<span class="muted">QR unavailable</span>'}}
+function loadPhoto(hasPhoto){if(!hasPhoto)return;document.getElementById('photoWrap').innerHTML=`<img class="person-photo" src="${assetUrl('photo')}" alt="Operative photo" onerror="this.parentElement.innerHTML='<div class=&quot;photo-placeholder&quot;>Photo unavailable</div>'">`}
+function fillRoleFilter(p){const sel=document.getElementById('roleFilter');const roles=[p.primary_job_role,p.secondary_job_role].filter(Boolean);sel.innerHTML='<option value="all">All certifications</option>'+roles.map(r=>`<option value="${esc(r)}">${esc(r)}</option>`).join('')}
+async function loadOnce(){
   if(!token)throw new Error('This verification link is incomplete.');
   const include=document.getElementById('showExpired').checked;
   const {data,error}=await db.rpc('get_public_learner_verification',{p_token:token,p_include_expired:include});
-  if(error)throw error;
-  if(!data?.learner)throw new Error('This verification record could not be found.');
+  if(error)throw error;if(!data?.learner)throw new Error('This verification record could not be found.');
   const p=data.learner;
   document.getElementById('personName').textContent=p.full_name||[p.forename,p.surname].filter(Boolean).join(' ')||'Operative';
   document.getElementById('employeeNo').textContent=p.employee_number||'—';
@@ -83,18 +67,16 @@ async function load(){
   document.getElementById('jobTitle').textContent=p.job_title||'—';
   document.getElementById('primaryRole').textContent=p.primary_job_role||'—';
   document.getElementById('secondaryRole').textContent=p.secondary_job_role||'—';
-  const status=(p.account_status||'active');
-  const statusEl=document.getElementById('companyStatus');statusEl.textContent=status.charAt(0).toUpperCase()+status.slice(1);statusEl.className=status==='active'?'status-active':'status-archived';
-  fillRoleFilter(p);
-  await loadPhoto(p.has_photo);
+  const status=(p.account_status||'active');const statusEl=document.getElementById('companyStatus');statusEl.textContent=status.charAt(0).toUpperCase()+status.slice(1);statusEl.className=status==='active'?'status-active':'status-archived';
+  fillRoleFilter(p);loadPhoto(p.has_photo);
   const rows=data.accreditations||[];
-  document.getElementById('records').innerHTML=rows.length?`<table class="verify-table"><thead><tr><th>Module No</th><th>Module</th><th>Certification Date</th><th>Expires</th><th>Status</th><th>Awarding Body</th><th>Evidence</th></tr></thead><tbody>${rows.map(a=>`<tr><td><strong>${esc(a.module_no||a.accreditation_name||'—')}</strong></td><td>${esc(a.module||a.accreditation_name||'—')}</td><td>${fmt(a.issue_date)}</td><td>${fmt(a.expiry_date)}</td><td class="status-cell ${esc(a.status)}">${a.status==='valid'?'Valid':a.status==='expiring'?'Expiring':'Expired'}</td><td>${esc(a.awarding_body||'—')}</td><td>${a.has_certificate?`<button class="view-btn" onclick="openEvidence(${Number(a.id)})">View</button>`:'<span class="muted">Not uploaded</span>'}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No accreditations are currently recorded.</div>';
-  document.getElementById('verifyError').classList.add('hidden');
+  document.getElementById('records').innerHTML=rows.length?`<table class="verify-table"><thead><tr><th>Module No</th><th>Module</th><th>Certification Date</th><th>Expires</th><th>Status</th><th>Awarding Body</th><th>Evidence</th></tr></thead><tbody>${rows.map(a=>`<tr><td><strong>${esc(a.module_no||a.accreditation_name||'—')}</strong></td><td>${esc(a.module||a.accreditation_name||'—')}</td><td>${fmt(a.issue_date)}</td><td>${fmt(a.expiry_date)}</td><td class="status-cell ${esc(a.status)}">${a.status==='valid'?'Valid':a.status==='expiring'?'Expiring':'Expired'}</td><td>${esc(a.awarding_body||'—')}</td><td>${a.has_certificate?`<a class="view-btn" href="${assetUrl('certificate',Number(a.id))}" target="_blank" rel="noopener">View</a>`:'<span class="muted">Not uploaded</span>'}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No accreditations are currently recorded.</div>';
+  document.getElementById('verifyError').classList.add('hidden');document.getElementById('verifyApp').classList.remove('hidden');
 }
-function showErr(e){document.getElementById('verifyApp').classList.add('hidden');const box=document.getElementById('verifyError');box.textContent=e.message||'Unable to load verification record.';box.classList.remove('hidden')}
-document.getElementById('showExpired').onchange=()=>load().catch(showErr);
-QRCode.toCanvas(document.createElement('canvas'),location.href,{width:102,margin:0},(err,canvas)=>{if(!err)document.getElementById('qrCode').appendChild(canvas)});
-load().catch(showErr);
+async function loadWithRetry(){let last;for(let i=0;i<3;i++){try{return await loadOnce()}catch(e){last=e;if(i<2)await new Promise(r=>setTimeout(r,700*(i+1)))}}throw last}
+function showErr(e){const box=document.getElementById('verifyError');box.textContent=e?.message||'Unable to load verification record.';box.classList.remove('hidden')}
+document.getElementById('showExpired').addEventListener('change',()=>loadWithRetry().catch(showErr));
+renderQr();loadWithRetry().catch(showErr);
 </script>
 </body>
 </html>
