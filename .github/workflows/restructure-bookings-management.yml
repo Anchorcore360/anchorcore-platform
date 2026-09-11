@@ -1,0 +1,43 @@
+name: Restructure bookings management
+on:
+  push:
+    branches: [fullscreen-preview]
+    paths:
+      - 'training-schedule-booking-tools.js'
+      - 'standalone-bookings-nav.js'
+      - 'booked-courses.html'
+      - 'trainer-bookings-nav.js'
+      - '.github/workflows/restructure-bookings-management.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fullscreen-preview
+      - name: Patch training schedule and bookings pages
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          for name in ['training-schedule.html','bookings.html','external-customers.html']:
+              p=Path(name)
+              if not p.exists(): continue
+              s=p.read_text()
+              nav='<script src="standalone-bookings-nav.js"></script>'
+              if nav not in s:
+                  s=s.replace('</body></html>',nav+'\n</body></html>')
+              if name=='training-schedule.html':
+                  tools='<script src="training-schedule-booking-tools.js"></script>'
+                  if tools not in s:
+                      s=s.replace('</body></html>',tools+'\n</body></html>')
+              p.write_text(s)
+          PY
+      - name: Commit patched pages
+        run: |
+          git config user.name "Anchorcore360"
+          git config user.email "anchorcore360@outlook.com"
+          git add training-schedule.html bookings.html external-customers.html
+          git diff --cached --quiet || git commit -m "Restructure bookings management workflow"
+          git push
