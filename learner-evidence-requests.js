@@ -59,3 +59,4 @@
   window.addEventListener('load',()=>setTimeout(refreshRequests,400));
   setTimeout(refreshRequests,900);
 })();
+(function(){const s=document.createElement('script');s.src='learner-team.js?v=20260911-1';document.body.appendChild(s)})();
