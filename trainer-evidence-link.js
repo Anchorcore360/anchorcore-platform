@@ -21,5 +21,10 @@
     const n=await pendingCount();const badge=link.querySelector('[data-request-count]');
     if(badge){badge.textContent=n;badge.style.display=n?'inline-flex':'none'}
   }
-  document.addEventListener('DOMContentLoaded',addLink);setTimeout(addLink,500);
+  function loadBulkUpload(){
+    if(document.querySelector('script[data-bulk-learner-upload]'))return;
+    const s=document.createElement('script');s.src='bulk-learner-upload.js';s.dataset.bulkLearnerUpload='1';document.body.appendChild(s);
+  }
+  document.addEventListener('DOMContentLoaded',()=>{addLink();loadBulkUpload()});
+  setTimeout(()=>{addLink();loadBulkUpload()},500);
 })();
