@@ -1,0 +1,35 @@
+name: Add training schedule navigation
+on:
+  push:
+    branches: [fullscreen-preview]
+    paths:
+      - 'training-schedule.html'
+      - '.github/workflows/add-training-schedule-nav.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fullscreen-preview
+      - name: Add schedule link to trainer portal
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('trainer.html')
+          s=p.read_text()
+          if 'training-schedule.html' not in s:
+              needle='<a class="side-link" href="bookings.html">'
+              link='<a class="side-link" href="training-schedule.html"><span class="side-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v15H4z"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></span><span>Training Schedule</span></a>'
+              s=s.replace(needle,link+needle)
+          p.write_text(s)
+          PY
+      - name: Commit navigation update
+        run: |
+          git config user.name "Anchorcore360"
+          git config user.email "anchorcore360@outlook.com"
+          git add trainer.html
+          git diff --cached --quiet || git commit -m "Add training schedule to trainer workspace"
+          git push
