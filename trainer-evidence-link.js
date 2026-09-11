@@ -18,6 +18,12 @@
       link.innerHTML='<span class="side-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h5M8 16h3"/><path d="m15 16 2 2 4-5"/></svg></span><span>Reviews &amp; Requests</span><span data-request-count style="margin-left:auto;display:none;min-width:20px;height:20px;border-radius:999px;background:#b20d1c;color:#fff;font-size:11px;font-weight:900;align-items:center;justify-content:center;padding:0 6px"></span>';
       compliance.insertAdjacentElement('afterend',link);
     }
+    let bulk=document.querySelector('#trainerDashboardScreen .sidebar a[href="bulk-accreditation-upload.html"]');
+    if(!bulk){
+      bulk=document.createElement('a');bulk.className='side-link';bulk.href='bulk-accreditation-upload.html';
+      bulk.innerHTML='<span class="side-icon"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 14v6h14v-6"/></svg></span><span>Bulk Accreditation Upload</span>';
+      link.insertAdjacentElement('afterend',bulk);
+    }
     const n=await pendingCount();const badge=link.querySelector('[data-request-count]');
     if(badge){badge.textContent=n;badge.style.display=n?'inline-flex':'none'}
   }
