@@ -11,6 +11,7 @@
     .bulk-preview th,.bulk-preview td{padding:8px;border-bottom:1px solid #e5e7eb;text-align:left;white-space:nowrap}
     .bulk-summary{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:13px}
     .bulk-result-ok{color:#176b37;font-weight:700}.bulk-result-bad{color:#b42318;font-weight:700}.bulk-result-warn{color:#8a6100;font-weight:700}
+    .new-photo-wrap{display:flex;align-items:center;gap:12px}.new-photo-preview{width:58px;height:68px;border:1px dashed #b8c1ca;border-radius:8px;background:#f7f8fa;display:grid;place-items:center;overflow:hidden;color:#667085;font-size:10px;text-align:center}.new-photo-preview img{width:100%;height:100%;object-fit:cover}.new-photo-wrap input{max-width:240px}
   `;
   document.head.appendChild(style);
 
@@ -31,10 +32,46 @@
     return people.find(p=>String(p.employee_number||'').trim().toLowerCase()===needle)||people.find(p=>String(p.full_name||'').trim().toLowerCase()===needle)||null;
   }
   function managerLabel(r){const m=managerFor(r);if(m)return m.full_name||m.email||m.employee_number||'Matched';if(r.manager||r.manager_email)return 'Not Matched';return '—'}
-  async function loadPeople(){const {data}=await db.from('profiles').select('id,full_name,email,employee_number,account_status').order('full_name');people=(data||[]).filter(p=>String(p.account_status||'active').toLowerCase()==='active')}
+  async function loadPeople(){const {data}=await db.from('profiles').select('id,full_name,email,employee_number,account_status,job_title,organisation').order('full_name');people=(data||[]).filter(p=>String(p.account_status||'active').toLowerCase()==='active')}
+
+  async function installSingleLearnerEnhancements(){
+    const form=document.getElementById('addLearnerForm');if(!form||document.getElementById('newManager1'))return;
+    await loadPeople();
+    const grid=form.querySelector('div[style*="grid-template-columns"]');if(!grid)return;
+    const managerLabel=document.createElement('label');managerLabel.innerHTML=`Line Manager (Primary)<select id="newManager1"><option value="">Select Line Manager</option>${people.map(p=>`<option value="${p.id}">${esc(p.full_name||p.email||'Profile')}${p.job_title?' · '+esc(p.job_title):''}</option>`).join('')}</select>`;
+    const photoLabel=document.createElement('label');photoLabel.innerHTML=`Profile Picture<div class="new-photo-wrap"><div class="new-photo-preview" id="newPhotoPreview">Optional</div><input id="newProfilePhoto" type="file" accept="image/jpeg,image/png,image/webp"></div>`;
+    grid.appendChild(managerLabel);grid.appendChild(photoLabel);
+    const managerSelect=document.getElementById('newManager1');managerSelect.style.cssText='width:100%;padding:12px 14px;border:1px solid #cfd4da;border-radius:8px;background:#fff;font:inherit;margin-top:6px';
+    const photo=document.getElementById('newProfilePhoto');photo.onchange=()=>{const f=photo.files?.[0],box=document.getElementById('newPhotoPreview');if(!f){box.innerHTML='Optional';return}if(!f.type.startsWith('image/')){photo.value='';box.innerHTML='Optional';return alert('Please choose an image file.')}const url=URL.createObjectURL(f);box.innerHTML=`<img src="${url}" alt="Profile Preview">`};
+    form.addEventListener('submit',handleEnhancedSingleCreate,true);
+  }
+
+  async function handleEnhancedSingleCreate(e){
+    e.preventDefault();e.stopImmediatePropagation();
+    const btn=document.getElementById('saveLearnerBtn'),msg=document.getElementById('learnerFormMessage');
+    const forename=document.getElementById('newForename').value.trim(),surname=document.getElementById('newSurname').value.trim();
+    const payload={forename,surname,full_name:`${forename} ${surname}`.trim(),email:document.getElementById('newEmail').value.trim().toLowerCase(),employee_number:document.getElementById('newEmployeeNumber').value.trim(),job_title:document.getElementById('newJobTitle').value.trim(),organisation:document.getElementById('newOrganisation').value.trim(),password:document.getElementById('newPassword').value};
+    const managerId=document.getElementById('newManager1')?.value||null,photo=document.getElementById('newProfilePhoto')?.files?.[0]||null;
+    btn.disabled=true;btn.textContent='Creating...';msg.classList.add('hidden');
+    try{
+      const {data,error}=await db.functions.invoke('create-learner',{body:payload});if(error)throw new Error(error.message||'Unable to create learner.');if(data?.error)throw new Error(data.error);
+      const learnerId=data?.user?.id;if(!learnerId)throw new Error('Learner account was created but the learner ID was not returned.');
+      if(managerId){const {error:me}=await db.from('profiles').update({manager_1_id:managerId}).eq('id',learnerId);if(me)throw new Error(`Learner created, but Line Manager could not be saved: ${me.message}`)}
+      if(photo){
+        const ext=(photo.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';const path=`${learnerId}/profile-${Date.now()}.${ext}`;
+        const {error:ue}=await db.storage.from('learner-photos').upload(path,photo,{upsert:false,contentType:photo.type||undefined});if(ue)throw new Error(`Learner created, but profile picture could not be uploaded: ${ue.message}`);
+        const {error:pe}=await db.from('profiles').update({photo_path:path}).eq('id',learnerId);if(pe)throw new Error(`Profile picture uploaded, but could not be linked to the learner: ${pe.message}`);
+      }
+      formResetAfterCreate();if(typeof loadLearnerData==='function')await loadLearnerData();alert('Learner created successfully.');
+    }catch(err){msg.textContent=err.message||'Unable to create learner.';msg.style.color='#b20d1c';msg.classList.remove('hidden')}
+    finally{btn.disabled=false;btn.textContent='Create Learner'}
+  }
+  function formResetAfterCreate(){document.getElementById('addLearnerForm')?.reset();const p=document.getElementById('newPhotoPreview');if(p)p.innerHTML='Optional';document.getElementById('addLearnerPanel')?.classList.add('hidden')}
 
   function install(){
-    const view=document.getElementById('view-learners');if(!view||document.getElementById('bulkLearnerBtn'))return;
+    const view=document.getElementById('view-learners');if(!view)return;
+    installSingleLearnerEnhancements().catch(()=>{});
+    if(document.getElementById('bulkLearnerBtn'))return;
     const head=view.querySelector('.page-head');const addBtn=document.getElementById('addLearnerBtn');if(!head||!addBtn)return;
     let actions=head.querySelector('.bulk-actions');if(!actions){actions=document.createElement('div');actions.className='bulk-actions';addBtn.parentNode.insertBefore(actions,addBtn);actions.appendChild(addBtn)}
     const bulk=document.createElement('button');bulk.id='bulkLearnerBtn';bulk.type='button';bulk.className='btn secondary';bulk.textContent='Bulk Upload';actions.appendChild(bulk);
