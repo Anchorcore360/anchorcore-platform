@@ -34,3 +34,12 @@ button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!impo
   .header-inner{padding-left:48px;padding-right:48px}
   .portal-content{padding-left:48px;padding-right:48px}
 }
+
+/* Consistent title case across the platform */
+h1,h2,h3,
+form label,.modal-card label,
+.sidebar-title,.side-link,.side a,
+.btn,.text-btn,.mini-btn,.back-btn,.tab,.small,
+.panel-head,strong.title,.header-user{
+  text-transform:capitalize;
+}
