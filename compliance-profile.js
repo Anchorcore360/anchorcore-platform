@@ -58,3 +58,6 @@ async function loadComplianceSnapshot(){
   }catch(e){box.innerHTML=`<div class="empty">Unable to calculate compliance: ${esc(e.message||'Unknown error')}</div>`}
 }
 const complianceOriginalRender=render;render=async function(){await complianceOriginalRender();await loadComplianceSnapshot();};
+
+// Keep the History UI separate from the core learner profile so it only loads when needed.
+(function(){const s=document.createElement('script');s.src='learner-history.js?v=20260912-1';document.body.appendChild(s)})();
