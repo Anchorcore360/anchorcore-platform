@@ -43,3 +43,136 @@ form label,.modal-card label,
 .panel-head,strong.title,.header-user{
   text-transform:capitalize;
 }
+
+/* RRTA visual refresh - red / black / silver */
+:root{
+  --red:#a30d1b;
+  --red2:#c71f2f;
+  --charcoal:#171b1f;
+  --ink:#151a20;
+  --muted:#68717a;
+  --bg:#eef0f2;
+  --panel:#ffffff;
+  --line:#d7dce1;
+  --silver:#b7bdc4;
+  --silver-light:#f4f5f6;
+  --sidebar:#171b1f;
+  --sidebar2:#272d33;
+}
+html,body{background:linear-gradient(135deg,#f2f3f4 0%,#e9ecef 58%,#f7f8f9 100%)}
+.site-header{height:78px;background:linear-gradient(90deg,#fff 0%,#f5f6f7 70%,#eceff1 100%);border-bottom:3px solid var(--red);box-shadow:0 2px 14px rgba(19,24,29,.08)}
+.brand-logo{filter:drop-shadow(0 2px 4px rgba(0,0,0,.08))}
+.portal-shell{background:transparent}
+.sidebar{background:linear-gradient(180deg,var(--sidebar) 0%,#20252a 55%,#111417 100%);border-right:1px solid #343a40;box-shadow:8px 0 25px rgba(10,13,16,.08)}
+.sidebar-title,.side-title{position:relative;padding-bottom:34px!important;color:#fff!important;letter-spacing:.01em}
+.sidebar-title::after,.side-title::after{content:"Integrity Breeds Trust";position:absolute;left:12px;bottom:13px;color:#bfc5cb;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.side-link,.nav-btn{border-left:3px solid transparent;transition:background .16s ease,border-color .16s ease,transform .16s ease}
+.side-link:hover,.side-link.active,.nav-btn:hover,.nav-btn.active{background:linear-gradient(90deg,rgba(163,13,27,.96),rgba(112,12,23,.82));border-left-color:#e5e7e9;color:#fff;transform:translateX(1px)}
+.sidebar-section-label{color:#aeb5bc!important}
+.portal-content,.content{background:transparent}
+.page-head{border-bottom:1px solid #d9dde1;padding-bottom:16px}
+.page-head h1{font-weight:800;letter-spacing:-.025em}
+.eyebrow{color:var(--red);font-weight:900;letter-spacing:.13em}
+.panel,.stat,.course-admin-card,.profile-hero,.role-card,.req-panel,.team-card,.learning-card,.metric,.panel-card,.ring-card{box-shadow:0 8px 24px rgba(20,26,32,.055);border-color:#d5d9de!important}
+.panel,.course-admin-card,.profile-hero,.role-card,.req-panel,.team-card,.learning-card,.metric,.panel-card,.ring-card{background:linear-gradient(180deg,#fff 0%,#fbfcfc 100%)}
+.stat{position:relative;overflow:hidden;border-top:0!important;padding-top:22px}
+.stat::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,var(--red) 0%,#8b111e 45%,var(--silver) 100%)}
+.stat.alert::before{background:linear-gradient(90deg,#c20f24,#ff6c78)}
+.btn{border-radius:7px;transition:transform .14s ease,box-shadow .14s ease,background .14s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(20,25,30,.12)}
+.btn.primary{background:linear-gradient(135deg,#b50f20,#86101b)}
+.btn.dark{background:linear-gradient(135deg,#2b3035,#121518);border:1px solid #3a4148}
+.btn.secondary{background:linear-gradient(180deg,#fff,#f2f3f4);border-color:#c8cdd2}
+input,select,textarea{background:#fff;border-color:#cbd1d6!important;box-shadow:inset 0 1px 2px rgba(19,24,29,.03)}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(163,13,27,.13);border-color:#a30d1b!important}
+.table thead th{background:#f1f3f4;color:#4e5861;border-bottom:1px solid #cdd2d7}
+.table tbody tr:hover{background:#fbf4f5}
+.login-wrap,.portal-choice-wrap{background:radial-gradient(circle at 15% 15%,rgba(163,13,27,.09),transparent 28%),linear-gradient(135deg,#1b2025 0%,#30363c 48%,#d9dde1 160%)!important}
+.login-card,.portal-choice-card{position:relative;border-top:0!important;box-shadow:0 28px 70px rgba(0,0,0,.27)!important;overflow:hidden}
+.login-card::before,.portal-choice-card::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--red) 0%,#7d111b 48%,#bfc4c9 100%)}
+.login-card::after,.portal-choice-card::after{content:"Integrity Breeds Trust";display:block;margin-top:24px;padding-top:16px;border-top:1px solid #e1e4e7;color:#7b838b;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.portal-choice{border-color:#d2d7db!important;background:linear-gradient(180deg,#fff 0%,#f8f9fa 100%)!important;box-shadow:0 8px 22px rgba(19,24,29,.055)}
+.portal-choice:hover{border-color:#a30d1b!important;box-shadow:0 14px 30px rgba(19,24,29,.13)!important}
+.status.live,.badge.valid,.pill.pass{box-shadow:inset 0 0 0 1px rgba(20,118,78,.10)}
+@media(min-width:951px){
+  .portal-shell{grid-template-columns:270px minmax(0,1fr)}
+  .portal-content{padding:34px 46px 54px}
+  .sidebar{padding:26px 16px}
+  .side-link{padding:12px 15px}
+}
+@media(max-width:950px){
+  .sidebar-title::after,.side-title::after{display:none}
+  .side-link:hover,.side-link.active,.nav-btn:hover,.nav-btn.active{transform:none}
+}
+
+/* Professional motion and interaction polish */
+:root{--ease:cubic-bezier(.2,.8,.2,1);--ease-out:cubic-bezier(.16,1,.3,1)}
+html{scroll-behavior:smooth}
+body{min-height:100vh;overflow-x:hidden}
+::selection{background:rgba(163,13,27,.18);color:#151a20}
+.site-header{animation:rrtaHeaderIn .5s var(--ease-out) both;backdrop-filter:saturate(120%)}
+.brand-logo{transition:transform .3s var(--ease),filter .3s var(--ease)}
+.brand-logo:hover{transform:translateY(-1px) scale(1.012);filter:drop-shadow(0 5px 8px rgba(0,0,0,.12))}
+.sidebar{position:relative;overflow:hidden}
+.sidebar::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)}
+.sidebar::after{content:"";position:absolute;width:160px;height:160px;border-radius:50%;right:-95px;top:18%;background:rgba(163,13,27,.10);filter:blur(4px);pointer-events:none;animation:rrtaGlow 7s ease-in-out infinite alternate}
+.side-link,.nav-btn{position:relative;overflow:hidden;isolation:isolate;will-change:transform}
+.side-link::before,.nav-btn::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(255,255,255,.07),transparent 70%);transform:translateX(-110%);transition:transform .42s var(--ease-out)}
+.side-link::after,.nav-btn::after{content:"";position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:8px;background:#d8dde2;transform:scaleY(0);transition:transform .22s var(--ease-out)}
+.side-link:hover::before,.nav-btn:hover::before{transform:translateX(0)}
+.side-link:hover::after,.side-link.active::after,.nav-btn:hover::after,.nav-btn.active::after{transform:scaleY(1)}
+.side-link .side-icon,.nav-btn .side-icon{transition:transform .22s var(--ease-out),opacity .22s ease}
+.side-link:hover .side-icon,.side-link.active .side-icon,.nav-btn:hover .side-icon,.nav-btn.active .side-icon{transform:translateX(2px) scale(1.08)}
+.sidebar-section-label{animation:rrtaFadeUp .45s var(--ease-out) both}
+.portal-content,.content,.learner-shell,.assessment-shell,.test-shell,.verify-shell{animation:rrtaContentIn .5s var(--ease-out) both}
+.trainer-view.active{animation:rrtaViewIn .35s var(--ease-out) both}
+.page-head h1,.learner-top h1{background:linear-gradient(90deg,#11161b 0%,#343a40 65%,#7b838a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.panel,.stat,.course-admin-card,.profile-hero,.role-card,.req-panel,.team-card,.learning-card,.metric,.panel-card,.ring-card,.portal-choice,.verify-card,.course-detail,.assessment-intro,.question-card,.result-card{transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s var(--ease)}
+.panel:hover,.stat:hover,.course-admin-card:hover,.role-card:hover,.team-card:hover,.learning-card:hover,.metric:hover,.panel-card:hover,.ring-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(20,26,32,.09)}
+.stat strong,.metric strong{font-variant-numeric:tabular-nums}
+.stat-grid .stat{animation:rrtaCardIn .5s var(--ease-out) both}
+.stat-grid .stat:nth-child(2){animation-delay:.05s}.stat-grid .stat:nth-child(3){animation-delay:.1s}.stat-grid .stat:nth-child(4){animation-delay:.15s}.stat-grid .stat:nth-child(5){animation-delay:.2s}.stat-grid .stat:nth-child(6){animation-delay:.25s}
+.btn,.mini-btn,.learner-row-btn,.view-btn,.text-btn,.back-btn{position:relative;overflow:hidden;transition:transform .16s var(--ease),box-shadow .16s var(--ease),filter .16s ease,border-color .16s ease}
+.btn:active,.mini-btn:active,.learner-row-btn:active,.view-btn:active{transform:translateY(1px) scale(.985)}
+.btn.primary::after,.btn.dark::after,.learner-row-btn::after{content:"";position:absolute;inset:-40% auto -40% -35%;width:30%;transform:skewX(-18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);transition:left .55s var(--ease-out)}
+.btn.primary:hover::after,.btn.dark:hover::after,.learner-row-btn:hover::after{left:115%}
+.mini-btn:hover,.text-btn:hover,.back-btn:hover,.view-btn:hover{filter:brightness(.92)}
+input,select,textarea{transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px rgba(163,13,27,.08),inset 0 1px 2px rgba(19,24,29,.03);transform:translateY(-1px)}
+.table tbody tr{transition:background .16s ease,transform .16s ease,box-shadow .16s ease}
+.table tbody tr:hover{transform:translateX(2px);box-shadow:inset 3px 0 0 rgba(163,13,27,.7)}
+.status,.pill,.badge,.live-badge{transition:transform .18s var(--ease),box-shadow .18s ease}
+.status:hover,.pill:hover,.badge:hover,.live-badge:hover{transform:translateY(-1px)}
+.modal{animation:rrtaOverlayIn .2s ease both;backdrop-filter:blur(5px)}
+.modal-card{animation:rrtaModalIn .32s var(--ease-out) both;box-shadow:0 26px 70px rgba(0,0,0,.28)}
+.modal-close{transition:transform .18s var(--ease),color .18s ease}
+.modal-close:hover{transform:rotate(90deg);color:var(--red)}
+.portal-choice{position:relative;overflow:hidden}
+.portal-choice::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:4px;background:linear-gradient(90deg,var(--red),#7f101a,#c7ccd1);transition:right .3s var(--ease-out)}
+.portal-choice:hover::after{right:0}
+.login-card,.portal-choice-card{animation:rrtaLoginIn .55s var(--ease-out) both}
+.progress-track div{transition:width .4s var(--ease-out)}
+.answer{transition:transform .16s var(--ease),border-color .16s ease,background .16s ease,box-shadow .16s ease}
+.answer:hover{transform:translateX(3px);box-shadow:0 5px 14px rgba(20,25,30,.06)}
+.answer.selected{animation:rrtaSelect .22s var(--ease-out) both}
+.live-badge{position:relative}
+.live-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:#1f9d55;margin-right:6px;box-shadow:0 0 0 0 rgba(31,157,85,.35);animation:rrtaPulse 2.1s infinite}
+::-webkit-scrollbar{width:11px;height:11px}::-webkit-scrollbar-track{background:#eceff1}::-webkit-scrollbar-thumb{background:linear-gradient(#5a626a,#2d3339);border:3px solid #eceff1;border-radius:999px}::-webkit-scrollbar-thumb:hover{background:linear-gradient(#a30d1b,#77101a)}
+@keyframes rrtaHeaderIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes rrtaContentIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes rrtaViewIn{from{opacity:0;transform:translateX(7px)}to{opacity:1;transform:none}}
+@keyframes rrtaCardIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes rrtaFadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes rrtaModalIn{from{opacity:0;transform:translateY(14px) scale(.975)}to{opacity:1;transform:none}}
+@keyframes rrtaOverlayIn{from{opacity:0}to{opacity:1}}
+@keyframes rrtaLoginIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes rrtaSelect{0%{transform:scale(.992)}100%{transform:none}}
+@keyframes rrtaPulse{0%{box-shadow:0 0 0 0 rgba(31,157,85,.35)}70%{box-shadow:0 0 0 7px rgba(31,157,85,0)}100%{box-shadow:0 0 0 0 rgba(31,157,85,0)}}
+@keyframes rrtaGlow{from{transform:translateY(-8px);opacity:.6}to{transform:translateY(24px);opacity:1}}
+@media(max-width:950px){
+  .panel:hover,.stat:hover,.course-admin-card:hover,.role-card:hover,.team-card:hover,.learning-card:hover,.metric:hover,.panel-card:hover,.ring-card:hover{transform:none}
+  .table tbody tr:hover{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
+}
