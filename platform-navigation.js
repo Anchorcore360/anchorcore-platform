@@ -1,80 +1,18 @@
 (function(){
-  const I={
-    dashboard:'<svg viewBox="0 0 24 24"><path d="M3 13h7V3H3zM14 21h7V11h-7zM3 21h7v-4H3zM14 7h7V3h-7z"/></svg>',
-    people:'<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 21a6 6 0 0 1 12 0M13 21a5 5 0 0 1 9 0"/></svg>',
-    user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
-    company:'<svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 10h2M13 10h2M9 14h2M13 14h2"/></svg>',
-    training:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>',
-    compliance:'<svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
-    matrix:'<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 10h16M10 4v16"/></svg>',
-    request:'<svg viewBox="0 0 24 24"><path d="M4 4h16v14H7l-3 3z"/><path d="M8 9h8M8 13h5"/></svg>',
-    qr:'<svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM15 15h1M19 15h1M15 19h5"/></svg>',
-    booking:'<svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M9 10h6M9 14h6M9 18h4"/></svg>',
-    assess:'<svg viewBox="0 0 24 24"><path d="M9 11l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>',
-    award:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M9 13l-2 8 5-3 5 3-2-8"/></svg>',
-    report:'<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
-    course:'<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
-    upload:'<svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 14v6h14v-6"/></svg>'
-  };
+  const I={dashboard:'<svg viewBox="0 0 24 24"><path d="M3 13h7V3H3zM14 21h7V11h-7zM3 21h7v-4H3zM14 7h7V3h-7z"/></svg>',people:'<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 21a6 6 0 0 1 12 0M13 21a5 5 0 0 1 9 0"/></svg>',user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',company:'<svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg>',training:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>',compliance:'<svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',matrix:'<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 10h16M10 4v16"/></svg>',request:'<svg viewBox="0 0 24 24"><path d="M4 4h16v14H7l-3 3z"/><path d="M8 9h8M8 13h5"/></svg>',qr:'<svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM15 15h1M19 15h1M15 19h5"/></svg>',booking:'<svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M9 10h6M9 14h6M9 18h4"/></svg>',assess:'<svg viewBox="0 0 24 24"><path d="M9 11l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>',award:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M9 13l-2 8 5-3 5 3-2-8"/></svg>',report:'<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',course:'<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',upload:'<svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 14v6h14v-6"/></svg>'};
   const icon=n=>`<span class="rrta-nav-icon">${I[n]||I.course}</span>`;
   const academy=[
     {type:'link',label:'Dashboard',icon:'dashboard',href:'academy-admin.html'},
-    {type:'group',label:'Workforce Management',icon:'people',items:[
-      ['RRT Direct Staff','user','workforce-directory.html?type=direct'],
-      ['Subcontractors','company','workforce-directory.html?type=subcontractor'],
-      ['Managers & Teams','people','compliance-teams.html'],
-      ['Compliance','compliance','compliance-operatives.html'],
-      ['Job Roles','matrix','compliance.html'],
-      ['Training Needs','report','trainer-next-preview.html#gap'],
-      ['Training Requests','request','training-requests.html'],
-      ['Cards & QR','qr','verify.html']
-    ]},
-    {type:'group',label:'Training Operations',icon:'training',items:[
-      ['Training Schedule','training','training-schedule.html'],
-      ['Bookings','booking','booked-courses.html'],
-      ['External Customers','company','external-customers.html'],
-      ['External Delegates','user','external-customers.html#delegates'],
-      ['Course Delivery','training','trainer-next-preview.html#delivery'],
-      ['Assessments','assess','customer-service-assessment.html'],
-      ['Requests & Reviews','request','requests-review.html'],
-      ['Accreditations','award','bulk-accreditation-upload.html'],
-      ['Certificates','award','trainer-next-preview.html#reports'],
-      ['Reports','report','trainer-next-preview.html#reports']
-    ]},
-    {type:'group',label:'Tools & Uploads',icon:'upload',items:[
-      ['Bulk Staff Upload','upload','bulk-learner-upload.html'],
-      ['Bulk Accreditation Upload','upload','bulk-accreditation-upload.html']
-    ]},
+    {type:'group',label:'Workforce Management',icon:'people',items:[['RRT Direct Staff','user','workforce-directory.html?type=direct_staff'],['Subcontractors','company','workforce-directory.html?type=subcontractor'],['Managers & Teams','people','compliance-teams.html'],['Compliance','compliance','compliance-operatives.html'],['Job Roles','matrix','compliance.html'],['Training Needs','report','trainer-next-preview.html#gap'],['Training Requests','request','training-requests.html'],['Cards & QR','qr','verify.html']]},
+    {type:'group',label:'Training Operations',icon:'training',items:[['Training Schedule','training','training-schedule.html'],['Bookings','booking','booked-courses.html'],['External Customers','company','external-customers.html'],['External Delegates','user','external-customers.html#delegates'],['Course Delivery','training','trainer-next-preview.html#delivery'],['Assessments','assess','customer-service-assessment.html'],['Requests & Reviews','request','requests-review.html'],['Accreditations','award','bulk-accreditation-upload.html'],['Certificates','award','trainer-next-preview.html#certificates'],['Reports','report','trainer-next-preview.html#reports']]},
+    {type:'group',label:'Tools & Uploads',icon:'upload',items:[['Bulk Staff Upload','upload','bulk-learner-upload.html'],['Bulk Accreditation Upload','upload','bulk-accreditation-upload.html']]},
     {type:'section',label:'Courses'},
-    {type:'link',label:'Online Courses',icon:'course',href:'trainer.html#courses'},
-    {type:'link',label:'Smart Awards',icon:'award',href:'trainer.html#courses?category=Smart%20Awards'},
-    {type:'link',label:'EUSR',icon:'award',href:'trainer.html#courses?category=EUSR'},
-    {type:'link',label:'ProTrainings Courses',icon:'course',href:'trainer.html#courses?category=ProTrainings'}
+    {type:'link',label:'Online Courses',icon:'course',href:'courses.html?category=online'},
+    {type:'link',label:'Smart Awards',icon:'award',href:'courses.html?category=smart'},
+    {type:'link',label:'EUSR',icon:'award',href:'courses.html?category=eusr'},
+    {type:'link',label:'ProTrainings Courses',icon:'course',href:'courses.html?category=protrainings'}
   ];
-  const workforce=[
-    {type:'link',label:'Dashboard',icon:'dashboard',href:'workforce.html'},
-    {type:'link',label:'My Learning',icon:'course',href:'learner.html'},
-    {type:'section',label:'My Team'},
-    {type:'link',label:'Team Overview',icon:'people',href:'workforce.html#team'},
-    {type:'link',label:'Staff Profiles',icon:'user',href:'workforce.html#team'},
-    {type:'link',label:'Compliance',icon:'compliance',href:'compliance-operatives.html'},
-    {type:'link',label:'Job Roles',icon:'matrix',href:'compliance.html'},
-    {type:'link',label:'Training Needs',icon:'report',href:'trainer-next-preview.html#gap'},
-    {type:'link',label:'Request Training From RRTA',icon:'request',href:'training-requests.html'},
-    {type:'link',label:'Cards & QR',icon:'qr',href:'verify.html'}
-  ];
-  const learner=[
-    {type:'link',label:'My Dashboard',icon:'dashboard',href:'learner.html'},
-    {type:'link',label:'My Profile',icon:'user',href:'learner.html#profile'},
-    {type:'link',label:'My Compliance',icon:'compliance',href:'learner.html#compliance'},
-    {type:'link',label:'My Training Needs',icon:'report',href:'learner.html#compliance'},
-    {type:'link',label:'Upcoming Training',icon:'training',href:'learner.html#training'},
-    {type:'link',label:'My Accreditations',icon:'award',href:'learner.html#accreditations'},
-    {type:'link',label:'My Certificates',icon:'award',href:'learner.html#certificates'},
-    {type:'link',label:'Online Courses & Assessments',icon:'assess',href:'learner.html#assessments'},
-    {type:'link',label:'Upload Evidence',icon:'upload',href:'learner.html#evidence'},
-    {type:'link',label:'My Requests',icon:'request',href:'learner.html#requests'},
-    {type:'link',label:'My QR Card',icon:'qr',href:'learner.html#qr'}
-  ];
+  const workforce=[{type:'link',label:'Dashboard',icon:'dashboard',href:'workforce.html'},{type:'link',label:'My Learning',icon:'course',href:'learner-portal.html'},{type:'section',label:'My Team'},{type:'link',label:'Team Overview',icon:'people',href:'workforce.html#team'},{type:'link',label:'Staff Profiles',icon:'user',href:'workforce.html#team'},{type:'link',label:'Compliance',icon:'compliance',href:'compliance-operatives.html'},{type:'link',label:'Job Roles',icon:'matrix',href:'compliance.html'},{type:'link',label:'Training Needs',icon:'report',href:'trainer-next-preview.html#gap'},{type:'link',label:'Request Training From RRTA',icon:'request',href:'workforce.html#requests'},{type:'link',label:'Cards & QR',icon:'qr',href:'verify.html'}];
+  const learner=[{type:'link',label:'My Dashboard',icon:'dashboard',href:'learner-portal.html'},{type:'link',label:'My Profile',icon:'user',href:'learner-portal.html#profile'},{type:'link',label:'My Compliance',icon:'compliance',href:'learner-portal.html#compliance'},{type:'link',label:'My Training Needs',icon:'report',href:'learner-portal.html#compliance'},{type:'link',label:'Upcoming Training',icon:'training',href:'learner-portal.html#training'},{type:'link',label:'My Accreditations',icon:'award',href:'learner-portal.html#accreditations'},{type:'link',label:'My Certificates',icon:'award',href:'learner-portal.html#certificates'},{type:'link',label:'Online Courses & Assessments',icon:'assess',href:'learner-portal.html#assessments'},{type:'link',label:'Upload Evidence',icon:'upload',href:'learner-portal.html#requests'},{type:'link',label:'My Requests',icon:'request',href:'learner-portal.html#requests'},{type:'link',label:'My QR Card',icon:'qr',href:'learner-portal.html#qr'}];
   window.RRTAPlatformNavigation={icons:I,icon,menus:{academy,workforce,learner}};
 })();
