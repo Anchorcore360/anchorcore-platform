@@ -37,3 +37,4 @@ const obs=new MutationObserver(()=>enhanceAll());
 const rootEl=document.getElementById('root'); if(rootEl)obs.observe(rootEl,{childList:true,subtree:true});
 loadExternalCandidates();
 })();
+(function(){if(window.__rrtaUnifiedNavLoader)return;window.__rrtaUnifiedNavLoader=true;const s=document.createElement('script');s.src='trainer-navigation.js';document.head.appendChild(s)})();
