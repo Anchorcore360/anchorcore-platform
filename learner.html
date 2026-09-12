@@ -12,12 +12,12 @@
     <section class="login-wrap">
       <div class="login-card">
         <div class="eyebrow">Rapid Response Training Academy</div>
-        <h1>Learner Portal</h1>
-        <p class="lead">Sign in to view your assigned learning and assessments.</p>
+        <h1>RRT Learner Portal</h1>
+        <p class="lead">Use the same account you use for Workforce or Academy access.</p>
         <form id="learnerLoginForm">
           <label>Email Address<input id="learnerEmail" type="email" autocomplete="username" required></label>
           <label>Password<input id="learnerPassword" type="password" autocomplete="current-password" required></label>
-          <button class="btn primary full" type="submit">Sign In To Learner Portal</button>
+          <button class="btn primary full" type="submit">Sign In To My Learning</button>
           <p id="learnerError" class="error hidden">Email or password not recognised.</p>
         </form>
         <p style="margin-top:20px"><a class="text-btn" href="portal.html">← Back To Portal Choice</a></p>
@@ -29,22 +29,24 @@
     const db = window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
     const form=document.getElementById('learnerLoginForm');
     const errorBox=document.getElementById('learnerError');
+    async function canUseLearnerPortal(userId){
+      const [{data:profile,error:profileError},{data:access}] = await Promise.all([
+        db.from('profiles').select('role,permission_level').eq('id',userId).single(),
+        db.from('portal_access').select('learner_portal').eq('user_id',userId).maybeSingle()
+      ]);
+      if(profileError||!profile)return false;
+      return access?.learner_portal===true || String(profile.role).toLowerCase()==='learner' || profile.permission_level==='super_user';
+    }
     form.addEventListener('submit',async(e)=>{
       e.preventDefault(); errorBox.classList.add('hidden');
       const email=document.getElementById('learnerEmail').value.trim().toLowerCase();
       const password=document.getElementById('learnerPassword').value;
       const {data,error}=await db.auth.signInWithPassword({email,password});
       if(error){errorBox.textContent=error.message||'Email or password not recognised.';errorBox.classList.remove('hidden');return;}
-      const {data:profile,error:profileError}=await db.from('profiles').select('role').eq('id',data.user.id).single();
-      if(profileError || profile?.role!=='learner'){
-        await db.auth.signOut();
-        errorBox.textContent='This account is not configured as a learner.';
-        errorBox.classList.remove('hidden');
-        return;
-      }
-      window.location.href='learner-dashboard.html';
+      if(!(await canUseLearnerPortal(data.user.id))){await db.auth.signOut();errorBox.textContent='This account does not have learner portal access.';errorBox.classList.remove('hidden');return;}
+      window.location.href='learner-portal.html';
     });
-    (async()=>{const{data}=await db.auth.getUser();if(data?.user){const{data:p}=await db.from('profiles').select('role').eq('id',data.user.id).maybeSingle();if(p?.role==='learner')window.location.href='learner-dashboard.html'}})();
+    (async()=>{const{data}=await db.auth.getUser();if(data?.user&&await canUseLearnerPortal(data.user.id))window.location.href='learner-portal.html'})();
   </script>
 </body>
 </html>
