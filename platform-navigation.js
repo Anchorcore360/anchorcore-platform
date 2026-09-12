@@ -18,7 +18,7 @@
       ['Training Schedule','training','training-schedule.html'],
       ['Bookings','booking','booked-courses.html'],
       ['Course Delivery','training','course-delivery.html'],
-      ['Assessments','assess','courses.html?category=online'],
+      ['Assessments','assess','customer-service-assessment.html'],
       ['Accreditations','award','bulk-accreditation-upload.html'],
       ['Certificates','award','reports.html#certificates'],
       ['Reviews & Requests','request','requests-review.html']
