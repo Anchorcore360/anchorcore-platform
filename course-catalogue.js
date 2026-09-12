@@ -132,9 +132,12 @@ if(document.getElementById('view-courses')?.classList.contains('active'))loadRrt
     box.querySelectorAll('[data-atlas-page]').forEach(b=>b.addEventListener('click',()=>{rrtaLearnerPage=Number(b.dataset.atlasPage)||1;rrtaExpandedLearner=null;atlasRender()}));
     box.querySelector('#atlasRows')?.addEventListener('change',e=>{rrtaLearnerRows=Number(e.target.value)||10;rrtaLearnerPage=1;rrtaExpandedLearner=null;atlasRender()});
     box.querySelectorAll('[data-atlas-expand]').forEach(b=>b.addEventListener('click',()=>openLearnerDetail(b.dataset.atlasExpand)));
-    if(rrtaExpandedLearner)openLearnerDetail(rrtaExpandedLearner).catch(()=>{});
   }
 
   try{renderLearnerResults=atlasRender}catch(e){window.renderLearnerResults=atlasRender}
-  ['learnerSearch','learnerStatus','learnerOrganisation'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>{rrtaLearnerPage=1;rrtaExpandedLearner=null},true));
+  ['learnerSearch','learnerStatus','learnerOrganisation'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const reset=()=>{rrtaLearnerPage=1;rrtaExpandedLearner=null};
+    el.addEventListener('input',reset,true);el.addEventListener('change',reset,true);
+  });
 })();
