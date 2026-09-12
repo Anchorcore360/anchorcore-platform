@@ -43,3 +43,64 @@ form label,.modal-card label,
 .panel-head,strong.title,.header-user{
   text-transform:capitalize;
 }
+
+/* RRTA visual refresh - red / black / silver */
+:root{
+  --red:#a30d1b;
+  --red2:#c71f2f;
+  --charcoal:#171b1f;
+  --ink:#151a20;
+  --muted:#68717a;
+  --bg:#eef0f2;
+  --panel:#ffffff;
+  --line:#d7dce1;
+  --silver:#b7bdc4;
+  --silver-light:#f4f5f6;
+  --sidebar:#171b1f;
+  --sidebar2:#272d33;
+}
+html,body{background:linear-gradient(135deg,#f2f3f4 0%,#e9ecef 58%,#f7f8f9 100%)}
+.site-header{height:78px;background:linear-gradient(90deg,#fff 0%,#f5f6f7 70%,#eceff1 100%);border-bottom:3px solid var(--red);box-shadow:0 2px 14px rgba(19,24,29,.08)}
+.brand-logo{filter:drop-shadow(0 2px 4px rgba(0,0,0,.08))}
+.portal-shell{background:transparent}
+.sidebar{background:linear-gradient(180deg,var(--sidebar) 0%,#20252a 55%,#111417 100%);border-right:1px solid #343a40;box-shadow:8px 0 25px rgba(10,13,16,.08)}
+.sidebar-title,.side-title{position:relative;padding-bottom:34px!important;color:#fff!important;letter-spacing:.01em}
+.sidebar-title::after,.side-title::after{content:"Integrity Breeds Trust";position:absolute;left:12px;bottom:13px;color:#bfc5cb;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.side-link,.nav-btn{border-left:3px solid transparent;transition:background .16s ease,border-color .16s ease,transform .16s ease}
+.side-link:hover,.side-link.active,.nav-btn:hover,.nav-btn.active{background:linear-gradient(90deg,rgba(163,13,27,.96),rgba(112,12,23,.82));border-left-color:#e5e7e9;color:#fff;transform:translateX(1px)}
+.sidebar-section-label{color:#aeb5bc!important}
+.portal-content,.content{background:transparent}
+.page-head{border-bottom:1px solid #d9dde1;padding-bottom:16px}
+.page-head h1{font-weight:800;letter-spacing:-.025em}
+.eyebrow{color:var(--red);font-weight:900;letter-spacing:.13em}
+.panel,.stat,.course-admin-card,.profile-hero,.role-card,.req-panel,.team-card,.learning-card,.metric,.panel-card,.ring-card{box-shadow:0 8px 24px rgba(20,26,32,.055);border-color:#d5d9de!important}
+.panel,.course-admin-card,.profile-hero,.role-card,.req-panel,.team-card,.learning-card,.metric,.panel-card,.ring-card{background:linear-gradient(180deg,#fff 0%,#fbfcfc 100%)}
+.stat{position:relative;overflow:hidden;border-top:0!important;padding-top:22px}
+.stat::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,var(--red) 0%,#8b111e 45%,var(--silver) 100%)}
+.stat.alert::before{background:linear-gradient(90deg,#c20f24,#ff6c78)}
+.btn{border-radius:7px;transition:transform .14s ease,box-shadow .14s ease,background .14s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(20,25,30,.12)}
+.btn.primary{background:linear-gradient(135deg,#b50f20,#86101b)}
+.btn.dark{background:linear-gradient(135deg,#2b3035,#121518);border:1px solid #3a4148}
+.btn.secondary{background:linear-gradient(180deg,#fff,#f2f3f4);border-color:#c8cdd2}
+input,select,textarea{background:#fff;border-color:#cbd1d6!important;box-shadow:inset 0 1px 2px rgba(19,24,29,.03)}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(163,13,27,.13);border-color:#a30d1b!important}
+.table thead th{background:#f1f3f4;color:#4e5861;border-bottom:1px solid #cdd2d7}
+.table tbody tr:hover{background:#fbf4f5}
+.login-wrap,.portal-choice-wrap{background:radial-gradient(circle at 15% 15%,rgba(163,13,27,.09),transparent 28%),linear-gradient(135deg,#1b2025 0%,#30363c 48%,#d9dde1 160%)!important}
+.login-card,.portal-choice-card{position:relative;border-top:0!important;box-shadow:0 28px 70px rgba(0,0,0,.27)!important;overflow:hidden}
+.login-card::before,.portal-choice-card::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--red) 0%,#7d111b 48%,#bfc4c9 100%)}
+.login-card::after,.portal-choice-card::after{content:"Integrity Breeds Trust";display:block;margin-top:24px;padding-top:16px;border-top:1px solid #e1e4e7;color:#7b838b;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.portal-choice{border-color:#d2d7db!important;background:linear-gradient(180deg,#fff 0%,#f8f9fa 100%)!important;box-shadow:0 8px 22px rgba(19,24,29,.055)}
+.portal-choice:hover{border-color:#a30d1b!important;box-shadow:0 14px 30px rgba(19,24,29,.13)!important}
+.status.live,.badge.valid,.pill.pass{box-shadow:inset 0 0 0 1px rgba(20,118,78,.10)}
+@media(min-width:951px){
+  .portal-shell{grid-template-columns:270px minmax(0,1fr)}
+  .portal-content{padding:34px 46px 54px}
+  .sidebar{padding:26px 16px}
+  .side-link{padding:12px 15px}
+}
+@media(max-width:950px){
+  .sidebar-title::after,.side-title::after{display:none}
+  .side-link:hover,.side-link.active,.nav-btn:hover,.nav-btn.active{transform:none}
+}
