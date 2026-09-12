@@ -70,3 +70,71 @@ installCourseSubmenu();
 if(document.getElementById('view-courses')?.classList.contains('active'))loadRrtaCourseCatalogue();
 
 (function(){if(window.__rrtaUnifiedNavLoader)return;window.__rrtaUnifiedNavLoader=true;const s=document.createElement('script');s.src='trainer-navigation.js';document.head.appendChild(s)})();
+
+(function(){
+  function fixDuplicateNavIcons(){
+    document.querySelectorAll('#trainerSidebar .nav-parent').forEach(el=>{
+      const old=el.querySelector(':scope > .side-icon');
+      const modern=el.querySelector(':scope > .rrta-nav-icon');
+      if(old&&modern)old.remove();
+    });
+    document.querySelectorAll('#trainerSidebar .nav-subitem').forEach(el=>{
+      const icons=el.querySelectorAll(':scope > .rrta-nav-icon');
+      icons.forEach((node,i)=>{if(i>0)node.remove()});
+    });
+  }
+  fixDuplicateNavIcons();
+  new MutationObserver(fixDuplicateNavIcons).observe(document.documentElement,{childList:true,subtree:true});
+
+  let rrtaLearnerPage=1;
+  let rrtaLearnerRows=10;
+  let rrtaExpandedLearner=null;
+
+  const style=document.createElement('style');
+  style.textContent=`
+    #view-learners .panel{padding:0;overflow:hidden}
+    #view-learners .panel>.panel-head{padding:18px 20px 6px}
+    #view-learners .learner-tools{grid-template-columns:minmax(260px,1.4fr) minmax(160px,.65fr) minmax(180px,.75fr);gap:10px;padding:0 20px 14px;margin:0}
+    #view-learners .learner-tools input,#view-learners .learner-tools select{height:42px;padding:8px 11px;border-radius:7px;font-size:13px}
+    .atlas-wrap{border-top:1px solid var(--rrta-line);overflow:auto}.atlas-table{width:100%;border-collapse:collapse;min-width:930px}.atlas-table th{background:var(--rrta-surface-2);color:var(--rrta-text);font-size:11px;text-align:left;padding:11px 12px;border-right:1px solid var(--rrta-line);border-bottom:1px solid var(--rrta-line);white-space:nowrap}.atlas-table td{font-size:12px;padding:10px 12px;border-right:1px solid var(--rrta-line);border-bottom:1px solid var(--rrta-line);color:var(--rrta-text);vertical-align:middle}.atlas-table tr:hover>td{background:color-mix(in srgb,var(--rrta-surface-2) 65%,transparent)}.atlas-expand{width:31px;height:31px;border:1px solid var(--rrta-line);background:var(--rrta-surface);color:var(--rrta-text);border-radius:7px;cursor:pointer;font-size:16px;display:grid;place-items:center}.atlas-status{display:inline-flex;border-radius:999px;padding:5px 8px;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.04em;background:rgba(34,160,107,.11);color:var(--rrta-good)}.atlas-status.archived{background:rgba(207,54,72,.11);color:var(--rrta-danger)}.atlas-detail td{padding:0!important;background:var(--rrta-surface-2)!important}.atlas-detail-card{padding:16px 18px;display:grid;grid-template-columns:repeat(5,minmax(120px,1fr)) auto;gap:14px;align-items:center;animation:viewIn .2s ease both}.atlas-detail-item span{display:block;color:var(--rrta-muted);font-size:9px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}.atlas-detail-item strong{font-size:12px;font-weight:750}.atlas-detail-actions{display:flex;gap:7px;justify-content:flex-end}.atlas-detail-actions a{white-space:nowrap}.atlas-footer{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:11px 12px;background:var(--rrta-surface-2);border-top:1px solid var(--rrta-line);font-size:11px;color:var(--rrta-muted)}.atlas-footer-left{display:flex;align-items:center;gap:8px}.atlas-footer select{height:34px;border:1px solid var(--rrta-line);background:var(--rrta-surface);color:var(--rrta-text);border-radius:7px;padding:0 8px}.atlas-pages{display:flex;gap:5px;align-items:center}.atlas-pages button{min-width:34px;height:34px;border:1px solid var(--rrta-line);background:var(--rrta-surface);color:var(--rrta-text);border-radius:7px;font-weight:750;cursor:pointer}.atlas-pages button.active{background:var(--rrta-red);border-color:var(--rrta-red);color:#fff}.atlas-pages button:disabled{opacity:.45;cursor:not-allowed}
+    @media(max-width:1100px){.atlas-detail-card{grid-template-columns:repeat(2,minmax(140px,1fr))}.atlas-detail-actions{justify-content:flex-start}}
+  `;
+  document.head.appendChild(style);
+
+  function learnerName(l){const bits=(l.full_name||'').trim().split(/\s+/);return {first:l.forename||bits[0]||'—',last:l.surname||bits.slice(1).join(' ')||'—'}}
+  function pageButtons(totalPages){
+    const pages=[];const start=Math.max(1,Math.min(rrtaLearnerPage-2,totalPages-4));const end=Math.min(totalPages,start+4);
+    for(let p=start;p<=end;p++)pages.push(`<button data-atlas-page="${p}" class="${p===rrtaLearnerPage?'active':''}">${p}</button>`);
+    return pages.join('');
+  }
+  async function openLearnerDetail(id){
+    rrtaExpandedLearner=rrtaExpandedLearner===id?null:id;
+    renderLearnerResults();
+    if(rrtaExpandedLearner!==id)return;
+    const target=document.querySelector(`[data-detail-body="${id}"]`);if(!target)return;
+    const {data,error}=await db.from('profiles').select('phone,date_of_birth,manager_1_id,manager_2_id,manager_3_id').eq('id',id).single();
+    if(error){target.innerHTML='<div class="atlas-detail-item"><strong>Unable to load extra details.</strong></div>';return}
+    const managerIds=[data.manager_1_id,data.manager_2_id,data.manager_3_id].filter(Boolean);
+    let managers=[];if(managerIds.length){const m=await db.from('profiles').select('id,full_name').in('id',managerIds);managers=m.data||[]}
+    const row=filteredLearners.find(x=>x.id===id)||{};
+    target.innerHTML=`<div class="atlas-detail-item"><span>Phone</span><strong>${escapeHtml(data.phone||'Not Recorded')}</strong></div><div class="atlas-detail-item"><span>Date Of Birth</span><strong>${escapeHtml(data.date_of_birth?new Date(data.date_of_birth+'T00:00:00').toLocaleDateString('en-GB'):'Not Recorded')}</strong></div><div class="atlas-detail-item"><span>Employee Number</span><strong>${escapeHtml(row.employee_number||'Not Recorded')}</strong></div><div class="atlas-detail-item"><span>Organisation</span><strong>${escapeHtml(row.organisation||'Not Recorded')}</strong></div><div class="atlas-detail-item"><span>Managers</span><strong>${escapeHtml(managers.length?managers.map(x=>x.full_name).join(', '):'Not Assigned')}</strong></div><div class="atlas-detail-actions"><a class="btn secondary" href="learner-compliance.html?id=${encodeURIComponent(id)}">Compliance</a><a class="btn dark" href="learner-profile.html?id=${encodeURIComponent(id)}">Open Profile</a></div>`;
+  }
+
+  function atlasRender(){
+    const box=document.getElementById('learnerResults');if(!box)return;
+    const total=filteredLearners.length;
+    const totalPages=Math.max(1,Math.ceil(total/rrtaLearnerRows));
+    if(rrtaLearnerPage>totalPages)rrtaLearnerPage=totalPages;
+    const start=(rrtaLearnerPage-1)*rrtaLearnerRows;
+    const rows=filteredLearners.slice(start,start+rrtaLearnerRows);
+    if(!total){box.innerHTML='<div class="empty-state"><strong>No Learners Found</strong>Try changing your search or filter selections.</div>';return}
+    box.innerHTML=`<div class="atlas-wrap"><table class="atlas-table"><thead><tr><th></th><th>Name</th><th>Job Title</th><th>Organisation</th><th>Employee No.</th><th>Email</th><th>Status</th></tr></thead><tbody>${rows.map(l=>{const n=learnerName(l),open=rrtaExpandedLearner===l.id;return `<tr><td><button class="atlas-expand" data-atlas-expand="${l.id}" aria-label="${open?'Collapse':'Expand'} ${escapeHtml(l.full_name||'learner')}">${open?'−':'+'}</button></td><td><strong>${escapeHtml(n.first)} ${escapeHtml(n.last)}</strong></td><td>${escapeHtml(l.job_title||'—')}</td><td>${escapeHtml(l.organisation||'—')}</td><td>${escapeHtml(l.employee_number||'—')}</td><td>${escapeHtml(l.email||'—')}</td><td><span class="atlas-status ${String(l.account_status||'active').toLowerCase()==='active'?'':'archived'}">${escapeHtml(l.account_status||'Active')}</span></td></tr>${open?`<tr class="atlas-detail"><td colspan="7"><div class="atlas-detail-card" data-detail-body="${l.id}"><div class="atlas-detail-item"><strong>Loading details…</strong></div></div></td></tr>`:''}`}).join('')}</tbody></table></div><div class="atlas-footer"><div class="atlas-footer-left"><select id="atlasRows"><option value="10" ${rrtaLearnerRows===10?'selected':''}>10 rows</option><option value="25" ${rrtaLearnerRows===25?'selected':''}>25 rows</option><option value="50" ${rrtaLearnerRows===50?'selected':''}>50 rows</option></select><span>Displaying ${start+1} - ${Math.min(start+rrtaLearnerRows,total)} of ${total} learners</span></div><div class="atlas-pages"><button data-atlas-page="1" ${rrtaLearnerPage===1?'disabled':''}>First</button><button data-atlas-page="${Math.max(1,rrtaLearnerPage-1)}" ${rrtaLearnerPage===1?'disabled':''}>‹</button>${pageButtons(totalPages)}<button data-atlas-page="${Math.min(totalPages,rrtaLearnerPage+1)}" ${rrtaLearnerPage===totalPages?'disabled':''}>›</button><button data-atlas-page="${totalPages}" ${rrtaLearnerPage===totalPages?'disabled':''}>Last</button></div></div>`;
+    box.querySelectorAll('[data-atlas-page]').forEach(b=>b.addEventListener('click',()=>{rrtaLearnerPage=Number(b.dataset.atlasPage)||1;rrtaExpandedLearner=null;atlasRender()}));
+    box.querySelector('#atlasRows')?.addEventListener('change',e=>{rrtaLearnerRows=Number(e.target.value)||10;rrtaLearnerPage=1;rrtaExpandedLearner=null;atlasRender()});
+    box.querySelectorAll('[data-atlas-expand]').forEach(b=>b.addEventListener('click',()=>openLearnerDetail(b.dataset.atlasExpand)));
+    if(rrtaExpandedLearner)openLearnerDetail(rrtaExpandedLearner).catch(()=>{});
+  }
+
+  try{renderLearnerResults=atlasRender}catch(e){window.renderLearnerResults=atlasRender}
+  ['learnerSearch','learnerStatus','learnerOrganisation'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>{rrtaLearnerPage=1;rrtaExpandedLearner=null},true));
+})();
