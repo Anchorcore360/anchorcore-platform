@@ -110,4 +110,61 @@ openAccModal=async function(existing=null){
 
 document.querySelectorAll('[data-open-modal="accreditation"]').forEach(btn=>btn.onclick=()=>openAccModal());
 
+// Accreditation list / grid view toggle.
+(function installAccreditationViewToggle(){
+  const list=document.getElementById('accreditationList');
+  const tab=document.getElementById('tab-accreditations');
+  if(!list||!tab||document.getElementById('accreditationViewToggle'))return;
+
+  const style=document.createElement('style');
+  style.textContent=`
+    .accreditation-head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .accreditation-view-toggle{display:inline-flex;align-items:center;padding:3px;border:1px solid #d7dce2;border-radius:9px;background:#f5f7f9}
+    .accreditation-view-btn{width:34px;height:30px;border:0;border-radius:6px;background:transparent;color:#667085;display:grid;place-items:center;cursor:pointer;transition:background .16s ease,color .16s ease,transform .16s ease}
+    .accreditation-view-btn:hover{transform:translateY(-1px);color:#182028}
+    .accreditation-view-btn.active{background:#252b31;color:#fff;box-shadow:0 2px 7px rgba(0,0,0,.14)}
+    .accreditation-view-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    #accreditationList.accreditation-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:stretch}
+    #accreditationList.accreditation-grid>.record{min-width:0;min-height:180px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;padding:16px;background:#fbfcfd;border-radius:12px;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+    #accreditationList.accreditation-grid>.record:hover{transform:translateY(-2px);border-color:#c8cfd7;box-shadow:0 8px 20px rgba(18,24,33,.07)}
+    #accreditationList.accreditation-grid>.record>div:first-child{min-width:0}
+    #accreditationList.accreditation-grid>.record>div:first-child>strong{font-size:16px;display:block;margin-bottom:7px}
+    #accreditationList.accreditation-grid>.record small{line-height:1.5;overflow-wrap:anywhere}
+    #accreditationList.accreditation-grid>.record>div:last-child{width:100%;align-items:center!important;justify-content:space-between;gap:8px!important;margin-top:auto}
+    #accreditationList.accreditation-grid .download-link{display:inline-flex;align-items:center;margin-top:7px;font-weight:700}
+    #accreditationList.accreditation-grid .action-wrap{margin-left:auto}
+    #accreditationList.accreditation-grid>.empty{grid-column:1/-1}
+    @media(max-width:1180px){#accreditationList.accreditation-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:900px){#accreditationList.accreditation-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:600px){#accreditationList.accreditation-grid{grid-template-columns:1fr}.accreditation-head-actions{width:100%;justify-content:space-between}}
+  `;
+  document.head.appendChild(style);
+
+  const heading=tab.querySelector('.panel-head-row');
+  const addButton=heading?.querySelector('[data-open-modal="accreditation"]');
+  if(!heading||!addButton)return;
+  const actionsWrap=document.createElement('div');
+  actionsWrap.className='accreditation-head-actions';
+  const toggle=document.createElement('div');
+  toggle.id='accreditationViewToggle';
+  toggle.className='accreditation-view-toggle';
+  toggle.setAttribute('role','group');
+  toggle.setAttribute('aria-label','Accreditation view');
+  toggle.innerHTML=`
+    <button type="button" class="accreditation-view-btn" data-accreditation-view="list" title="List View" aria-label="List View"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+    <button type="button" class="accreditation-view-btn" data-accreditation-view="grid" title="Grid View" aria-label="Grid View"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>`;
+  addButton.replaceWith(actionsWrap);
+  actionsWrap.append(toggle,addButton);
+
+  const saved=localStorage.getItem('rrtaAccreditationView')||'grid';
+  const apply=view=>{
+    const mode=view==='list'?'list':'grid';
+    list.classList.toggle('accreditation-grid',mode==='grid');
+    toggle.querySelectorAll('[data-accreditation-view]').forEach(btn=>btn.classList.toggle('active',btn.dataset.accreditationView===mode));
+    localStorage.setItem('rrtaAccreditationView',mode);
+  };
+  toggle.querySelectorAll('[data-accreditation-view]').forEach(btn=>btn.addEventListener('click',()=>apply(btn.dataset.accreditationView)));
+  apply(saved);
+})();
+
 // NOPS catalogue integration enabled.
