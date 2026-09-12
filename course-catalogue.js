@@ -68,3 +68,5 @@ const coursesNav=document.querySelector('.side-link[data-view="courses"]');
 if(coursesNav)coursesNav.addEventListener('click',()=>setTimeout(()=>loadRrtaCourseCatalogue(),0));
 installCourseSubmenu();
 if(document.getElementById('view-courses')?.classList.contains('active'))loadRrtaCourseCatalogue();
+
+(function(){if(window.__rrtaUnifiedNavLoader)return;window.__rrtaUnifiedNavLoader=true;const s=document.createElement('script');s.src='trainer-navigation.js';document.head.appendChild(s)})();
