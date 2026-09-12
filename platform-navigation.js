@@ -5,7 +5,7 @@
     {type:'link',label:'Dashboard',icon:'dashboard',href:'academy-admin.html'},
     {type:'group',label:'Compliance',icon:'compliance',items:[['RRT Direct Staff','user','workforce-directory.html?type=direct_staff'],['Subcontractors','company','workforce-directory.html?type=subcontractor'],['Add Staff Member','user','add-staff.html'],['Teams & Managers','people','compliance-teams.html'],['Job Roles','matrix','compliance.html'],['Compliance Overview','compliance','compliance-operatives.html'],['Training Needs','report','training-needs.html'],['Training Requests','request','training-requests.html'],['Cards & QR','qr','verify.html']]},
     {type:'group',label:'Training',icon:'training',items:[['Training Schedule','training','training-schedule.html'],['Bookings','booking','booked-courses.html'],['Course Delivery','training','course-delivery.html'],['Assessments','assess','customer-service-assessment.html'],['Accreditations','award','bulk-accreditation-upload.html'],['Certificates','award','reports.html#certificates'],['Reviews & Requests','request','requests-review.html']]},
-    {type:'link',label:'Customer Database',icon:'company',href:'external-customers.html'},
+    {type:'group',label:'Customer Database',icon:'company',items:[['All Companies','company','external-customers.html?view=all'],['RRT Subcontractor Companies','people','external-customers.html?view=rrt'],['RRTA Customers','company','external-customers.html?view=rrta'],['Dual Relationship Companies','compliance','external-customers.html?view=both']]},
     {type:'link',label:'Reports',icon:'report',href:'reports.html'},
     {type:'section',label:'Courses'},
     {type:'link',label:'Online Courses',icon:'course',href:'courses.html?category=online'},
