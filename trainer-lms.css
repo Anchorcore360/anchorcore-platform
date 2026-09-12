@@ -35,3 +35,21 @@ html,body{background:var(--rrta-bg);color:var(--rrta-text);transition:background
 html.reduce-motion *,html.reduce-motion *:before,html.reduce-motion *:after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
 @media(max-width:1050px){#trainerDashboardScreen .portal-shell,#trainerDashboardScreen .portal-shell.nav-wide{grid-template-columns:78px minmax(0,1fr)}.rrta-side-brand{justify-content:center;padding-left:0;padding-right:0}.rrta-side-brand img{width:46px}.sidebar-section-label,.side-link>span:not(.side-icon),.nav-parent .nav-label,.nav-chevron,.nav-submenu,.sidebar-user-copy,.sidebar-trust{display:none!important}#trainerDashboardScreen .side-link,.nav-parent{justify-content:center;padding:12px}.sidebar-avatar{margin:auto}.dashboard-grid{grid-template-columns:1fr}}
 @media(max-width:720px){#trainerDashboardScreen .portal-shell,#trainerDashboardScreen .portal-shell.nav-wide{display:block}.sidebar{display:none!important}.trainer-topbar{padding:0 15px;height:60px}.trainer-content{padding:18px 13px 34px}#trainerStats.stat-grid{grid-template-columns:1fr 1fr;gap:10px}.schedule-row{grid-template-columns:56px minmax(0,1fr);gap:10px}.schedule-meta,.schedule-status{display:none}.theme-options{grid-template-columns:1fr}}
+
+/* Fixed desktop sidebar with flyout submenus */
+@media(min-width:1051px){
+#trainerDashboardScreen .portal-shell,#trainerDashboardScreen .portal-shell.nav-wide{grid-template-columns:248px minmax(0,1fr)!important}
+#trainerDashboardScreen .sidebar{overflow:visible!important}
+#trainerDashboardScreen .nav-group{position:relative}
+#trainerDashboardScreen .nav-submenu{position:absolute;left:calc(100% + 12px);top:-4px;width:260px;display:block!important;grid-template-rows:1fr!important;margin:0!important;padding:8px;opacity:0;visibility:hidden;pointer-events:none;transform:translateX(-10px) scale(.985);transform-origin:left top;background:linear-gradient(180deg,var(--rrta-sidebar-2),var(--rrta-sidebar));border:1px solid rgba(255,255,255,.12);border-radius:13px;box-shadow:0 18px 45px rgba(0,0,0,.28);z-index:40;transition:opacity .18s ease,transform .22s cubic-bezier(.2,.8,.2,1),visibility .18s ease}
+#trainerDashboardScreen .nav-submenu:before{content:"";position:absolute;left:-13px;top:0;bottom:0;width:14px}
+#trainerDashboardScreen .nav-submenu-inner{overflow:visible}
+#trainerDashboardScreen .nav-group.open .nav-submenu{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(0) scale(1);margin:0!important}
+#trainerDashboardScreen .nav-subitem{padding:10px 12px;margin:2px 0;border-radius:9px;font-size:12px}
+#trainerDashboardScreen .nav-subitem:after{display:none}
+#trainerDashboardScreen .nav-parent{transform:none!important}
+#trainerDashboardScreen .nav-parent:hover{transform:translateX(2px)!important}
+#trainerDashboardScreen .nav-group.open>.nav-parent{background:rgba(255,255,255,.08);color:#fff}
+#trainerDashboardScreen .nav-group.open>.nav-parent:after{content:"";position:absolute;right:-12px;top:50%;width:12px;height:1px;background:rgba(255,255,255,.2)}
+#trainerDashboardScreen .nav-group.open .nav-chevron{transform:rotate(0deg) translateX(2px)}
+}
