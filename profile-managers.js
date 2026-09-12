@@ -187,3 +187,35 @@ const rewireProfileEditors=()=>{
   if(details)details.onclick=openProfileModal;
 };
 rewireProfileEditors();
+
+(async function installModernProfileShell(){
+  if(document.body.dataset.profileShellReady==='1')return;
+  document.body.dataset.profileShellReady='1';
+  const {data:u}=await db.auth.getUser();
+  if(!u?.user)return;
+  const [{data:p},{data:access}]=await Promise.all([
+    db.from('profiles').select('role,permission_level').eq('id',u.user.id).maybeSingle(),
+    db.from('portal_access').select('academy_admin,workforce_manager').eq('user_id',u.user.id).maybeSingle()
+  ]);
+  const academy=access?.academy_admin===true||p?.permission_level==='super_user'||String(p?.role||'').toLowerCase()==='trainer';
+  const portalType=academy?'academy':'workforce';
+  const title=academy?'RRTA Training Academy Administration':'RRT Workforce Management';
+  const subtitle=academy?'Staff Profile':'Team Member Profile';
+  const backHref=academy?'compliance-operatives.html':'workforce.html#team';
+  const backText=academy?'← Back To Compliance':'← Back To My Team';
+  document.body.dataset.portalNav=portalType;
+  document.querySelector('.site-header')?.remove();
+  let css=document.querySelector('link[href="portal-navigation.css"]');
+  if(!css){css=document.createElement('link');css.rel='stylesheet';css.href='portal-navigation.css';document.head.appendChild(css)}
+  const app=document.getElementById('profileApp');
+  const errorBox=document.getElementById('profileError');
+  if(!app)return;
+  const shell=document.createElement('div');shell.className='profile-platform-shell';
+  const side=document.createElement('aside');side.className='side';side.innerHTML='<div class="brand"><img src="rrta-logo.png" alt="RRTA"></div><div class="spacer"></div>';
+  const main=document.createElement('main');main.className='profile-platform-main';
+  const top=document.createElement('header');top.className='profile-platform-top';top.innerHTML=`<strong>${title}</strong><span>${subtitle}</span>`;
+  const host=document.createElement('div');host.className='profile-platform-content';
+  app.parentNode.insertBefore(shell,app);shell.appendChild(side);shell.appendChild(main);main.appendChild(top);main.appendChild(host);host.appendChild(app);if(errorBox)host.appendChild(errorBox);
+  const back=app.querySelector('.profile-topbar a.text-btn');if(back){back.href=backHref;back.textContent=backText}
+  const script=document.createElement('script');script.src='portal-navigation.js';document.head.appendChild(script);
+})();
