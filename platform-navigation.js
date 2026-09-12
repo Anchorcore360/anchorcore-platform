@@ -6,6 +6,7 @@
     {type:'group',label:'Compliance',icon:'compliance',items:[
       ['RRT Direct Staff','user','workforce-directory.html?type=direct_staff'],
       ['Subcontractors','company','workforce-directory.html?type=subcontractor'],
+      ['Add Staff Member','user','add-staff.html'],
       ['Teams & Managers','people','compliance-teams.html'],
       ['Job Roles','matrix','compliance.html'],
       ['Compliance Overview','compliance','compliance-operatives.html'],
@@ -33,7 +34,6 @@
     {type:'link',label:'EUSR',icon:'award',href:'courses.html?category=eusr'},
     {type:'link',label:'ProTrainings Courses',icon:'course',href:'courses.html?category=protrainings'},
     {type:'group',label:'Tools & Uploads',icon:'upload',items:[
-      ['Bulk Staff Upload','upload','bulk-learner-upload.html'],
       ['Bulk Accreditation Upload','upload','bulk-accreditation-upload.html']
     ]}
   ];
