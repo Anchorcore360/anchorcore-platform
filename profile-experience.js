@@ -6,8 +6,7 @@
   const actionIcons={
     openVerificationBtn:{label:'Open Live Check',svg:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>'},
     downloadAccPdfBtn:{label:'Download Accreditation PDF',svg:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11"/><path d="m8 10 4 4 4-4"/><path d="M5 18v2h14v-2"/></svg>'},
-    editProfileBtn:{label:'Edit Profile',svg:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>'},
-    smartAwardsBtn:{label:'Smart Awards',svg:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="m9.5 11.2-1 9 3.5-2 3.5 2-1-9"/></svg>'}
+    editProfileBtn:{label:'Edit Profile',svg:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>'}
   };
 
   function injectQuickActionStyles(){
@@ -33,6 +32,8 @@
     Object.entries(actionIcons).forEach(([id,cfg])=>{
       const btn=document.getElementById(id);if(!btn)return;
       if(btn.parentElement!==dock)dock.appendChild(btn);
+      if(btn.dataset.profileCompacted==='1')return;
+      btn.dataset.profileCompacted='1';
       btn.className='profile-icon-action';
       btn.innerHTML=cfg.svg;
       btn.title=cfg.label;
@@ -98,6 +99,5 @@
 
   async function apply(){try{await loadBookedCourses()}catch(e){bookedCourses=[];console.warn('Booked courses unavailable',e)}ensureBookedTab();ensurePanels();renderLearningHome();moveComplianceManagement();mergeCertificatesIntoAccreditations();renderBookedCourses();wireTabs();compactTopActions()}
 
-  const observer=new MutationObserver(()=>compactTopActions());observer.observe(document.documentElement,{childList:true,subtree:true});setTimeout(()=>observer.disconnect(),12000);
-  const start=()=>setTimeout(apply,180);window.addEventListener('load',start);if(document.readyState==='complete'||document.readyState==='interactive')start();if(typeof render==='function'){const prior=render;render=async function(){const r=await prior.apply(this,arguments);setTimeout(apply,80);return r}}
+  const start=()=>{setTimeout(apply,180);setTimeout(compactTopActions,700);setTimeout(compactTopActions,1600)};window.addEventListener('load',start);if(document.readyState==='complete'||document.readyState==='interactive')start();if(typeof render==='function'){const prior=render;render=async function(){const r=await prior.apply(this,arguments);setTimeout(apply,80);return r}}
 })();
