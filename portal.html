@@ -4,10 +4,10 @@ body{margin:0;background:#f3f5f7}.wrap{min-height:100vh;display:grid;place-items
 const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
 const loginZone=document.getElementById('loginZone'),workspaceZone=document.getElementById('workspaceZone'),sessionBox=document.getElementById('sessionBox'),loginError=document.getElementById('loginError');
 async function loadAccess(user){
-  const [{data:p,error:pe},{data:a}]=await Promise.all([db.from('profiles').select('id,full_name,email,role,permission_level,job_title').eq('id',user.id).single(),db.from('portal_access').select('*').eq('user_id',user.id).maybeSingle()]);
+  const [{data:p,error:pe},{data:a}]=await Promise.all([db.from('profiles').select('id,full_name,email,role,permission_level,job_title,organisational_access_role,portal_access_role').eq('id',user.id).single(),db.from('portal_access').select('*').eq('user_id',user.id).maybeSingle()]);
   if(pe||!p)throw new Error('Your profile could not be loaded.');
   const academy=a?.academy_admin===true||p.permission_level==='super_user'||String(p.role).toLowerCase()==='trainer';
-  const workforce=a?.workforce_manager===true||academy;
+  const systemRole=String(p.organisational_access_role||p.portal_access_role||'operative').toLowerCase();const workforce=a?.workforce_manager===true||['supervisor','manager','operations_manager'].includes(systemRole)||academy;
   const learner=a?.learner_portal===true||p.permission_level==='super_user'||String(p.role).toLowerCase()==='learner';
   academyCard.classList.toggle('hidden',!academy);workforceCard.classList.toggle('hidden',!workforce);learnerCard.classList.toggle('hidden',!learner);
   sessionName.textContent=p.full_name||p.email||'Signed In';sessionRole.textContent=p.permission_level==='super_user'?'Super User':(p.job_title||p.role||'Platform Access');
