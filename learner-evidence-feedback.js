@@ -14,13 +14,13 @@
     s.textContent=`
       .learner-action-panel{margin:15px 0;background:linear-gradient(135deg,#fff7f7,#fff);border:1px solid #efc5ca;border-left:5px solid #b20f22;border-radius:14px;padding:17px 18px;box-shadow:0 10px 24px rgba(18,24,33,.05)}
       .learner-action-panel-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:11px}.learner-action-panel h3{margin:4px 0 3px;font-size:18px}.learner-action-panel p{margin:0;color:#687484;font-size:11px;line-height:1.5}.learner-action-count{min-width:32px;height:32px;border-radius:999px;background:#b20f22;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:900}
-      .learner-action-list{display:grid;gap:9px}.learner-action-item{border:1px solid #ead9dc;border-radius:10px;padding:12px;background:#fff;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}.learner-action-item strong{display:block;font-size:12px}.learner-action-note{margin-top:6px!important;color:#8b2633!important;font-weight:700}.learner-action-btn{border:0;background:#b20f22;color:#fff;border-radius:8px;padding:8px 10px;font-size:9px;font-weight:850;cursor:pointer;white-space:nowrap}
+      .learner-action-list{display:grid;gap:9px}.learner-action-item{border:1px solid #ead9dc;border-radius:10px;padding:12px;background:#fff;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}.learner-action-item strong{display:block;font-size:12px}.learner-action-note{margin-top:6px!important;color:#8b2633!important;font-weight:700}.learner-notification-actions{display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap}.learner-action-btn{border:0;background:#b20f22;color:#fff;border-radius:8px;padding:8px 10px;font-size:9px;font-weight:850;cursor:pointer;white-space:nowrap}.learner-read-btn{border:1px solid #d8dde4;background:#fff;color:#303a46;border-radius:8px;padding:8px 10px;font-size:9px;font-weight:850;cursor:pointer;white-space:nowrap}
       .learner-feedback-note{display:block;margin-top:5px;padding:7px 9px;border-radius:7px;background:#fff1f2;color:#9b1c2f;font-size:9px;font-weight:750;line-height:1.4}
       .learner-evidence-modal{position:fixed;inset:0;z-index:2147483600;background:rgba(16,22,30,.55);display:grid;place-items:center;padding:20px;backdrop-filter:blur(2px)}
       .learner-evidence-modal-card{width:min(540px,96vw);background:#fff;border-radius:16px;box-shadow:0 26px 70px rgba(0,0,0,.28);overflow:hidden}.learner-evidence-modal-head{padding:19px 20px 16px;border-bottom:1px solid #e5e8ec;display:flex;justify-content:space-between;gap:15px}.learner-evidence-modal-head h2{margin:4px 0 0;font-size:20px}.learner-evidence-close{width:34px;height:34px;border:0;border-radius:50%;background:#eef1f4;font-size:19px;cursor:pointer}.learner-evidence-modal-body{padding:19px 20px}.learner-evidence-modal-body p{font-size:11px;color:#657181;line-height:1.55}.learner-evidence-feedback{margin:14px 0;padding:12px 13px;background:#fff3f4;border:1px solid #f1c9ce;border-radius:10px;color:#8f1827;font-size:11px;line-height:1.5}.learner-evidence-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.learner-evidence-modal-actions button{border:0;border-radius:8px;padding:10px 12px;font-size:10px;font-weight:850;cursor:pointer}.learner-evidence-cancel{background:#eef1f4;color:#303a46}.learner-evidence-upload{background:#b20f22;color:#fff}
       .learner-evidence-nav-badge{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#d92d20;color:#fff;font-size:9px;font-weight:900;display:inline-grid;place-items:center;box-shadow:0 0 0 2px #1b222c}
       .learner-read-marker{display:block;margin-top:5px;color:#667085;font-size:8px;font-weight:800}
-      @media(max-width:650px){.learner-action-item{grid-template-columns:1fr}.learner-action-btn{width:100%}.learner-evidence-modal-actions{flex-direction:column-reverse}.learner-evidence-modal-actions button{width:100%}}
+      @media(max-width:650px){.learner-action-item{grid-template-columns:1fr}.learner-notification-actions{justify-content:stretch}.learner-action-btn,.learner-read-btn{width:100%}.learner-evidence-modal-actions{flex-direction:column-reverse}.learner-evidence-modal-actions button{width:100%}}
     `;
     document.head.appendChild(s);
   }
@@ -32,7 +32,20 @@
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   }
 
+  async function markOneRead(r){
+    if(!db||!r||r.learner_read_at)return true;
+    const {data,error}=await db.rpc('mark_evidence_feedback_read',{request_id:r.id});
+    if(error)return false;
+    const stamp=data||new Date().toISOString();
+    r.learner_read_at=stamp;
+    const original=rows.find(x=>String(x.id)===String(r.id));
+    if(original)original.learner_read_at=stamp;
+    apply();
+    return true;
+  }
+
   function submitReplacement(r){
+    markOneRead(r);
     goToEvidenceRequests();
     setTimeout(()=>{
       const form=document.getElementById('evidenceForm');
@@ -70,20 +83,21 @@
     let badge=link.querySelector('.learner-evidence-nav-badge');
     if(!count){badge?.remove();return}
     if(!badge){badge=document.createElement('span');badge.className='learner-evidence-nav-badge';link.appendChild(badge)}
-    badge.textContent=count>99?'99+':String(count);badge.title=`${count} unread Academy feedback notification${count===1?'':'s'}`;
+    badge.textContent=count>99?'99+':String(count);badge.title=`${count} unread notification${count===1?'':'s'}`;
   }
 
-  function injectOverview(rejected){
+  function injectOverview(unread){
     let host=document.querySelector('.view.active .welcome-grid')?.parentElement || [...document.querySelectorAll('.view')].find(v=>v.querySelector('.welcome-grid'));
     if(!host)return;
     host.querySelector('#learnerEvidenceActionPanel')?.remove();
-    if(!rejected.length)return;
+    if(!unread.length)return;
     const panel=document.createElement('section');
     panel.id='learnerEvidenceActionPanel';panel.className='learner-action-panel';
-    panel.innerHTML=`<div class="learner-action-panel-head"><div><div class="eyebrow">Evidence Action Required</div><h3>${rejected.length===1?'1 submission needs your attention':`${rejected.length} submissions need your attention`}</h3><p>The Training Academy has returned evidence to you. Read the feedback and upload replacement evidence.</p></div><span class="learner-action-count">${rejected.length}</span></div><div class="learner-action-list">${rejected.map(r=>`<div class="learner-action-item"><div><strong>${esc(r.qualification_name||'Qualification')}</strong><p class="learner-action-note">Academy feedback: ${esc(r.reviewer_note||'Please upload suitable replacement evidence.')}</p>${r.learner_read_at?'<span class="learner-read-marker">Feedback read</span>':''}</div><button type="button" class="learner-action-btn" data-replace-evidence="${esc(r.id)}">Upload replacement evidence</button></div>`).join('')}</div>`;
+    panel.innerHTML=`<div class="learner-action-panel-head"><div><div class="eyebrow">Notifications</div><h3>${unread.length===1?'1 New Notification':`${unread.length} New Notifications`}</h3><p>Important updates from the Training Academy will appear here until you mark them as read.</p></div><span class="learner-action-count">${unread.length}</span></div><div class="learner-action-list">${unread.map(r=>`<div class="learner-action-item" data-notification="${esc(r.id)}"><div><strong>${esc(r.qualification_name||'Qualification')}</strong><p class="learner-action-note">Academy feedback: ${esc(r.reviewer_note||'Please upload suitable replacement evidence.')}</p></div><div class="learner-notification-actions"><button type="button" class="learner-read-btn" data-mark-read="${esc(r.id)}">Mark as read</button><button type="button" class="learner-action-btn" data-replace-evidence="${esc(r.id)}">Upload replacement evidence</button></div></div>`).join('')}</div>`;
     const welcome=host.querySelector('.welcome-grid');
     if(welcome)welcome.insertAdjacentElement('afterend',panel);else host.prepend(panel);
-    panel.querySelectorAll('[data-replace-evidence]').forEach(b=>b.onclick=()=>{const r=rejected.find(x=>String(x.id)===String(b.dataset.replaceEvidence));if(r)openActionModal(r)});
+    panel.querySelectorAll('[data-replace-evidence]').forEach(b=>b.onclick=()=>{const r=unread.find(x=>String(x.id)===String(b.dataset.replaceEvidence));if(r)openActionModal(r)});
+    panel.querySelectorAll('[data-mark-read]').forEach(b=>b.onclick=async()=>{const r=unread.find(x=>String(x.id)===String(b.dataset.markRead));if(!r)return;b.disabled=true;b.textContent='Marking…';const ok=await markOneRead(r);if(!ok){b.disabled=false;b.textContent='Mark as read'}});
   }
 
   function cleanReadComplianceRow(c){
@@ -107,11 +121,7 @@
       const h=card.querySelector('h3');if(!h)return;const r=latest.get(norm(h.textContent));if(!r||r.status!=='rejected')return;
       const pill=card.querySelector('.pill');
       const actions=card.querySelector('.compliance-card-actions');
-      if(r.learner_read_at){
-        if(pill){pill.textContent='Missing';pill.classList.remove('good','warn');pill.classList.add('bad')}
-        if(actions)actions.innerHTML='';
-        return;
-      }
+      if(r.learner_read_at){if(pill){pill.textContent='Missing';pill.classList.remove('good','warn');pill.classList.add('bad')}if(actions)actions.innerHTML='';return}
       if(pill){pill.textContent='Action Required';pill.classList.remove('good','warn');pill.classList.add('bad')}
       if(actions)actions.innerHTML=`<span class="learner-feedback-note">Academy feedback: ${esc(r.reviewer_note||'Please review the Academy feedback in Evidence Requests.')}</span>`;
     });
@@ -126,27 +136,8 @@
       const target=c[c.length-1];
       if(target&&r.reviewer_note&&!target.querySelector('.learner-feedback-note')){const n=document.createElement('span');n.className='learner-feedback-note';n.textContent='Academy feedback: '+r.reviewer_note;target.appendChild(n)}
       if(target&&!target.querySelector('[data-request-replace]')){const b=document.createElement('button');b.type='button';b.className='learner-action-btn';b.dataset.requestReplace=r.id;b.textContent='Upload New Evidence';b.style.marginTop='7px';b.onclick=()=>openActionModal(r);target.appendChild(b)}
+      if(target&&r.learner_read_at&&!target.querySelector('.learner-read-marker')){const read=document.createElement('span');read.className='learner-read-marker';read.textContent='Notification read';target.appendChild(read)}
     });
-  }
-
-  function evidenceRequestsVisible(){
-    if(location.hash==='#requests')return true;
-    const body=document.getElementById('requestBody');
-    return !!body?.closest('.view')?.classList.contains('active');
-  }
-
-  async function markFeedbackRead(){
-    if(markingRead||!db||!evidenceRequestsVisible())return;
-    const latest=latestByQualification();
-    const unread=[...latest.values()].filter(r=>r.status==='rejected'&&!r.learner_read_at);
-    if(!unread.length)return;
-    markingRead=true;
-    for(const r of unread){
-      const {data,error}=await db.rpc('mark_evidence_feedback_read',{request_id:r.id});
-      if(!error){r.learner_read_at=data||new Date().toISOString();const original=rows.find(x=>String(x.id)===String(r.id));if(original)original.learner_read_at=r.learner_read_at}
-    }
-    markingRead=false;
-    apply();
   }
 
   function apply(){
@@ -154,7 +145,7 @@
     const rejected=[...latest.values()].filter(r=>r.status==='rejected');
     const unread=rejected.filter(r=>!r.learner_read_at);
     updateEvidenceNavBadge(unread.length);
-    injectOverview(rejected);enhanceCompliance(latest);enhanceRequests(latest);
+    injectOverview(unread);enhanceCompliance(latest);enhanceRequests(latest);
   }
 
   async function boot(attempt=0){
@@ -165,9 +156,8 @@
     const {data,error}=await db.from('evidence_review_requests').select('id,learner_id,qualification_name,awarding_body,status,reviewer_note,submitted_at,reviewed_at,learner_read_at').eq('learner_id',u.user.id).order('submitted_at',{ascending:false});
     if(error)return;
     rows=data||[];apply();
-    setTimeout(markFeedbackRead,250);
-    const obs=new MutationObserver(()=>requestAnimationFrame(()=>{apply();markFeedbackRead()}));obs.observe(document.body,{subtree:true,childList:true});
-    window.addEventListener('hashchange',()=>setTimeout(()=>{apply();markFeedbackRead()},120));
+    const obs=new MutationObserver(()=>requestAnimationFrame(apply));obs.observe(document.body,{subtree:true,childList:true});
+    window.addEventListener('hashchange',()=>setTimeout(apply,120));
   }
   boot();
 })();
