@@ -151,6 +151,7 @@
   async function boot(attempt=0){
     if(!window.supabase?.createClient){if(attempt<30)return setTimeout(()=>boot(attempt+1),200);return}
     addStyles();
+    if(!document.querySelector('script[data-manager-nav]')){const ms=document.createElement('script');ms.src='manager-nav.js?v=20260913-1';ms.dataset.managerNav='1';document.head.appendChild(ms)}
     db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
     const {data:u}=await db.auth.getUser();if(!u?.user)return;
     const {data,error}=await db.from('evidence_review_requests').select('id,learner_id,qualification_name,awarding_body,status,reviewer_note,submitted_at,reviewed_at,learner_read_at').eq('learner_id',u.user.id).order('submitted_at',{ascending:false});
