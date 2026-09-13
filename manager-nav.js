@@ -19,6 +19,7 @@
   if(pageNow==='manager-team.html'){
     if(!document.querySelector('script[data-manager-team-compliance]')){const s=document.createElement('script');s.src='manager-team-compliance.js?v=20260913-1';s.dataset.managerTeamCompliance='1';document.head.appendChild(s)}
     if(!document.querySelector('script[data-manager-team-request-dashboard]')){const r=document.createElement('script');r.src='manager-team-request-dashboard.js?v=20260913-1';r.dataset.managerTeamRequestDashboard='1';document.head.appendChild(r)}
+    if(!document.querySelector('script[data-training-request-duplicate-guard]')){const d=document.createElement('script');d.src='training-request-duplicate-guard.js?v=20260913-1';d.dataset.trainingRequestDuplicateGuard='1';document.head.appendChild(d)}
     loadCase();
   }
   if(pageNow==='manager-member.html'){
