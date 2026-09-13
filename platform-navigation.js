@@ -3,7 +3,7 @@
   const icon=n=>`<span class="portal-nav-icon">${I[n]||I.course}</span>`;
   const academy=[
     {type:'link',label:'Dashboard',icon:'dashboard',href:'academy-admin.html'},
-    {type:'group',label:'Manage',icon:'people',items:[['Manage People','people','people-database.html'],['Manage Companies','company','external-customers.html?view=all']]},
+    {type:'group',label:'Manage',icon:'people',items:[['Manage People','people','manage-people.html'],['Manage Companies','company','manage-companies.html']]},
     {type:'group',label:'Compliance',icon:'compliance',items:[['Teams & Managers','people','compliance-teams.html'],['Job Roles','matrix','compliance.html'],['Compliance Overview','compliance','compliance-operatives.html'],['Training Needs','report','training-needs.html'],['Training Requests','request','training-requests.html'],['Cards & QR','qr','verify.html']]},
     {type:'group',label:'Training',icon:'training',items:[['Training Schedule','training','training-schedule.html'],['Bookings','booking','booked-courses.html'],['Course Delivery','training','course-delivery.html'],['Assessments','assess','customer-service-assessment.html'],['Accreditations','award','bulk-accreditation-upload.html'],['Certificates','award','reports.html#certificates'],['Reviews & Requests','request','requests-review.html']]},
     {type:'link',label:'Reports',icon:'report',href:'reports.html'},
