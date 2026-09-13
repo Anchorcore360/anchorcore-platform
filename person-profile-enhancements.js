@@ -7,7 +7,7 @@
   function renderSystemAccessCard(){
     const grid=document.getElementById('detailsGrid');if(!grid||typeof learner==='undefined'||!learner?.id)return;
     let card=document.getElementById('systemAccessDetail');
-    if(!card){card=document.createElement('div');card.className='detail';card.id='systemAccessDetail';const job=[...grid.querySelectorAll('.detail')].find(x=>(x.querySelector('span')?.textContent||'').trim().toLowerCase()==='job title');if(job)job.insertAdjacentElement('afterend',card);else grid.appendChild(card)}
+    if(!card){card=document.createElement('div');card.className='detail';card.id='systemAccessDetail';const surname=[...grid.querySelectorAll('.detail')].find(x=>(x.querySelector('span')?.textContent||'').trim().toLowerCase()==='surname');if(surname)surname.insertAdjacentElement('afterend',card);else grid.prepend(card)}
     card.innerHTML='<span>System access</span><strong><span style="display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#edf2f7;color:#344054;font-size:10px;font-weight:850">'+accessLabel(learner.organisational_access_role||learner.portal_access_role||'operative')+'</span></strong>';
   }
 
