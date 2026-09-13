@@ -10,7 +10,7 @@
       const [{data:u},{data:r,error}]=await Promise.all([db.auth.getUser(),db.from('training_requests').select('id,booked_booking_id,preferred_date').eq('id',requestId).single()]);
       if(error)throw error;if(!r?.booked_booking_id)throw new Error('This request is not linked to a confirmed booking yet.');
       const note=prompt('Message to include with the joining instructions:')||'Your joining instructions are ready to view.';
-      const url=`joining-instructions-preview.html?booking=${encodeURIComponent(r.booked_booking_id)}`;
+      const url=`joining-instructions-view.html?booking=${encodeURIComponent(r.booked_booking_id)}`;
       const ev=await db.from('training_request_events').insert({request_id:requestId,actor_id:u?.user?.id,actor_role:'academy',event_type:'joining_instructions',message:note,proposed_date:r.preferred_date||null,metadata:{url,booking_id:r.booked_booking_id}});
       if(ev.error)throw ev.error;
       const up=await db.from('training_requests').update({last_activity_at:new Date().toISOString(),waiting_on:'manager'}).eq('id',requestId);if(up.error)throw up.error;
