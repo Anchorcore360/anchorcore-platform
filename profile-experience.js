@@ -61,7 +61,7 @@
     const tabs=document.querySelector('.tabs');
     const overviewBtn=tabs?.querySelector('[data-tab="overview"]');
     if(!tabs||!overviewBtn)return;
-    overviewBtn.textContent='Learning';
+    overviewBtn.textContent='Overview';
     if(!tabs.querySelector('[data-tab="bookings"]')){const b=document.createElement('button');b.className='tab-btn';b.dataset.tab='bookings';b.textContent='Booked Courses';overviewBtn.insertAdjacentElement('afterend',b)}
     if(!tabs.querySelector('[data-tab="compliance"]')){const b=document.createElement('button');b.className='tab-btn';b.dataset.tab='compliance';b.textContent='Compliance';const acc=tabs.querySelector('[data-tab="accreditations"]');if(acc)acc.insertAdjacentElement('beforebegin',b);else tabs.appendChild(b)}
     ['assignments','assessments','certificates','training'].forEach(name=>tabs.querySelector(`[data-tab="${name}"]`)?.remove());
@@ -75,6 +75,8 @@
   }
 
   function setMetric(id,label,value){const valueEl=document.getElementById(id);if(!valueEl)return;const card=valueEl.closest('.metric');const labelEl=card?.querySelector('span');if(labelEl)labelEl.textContent=label;valueEl.textContent=value}
+
+  function promotePersonalDetails(){const overview=document.getElementById('tab-overview'),stats=overview?.querySelector('.profile-grid'),edit=document.getElementById('editProfileBtn2'),card=edit?.closest('.panel-card');if(overview&&card&&card.parentElement!==overview){if(stats)overview.insertBefore(card,stats);else overview.prepend(card)}if(card)card.style.marginBottom='16px'}
 
   function renderLearningHome(){
     const overview=document.getElementById('tab-overview');if(!overview)return;
@@ -97,7 +99,7 @@
 
   function wireTabs(){document.querySelectorAll('.tabs [data-tab]').forEach(btn=>{if(btn.dataset.solidProfileWired)return;btn.dataset.solidProfileWired='1';btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('tab-'+btn.dataset.tab)?.classList.add('active')})})}
 
-  async function apply(){try{await loadBookedCourses()}catch(e){bookedCourses=[];console.warn('Booked courses unavailable',e)}ensureBookedTab();ensurePanels();renderLearningHome();moveComplianceManagement();mergeCertificatesIntoAccreditations();renderBookedCourses();wireTabs();compactTopActions()}
+  async function apply(){try{await loadBookedCourses()}catch(e){bookedCourses=[];console.warn('Booked courses unavailable',e)}ensureBookedTab();ensurePanels();promotePersonalDetails();renderLearningHome();moveComplianceManagement();mergeCertificatesIntoAccreditations();renderBookedCourses();wireTabs();compactTopActions()}
 
   const start=()=>{setTimeout(apply,180);setTimeout(compactTopActions,700);setTimeout(compactTopActions,1600)};window.addEventListener('load',start);if(document.readyState==='complete'||document.readyState==='interactive')start();if(typeof render==='function'){const prior=render;render=async function(){const r=await prior.apply(this,arguments);setTimeout(apply,80);return r}}
 })();
