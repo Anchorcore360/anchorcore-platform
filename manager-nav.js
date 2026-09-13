@@ -33,6 +33,7 @@
     if(!document.querySelector('script[data-manager-evidence-notifications]')){const n=document.createElement('script');n.src='learner-manager-evidence-notifications.js?v=20260913-1';n.dataset.managerEvidenceNotifications='1';document.head.appendChild(n)}
     if(!document.querySelector('script[data-accreditation-history]')){const h=document.createElement('script');h.src='accreditation-history.js?v=20260913-1';h.dataset.accreditationHistory='1';document.head.appendChild(h)}
     if(!document.querySelector('script[data-learner-profile-name-fix]')){const p=document.createElement('script');p.src='learner-profile-name-fix.js?v=20260913-1';p.dataset.learnerProfileNameFix='1';document.head.appendChild(p)}
+    if(!document.querySelector('script[data-learner-joining-instructions]')){const j=document.createElement('script');j.src='learner-joining-instructions.js?v=20260913-1';j.dataset.learnerJoiningInstructions='1';document.head.appendChild(j)}
     loadCase();
   }
   const wait=(n=0)=>{if(!window.supabase?.createClient){if(n<30)setTimeout(()=>wait(n+1),200);return}boot()};
