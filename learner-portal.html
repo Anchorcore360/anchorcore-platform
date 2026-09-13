@@ -312,22 +312,36 @@
       }
       .welcome-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+        grid-template-columns: minmax(0, 1.3fr) minmax(340px, 0.7fr);
         gap: 15px;
       }
       .welcome-card {
-        padding: 24px;
+        position: relative;
+        min-height: 270px;
+        padding: 28px 310px 28px 28px;
         border-radius: 14px;
-        background: linear-gradient(135deg, #20262d, #333c47);
-        color: #fff;
+        border: 1px solid #e4c9cd;
+        background: radial-gradient(circle at 78% 22%, rgba(178,15,34,.1), transparent 32%), linear-gradient(135deg,#fff 0%,#faf5f6 58%,#f0f2f4 100%);
+        color: var(--ink);
+        overflow: hidden;
+        box-shadow: 0 12px 28px rgba(30,39,51,.07);
+      }
+      .welcome-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 6px;
+        background: linear-gradient(#c8102e,#78101d);
       }
       .welcome-card h1 {
         margin: 7px 0;
-        font-size: 30px;
+        font-size: 34px;
       }
       .welcome-card p {
         margin: 0;
-        color: #d9dee5;
+        max-width: 570px;
+        color: #5f6b79;
+        line-height: 1.55;
       }
       .quick-actions {
         display: flex;
@@ -336,8 +350,53 @@
         margin-top: 18px;
       }
       .quick-actions .btn {
+        background: #20262d;
+        color: #fff;
+      }
+      .quick-actions .btn:first-child {
+        background: var(--red);
+      }
+      .telecoms-art {
+        position: absolute;
+        right: 20px;
+        bottom: 0;
+        width: 270px;
+        height: 245px;
+        color: #9e1424;
+      }
+      .review-panel {
+        margin-top: 0;
+        background: linear-gradient(180deg,#fff,#fbfcfd);
+      }
+      .review-summary {
+        display: grid;
+        grid-template-columns: 112px minmax(0,1fr);
+        gap: 16px;
+        align-items: center;
+        margin: 12px 0 6px;
+      }
+      .review-ring {
+        width: 108px;
+        height: 108px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(var(--red) calc(var(--score,0) * 1%),#e8ebef 0);
+      }
+      .review-ring-inner {
+        width: 78px;
+        height: 78px;
+        border-radius: 50%;
         background: #fff;
-        color: #20262d;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        box-shadow: inset 0 0 0 1px #eef0f2;
+      }
+      .review-ring strong { display:block; font-size:23px; }
+      .review-ring small { display:block; color:var(--muted); font-size:8px; font-weight:800; text-transform:uppercase; }
+      .review-copy strong { display:block; font-size:15px; margin-bottom:5px; }
+      .review-copy span { color:var(--muted); font-size:11px; line-height:1.45; }
       }
       .status-list {
         display: grid;
@@ -406,6 +465,9 @@
         .cards {
           grid-template-columns: 1fr 1fr;
         }
+        .welcome-card {
+          padding-right: 260px;
+        }
       }
       @media (max-width: 650px) {
         .content {
@@ -420,6 +482,24 @@
         }
         .profile-qr {
           margin: auto;
+        }
+        .welcome-card {
+          min-height: auto;
+          padding: 24px;
+        }
+        .telecoms-art {
+          display: none;
+        }
+        .review-summary {
+          grid-template-columns: 96px 1fr;
+        }
+        .review-ring {
+          width: 92px;
+          height: 92px;
+        }
+        .review-ring-inner {
+          width: 66px;
+          height: 66px;
         }
         .meta {
           justify-content: center;
@@ -459,11 +539,11 @@
           <section id="view-overview" class="view active">
             <div class="welcome-grid">
               <div class="welcome-card">
-                <div class="eyebrow" style="color: #ffccd2">Welcome Back</div>
+                <div class="eyebrow">Welcome Back</div>
                 <h1 id="welcomeName">Welcome</h1>
                 <p>
-                  Your training and compliance summary is kept here in one
-                  place.
+                  Your RRTA training, qualifications and compliance record—all
+                  together and ready when you need it.
                 </p>
                 <div class="quick-actions">
                   <button
@@ -484,10 +564,20 @@
                     My Certificates
                   </button>
                 </div>
+                <svg class="telecoms-art" viewBox="0 0 270 245" role="img" aria-label="Telecommunications network illustration">
+                  <circle cx="208" cy="52" r="37" fill="#fff" opacity=".82" />
+                  <path d="M208 22v170M182 192h52M190 192l18-98 18 98M194 151h28M199 123h18M204 94h8" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M187 69c-12-10-12-25 0-35M229 69c12-10 12-25 0-35M175 82c-23-20-23-51 0-71M241 82c23-20 23-51 0-71" fill="none" stroke="#c8102e" stroke-width="4" stroke-linecap="round" opacity=".7" />
+                  <path d="M18 215h234M36 215v-34h45v34M48 181v-22h20v22M91 215v-52h50v52M104 177h9M121 177h9M104 194h9M121 194h9" fill="none" stroke="#7b8490" stroke-width="4" stroke-linejoin="round" opacity=".6" />
+                </svg>
               </div>
-              <section class="panel" style="margin-top: 0">
-                <div class="eyebrow">At A Glance</div>
-                <h2 style="margin-top: 6px">What needs attention</h2>
+              <section class="panel review-panel">
+                <div class="eyebrow">Compliance Review</div>
+                <h2 style="margin: 6px 0 0">Your Current Position</h2>
+                <div class="review-summary">
+                  <div class="review-ring" id="complianceRing"><div class="review-ring-inner"><div><strong id="complianceScore">0%</strong><small>Current</small></div></div></div>
+                  <div class="review-copy"><strong id="complianceMessage">Checking your record…</strong><span>Based on your recorded accreditations. Open compliance for the full job-role review.</span></div>
+                </div>
                 <div class="status-list" id="attentionList"></div>
               </section>
             </div>
@@ -872,7 +962,6 @@
           expiring = accs.filter((a) => statusAcc(a)[0] === "Expiring").length,
           expired = accs.filter((a) => statusAcc(a)[0] === "Expired").length;
         profileStats.innerHTML = `<div class="stat"><span>Accreditations</span><strong>${accs.length}</strong></div><div class="stat"><span>Valid</span><strong>${valid}</strong></div><div class="stat"><span>Expiring</span><strong>${expiring}</strong></div><div class="stat"><span>Completed Training</span><strong>${records.filter((r) => String(r.completion_status).toLowerCase() === "achieved").length}</strong></div>`;
-        renderOverview(valid, expiring, expired);
         profileDetails.innerHTML = `<div class="card"><strong>Workforce Type</strong><span>${esc(profile.worker_type === "subcontractor" ? "Subcontractor" : "RRT Direct Staff")}</span></div><div class="card"><strong>Primary Job Role</strong><span>${esc(roleRows.find((x) => x.is_primary)?.job_roles?.name || "Not Assigned")}</span></div><div class="card"><strong>Phone</strong><span>${esc(profile.phone || "Not Recorded")}</span></div><div class="card"><strong>Continuous Service Date</strong><span>${fmt(profile.continuous_service_date)}</span></div>`;
         let covered = 0,
           missing = 0;
@@ -890,6 +979,7 @@
             return `<tr><td>${esc(n)}</td><td>${esc(r.compliance_items?.category || "")}</td><td><span class="pill ${st[1]}">${st[0]}</span></td></tr>`;
           })
           .join("");
+        renderOverview(valid, expiring, expired, covered, missing);
         complianceStats.innerHTML = `<div class="stat"><span>Requirements</span><strong>${requirements.length}</strong></div><div class="stat"><span>Covered</span><strong>${covered}</strong></div><div class="stat"><span>Missing / Expired</span><strong>${missing}</strong></div><div class="stat"><span>Compliance Score</span><strong>${requirements.length ? Math.round((covered / requirements.length) * 100) : 0}%</strong></div>`;
         complianceBody.innerHTML = reqRows
           ? `<table class="table"><thead><tr><th>Requirement</th><th>Category</th><th>Status</th></tr></thead><tbody>${reqRows}</tbody></table>`
@@ -961,8 +1051,22 @@
         link.href = `verify.html?t=${encodeURIComponent(profile.verification_token)}`;
         renderQrInto("profileQr");
       }
-      function renderOverview(valid, expiring, expired) {
+      function renderOverview(valid, expiring, expired, covered, missing) {
         welcomeName.textContent = `Welcome, ${(profile.forename || profile.full_name || "Learner").split(" ")[0]}`;
+        const score = requirements.length
+          ? Math.round((covered / requirements.length) * 100)
+          : accs.length
+            ? Math.round(((valid + expiring) / accs.length) * 100)
+            : 0;
+        complianceRing.style.setProperty("--score", score);
+        complianceScore.textContent = `${score}%`;
+        complianceMessage.textContent = requirements.length
+          ? missing
+            ? `${missing} requirement${missing === 1 ? "" : "s"} need attention`
+            : "Your role requirements are covered"
+          : accs.length
+            ? "Your recorded accreditations are current"
+            : "Your record is ready to be built";
         const upcoming = bookingRows
           .filter(
             (b) =>
