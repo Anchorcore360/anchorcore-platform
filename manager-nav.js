@@ -15,9 +15,11 @@
     body[data-portal-nav="learner"] #certificates.list .cert-actions{right:14px!important;bottom:50%!important;transform:translateY(50%)!important}
   `;document.head.appendChild(style);
   const pageNow=(location.pathname.split('/').pop()||'').toLowerCase();
+  const loadCase=()=>{if(document.querySelector('script[data-training-request-case]'))return;const c=document.createElement('script');c.src='training-request-case.js?v=20260913-1';c.dataset.trainingRequestCase='1';document.head.appendChild(c)};
   if(pageNow==='manager-team.html'){
     if(!document.querySelector('script[data-manager-team-compliance]')){const s=document.createElement('script');s.src='manager-team-compliance.js?v=20260913-1';s.dataset.managerTeamCompliance='1';document.head.appendChild(s)}
     if(!document.querySelector('script[data-manager-team-request-dashboard]')){const r=document.createElement('script');r.src='manager-team-request-dashboard.js?v=20260913-1';r.dataset.managerTeamRequestDashboard='1';document.head.appendChild(r)}
+    loadCase();
   }
   if(pageNow==='manager-member.html'){
     if(!document.querySelector('script[data-manager-member-evidence]')){const e=document.createElement('script');e.src='manager-member-evidence.js?v=20260913-3';e.dataset.managerMemberEvidence='1';document.head.appendChild(e)}
@@ -30,6 +32,7 @@
     if(!document.querySelector('script[data-manager-evidence-notifications]')){const n=document.createElement('script');n.src='learner-manager-evidence-notifications.js?v=20260913-1';n.dataset.managerEvidenceNotifications='1';document.head.appendChild(n)}
     if(!document.querySelector('script[data-accreditation-history]')){const h=document.createElement('script');h.src='accreditation-history.js?v=20260913-1';h.dataset.accreditationHistory='1';document.head.appendChild(h)}
     if(!document.querySelector('script[data-learner-profile-name-fix]')){const p=document.createElement('script');p.src='learner-profile-name-fix.js?v=20260913-1';p.dataset.learnerProfileNameFix='1';document.head.appendChild(p)}
+    loadCase();
   }
   const wait=(n=0)=>{if(!window.supabase?.createClient){if(n<30)setTimeout(()=>wait(n+1),200);return}boot()};
   async function boot(){
