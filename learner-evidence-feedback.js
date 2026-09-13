@@ -86,19 +86,34 @@
     panel.querySelectorAll('[data-replace-evidence]').forEach(b=>b.onclick=()=>{const r=rejected.find(x=>String(x.id)===String(b.dataset.replaceEvidence));if(r)openActionModal(r)});
   }
 
+  function cleanReadComplianceRow(c){
+    const pill=c[2]?.querySelector('.pill');
+    if(pill){pill.textContent='Missing';pill.classList.remove('good','warn');pill.classList.add('bad')}
+    c[0]?.querySelectorAll('.learner-feedback-note').forEach(n=>n.remove());
+    c[2]?.querySelectorAll('.compliance-upload-btn,[data-replace-inline]').forEach(n=>n.remove());
+  }
+
   function enhanceCompliance(latest){
     const body=document.getElementById('complianceBody');if(!body)return;
     body.querySelectorAll('table tbody tr').forEach(tr=>{
       const c=tr.querySelectorAll('td');if(c.length<3)return;
       const r=latest.get(norm(c[0].textContent));if(!r||r.status!=='rejected')return;
+      if(r.learner_read_at){cleanReadComplianceRow(c);return}
       const pill=c[2].querySelector('.pill');if(pill){pill.textContent='Action Required';pill.classList.remove('good','warn');pill.classList.add('bad')}
-      if(!c[2].querySelector('[data-replace-inline]')){const b=document.createElement('button');b.type='button';b.className='compliance-upload-btn';b.dataset.replaceInline=r.id;b.title='Upload replacement evidence';b.setAttribute('aria-label','Upload replacement evidence');b.innerHTML='↥';b.onclick=()=>openActionModal(r);c[2].appendChild(b)}
+      c[2].querySelectorAll('.compliance-upload-btn,[data-replace-inline]').forEach(n=>n.remove());
       if(r.reviewer_note&&!c[0].querySelector('.learner-feedback-note')){const n=document.createElement('span');n.className='learner-feedback-note';n.textContent='Academy feedback: '+r.reviewer_note;c[0].appendChild(n)}
     });
     body.querySelectorAll('.compliance-card').forEach(card=>{
       const h=card.querySelector('h3');if(!h)return;const r=latest.get(norm(h.textContent));if(!r||r.status!=='rejected')return;
-      const pill=card.querySelector('.pill');if(pill){pill.textContent='Action Required';pill.classList.remove('good','warn');pill.classList.add('bad')}
-      let actions=card.querySelector('.compliance-card-actions');if(actions){actions.innerHTML=`<span class="learner-feedback-note">Academy feedback: ${esc(r.reviewer_note||'Please upload replacement evidence.')}</span><button type="button" class="compliance-upload-btn" data-card-replace>Upload New Evidence</button>`;actions.querySelector('[data-card-replace]').onclick=()=>openActionModal(r)}
+      const pill=card.querySelector('.pill');
+      const actions=card.querySelector('.compliance-card-actions');
+      if(r.learner_read_at){
+        if(pill){pill.textContent='Missing';pill.classList.remove('good','warn');pill.classList.add('bad')}
+        if(actions)actions.innerHTML='';
+        return;
+      }
+      if(pill){pill.textContent='Action Required';pill.classList.remove('good','warn');pill.classList.add('bad')}
+      if(actions)actions.innerHTML=`<span class="learner-feedback-note">Academy feedback: ${esc(r.reviewer_note||'Please review the Academy feedback in Evidence Requests.')}</span>`;
     });
   }
 
