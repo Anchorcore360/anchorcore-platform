@@ -2,8 +2,24 @@
   if(window.__rrtaManagerNavLoaded)return;window.__rrtaManagerNavLoaded=true;
   if(document.body?.dataset.portalNav!=='learner')return;
   const style=document.createElement('style');style.textContent=`
-    .manager-nav-block{margin-top:8px;border-top:1px solid rgba(255,255,255,.08);padding-top:8px}.manager-nav-parent{width:100%;border:0;background:transparent;color:#c7ced8;border-radius:9px;padding:10px 12px;font:inherit;font-size:12px;font-weight:750;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left}.manager-nav-parent:hover,.manager-nav-parent.open{background:rgba(255,255,255,.08);color:#fff}.manager-nav-parent svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8}.manager-nav-parent .chev{margin-left:auto}.manager-nav-sub{display:none;padding:2px 0 3px 28px}.manager-nav-block.open .manager-nav-sub{display:grid;gap:2px}.manager-nav-sub a{color:#aeb7c2;text-decoration:none;border-radius:7px;padding:8px 9px;font-size:10px;font-weight:750}.manager-nav-sub a:hover,.manager-nav-sub a.active{background:rgba(255,255,255,.08);color:#fff}`;document.head.appendChild(style);
-  if((location.pathname.split('/').pop()||'').toLowerCase()==='manager-team.html'&&!document.querySelector('script[data-manager-team-compliance]')){const s=document.createElement('script');s.src='manager-team-compliance.js?v=20260913-1';s.dataset.managerTeamCompliance='1';document.head.appendChild(s)}
+    .manager-nav-block{margin-top:8px;border-top:1px solid rgba(255,255,255,.08);padding-top:8px}.manager-nav-parent{width:100%;border:0;background:transparent;color:#c7ced8;border-radius:9px;padding:10px 12px;font:inherit;font-size:12px;font-weight:750;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left}.manager-nav-parent:hover,.manager-nav-parent.open{background:rgba(255,255,255,.08);color:#fff}.manager-nav-parent svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8}.manager-nav-parent .chev{margin-left:auto}.manager-nav-sub{display:none;padding:2px 0 3px 28px}.manager-nav-block.open .manager-nav-sub{display:grid;gap:2px}.manager-nav-sub a{color:#aeb7c2;text-decoration:none;border-radius:7px;padding:8px 9px;font-size:10px;font-weight:750}.manager-nav-sub a:hover,.manager-nav-sub a.active{background:rgba(255,255,255,.08);color:#fff}
+    body[data-portal-nav="learner"] #certificates .cert{position:relative;padding:16px 54px 16px 16px;min-height:150px}
+    body[data-portal-nav="learner"] #certificates .cert-top{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:14px!important}
+    body[data-portal-nav="learner"] #certificates .cert-top strong{order:-1;display:block!important;font-size:15px!important;line-height:1.2!important;color:#18202a!important;margin:0!important;font-weight:900!important}
+    body[data-portal-nav="learner"] #certificates .cert-top .pill{margin:0!important;flex:0 0 auto!important;text-transform:capitalize}
+    body[data-portal-nav="learner"] #certificates .cert-actions{position:absolute!important;right:14px!important;bottom:14px!important;margin:0!important}
+    body[data-portal-nav="learner"] #certificates .cert-actions .btn{width:34px!important;height:34px!important;padding:0!important;border-radius:9px!important;display:grid!important;place-items:center!important;font-size:0!important;background:#fff!important;color:#20262d!important;border:1px solid #d7dde4!important;box-shadow:0 3px 8px rgba(18,24,33,.05)!important}
+    body[data-portal-nav="learner"] #certificates .cert-actions .btn:hover{background:#20262d!important;color:#fff!important;border-color:#20262d!important}
+    body[data-portal-nav="learner"] #certificates .cert-actions .btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8}
+    body[data-portal-nav="learner"] #certificates.list .cert{padding-right:60px!important}
+    body[data-portal-nav="learner"] #certificates.list .cert-actions{right:14px!important;bottom:50%!important;transform:translateY(50%)!important}
+  `;document.head.appendChild(style);
+  const pageNow=(location.pathname.split('/').pop()||'').toLowerCase();
+  if(pageNow==='manager-team.html'&&!document.querySelector('script[data-manager-team-compliance]')){const s=document.createElement('script');s.src='manager-team-compliance.js?v=20260913-1';s.dataset.managerTeamCompliance='1';document.head.appendChild(s)}
+  if(pageNow==='manager-member.html'){
+    const polish=()=>document.querySelectorAll('#certificates [data-cert-path]').forEach(b=>{if(b.dataset.eyeReady)return;b.dataset.eyeReady='1';b.setAttribute('aria-label','View certificate');b.setAttribute('title','View certificate');b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>'});
+    new MutationObserver(()=>requestAnimationFrame(polish)).observe(document.body,{childList:true,subtree:true});setTimeout(polish,250);setTimeout(polish,900);
+  }
   const wait=(n=0)=>{if(!window.supabase?.createClient){if(n<30)setTimeout(()=>wait(n+1),200);return}boot()};
   async function boot(){
     const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
