@@ -40,15 +40,15 @@ async function loadComplianceSnapshot(){
     const roleRes=await db.from('profile_job_roles').select('job_role_id,is_primary,job_roles(id,name,division)').eq('profile_id',learner.id).order('is_primary',{ascending:false});
     if(roleRes.error)throw roleRes.error;
     const roles=roleRes.data||[];
-    if(!roles.length){box.innerHTML='<div class="empty">No job roles have been assigned yet.</div>';return;}
+    if(!roles.length){box.innerHTML='<div class="empty">No compliance job role assigned.</div>';return;}
     const primary=roles.find(r=>r.is_primary)||roles[0];
     const secondary=roles.find(r=>!r.is_primary&&r.job_role_id!==primary.job_role_id);
     const primaryData=await analyseComplianceRole(primary);
     const secondaryData=secondary?await analyseComplianceRole(secondary):null;
     box.innerHTML=`<button type="button" id="openComplianceDetail" style="width:100%;border:0;background:transparent;padding:0;text-align:left;cursor:pointer">
       <div style="display:grid;grid-template-columns:${secondaryData?'1fr 1fr':'1fr'};gap:18px;align-items:start">
-        ${complianceRoleCard(primaryData,'Primary role')}
-        ${secondaryData?complianceRoleCard(secondaryData,'Secondary role'):''}
+        ${complianceRoleCard(primaryData,'Primary compliance role')}
+        ${secondaryData?complianceRoleCard(secondaryData,'Additional compliance role'):''}
       </div>
       <div style="margin-top:12px;color:#9d0b1a;font-weight:800;font-size:12px">View full compliance →</div>
     </button>`;
@@ -59,5 +59,5 @@ async function loadComplianceSnapshot(){
 }
 const complianceOriginalRender=render;render=async function(){await complianceOriginalRender();await loadComplianceSnapshot();};
 
-// Keep the History UI separate from the core learner profile so it only loads when needed.
-(function(){const s=document.createElement('script');s.src='learner-history.js?v=20260912-1';document.body.appendChild(s)})();
+// Keep History and person-profile presentation separate from the core learner profile.
+(function(){const h=document.createElement('script');h.src='learner-history.js?v=20260912-1';document.body.appendChild(h);const p=document.createElement('script');p.src='person-profile-enhancements.js?v=20260913-1';document.body.appendChild(p)})();
