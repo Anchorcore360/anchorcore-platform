@@ -6,7 +6,7 @@
     if(eyebrow)eyebrow.textContent='Person Record';
     const backLink=document.querySelector('.profile-topbar .text-btn');
     if(backLink){backLink.href='manage-people.html';backLink.textContent='← Back to Manage People'}
-    ['editProfileBtn','editProfileBtn2'].forEach(btnId=>{const btn=document.getElementById(btnId);if(btn){btn.onclick=e=>{e.preventDefault();e.stopImmediatePropagation();location.href=`manage-person.html?id=${encodeURIComponent(learner.id)}`};btn.textContent=btnId==='editProfileBtn'?'Edit Profile':'Edit Profile'}});
+    ['editProfileBtn','editProfileBtn2'].forEach(btnId=>{const btn=document.getElementById(btnId);if(btn){btn.onclick=e=>{e.preventDefault();e.stopImmediatePropagation();location.href=`manage-person.html?id=${encodeURIComponent(learner.id)}`};btn.textContent='Edit Profile'}});
     const accessValue=document.getElementById('jobTitle');
     if(accessValue){
       const label=accessValue.parentElement?.querySelector('strong');
@@ -42,6 +42,8 @@
   if(typeof render==='function'){
     const previousRender=render;
     render=async function(){const result=await previousRender.apply(this,arguments);await enhancePersonProfile();return result};
+    setTimeout(enhancePersonProfile,0);
+    setTimeout(enhancePersonProfile,350);
   }else{
     window.addEventListener('load',()=>setTimeout(enhancePersonProfile,250));
   }
