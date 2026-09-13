@@ -17,6 +17,7 @@
 <script src="portal-navigation.js?v=20260913-11"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
+const search=document.getElementById('search'),division=document.getElementById('division'),role=document.getElementById('role'),organisation=document.getElementById('organisation'),manager=document.getElementById('manager'),accreditation=document.getElementById('accreditation'),status=document.getElementById('status'),showAllItems=document.getElementById('showAllItems'),clearFilters=document.getElementById('clearFilters'),exportCurrent=document.getElementById('exportCurrent'),exportAll=document.getElementById('exportAll'),statPeople=document.getElementById('statPeople'),statCompliant=document.getElementById('statCompliant'),statMissing=document.getElementById('statMissing'),statExpiring=document.getElementById('statExpiring'),statExpired=document.getElementById('statExpired'),resultNote=document.getElementById('resultNote'),matrixWrap=document.getElementById('matrixWrap');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const norm=v=>String(v||'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();
 const code=v=>{const s=norm(v),m=s.match(/\b(SA\d+[A-Z]?|S\d{3}|Q\d{2,3}|K\d{3}|O\d|LA|EFAW)\b/);return m?m[1]:''};
