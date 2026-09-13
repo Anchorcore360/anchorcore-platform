@@ -5,7 +5,7 @@
 
   const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[c]);
   const norm=(v)=>String(v||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
-  let rows=[];
+  let rows=[],db=null,markingRead=false;
 
   function addStyles(){
     if(document.getElementById('rrta-learner-feedback-style'))return;
@@ -19,6 +19,7 @@
       .learner-evidence-modal{position:fixed;inset:0;z-index:2147483600;background:rgba(16,22,30,.55);display:grid;place-items:center;padding:20px;backdrop-filter:blur(2px)}
       .learner-evidence-modal-card{width:min(540px,96vw);background:#fff;border-radius:16px;box-shadow:0 26px 70px rgba(0,0,0,.28);overflow:hidden}.learner-evidence-modal-head{padding:19px 20px 16px;border-bottom:1px solid #e5e8ec;display:flex;justify-content:space-between;gap:15px}.learner-evidence-modal-head h2{margin:4px 0 0;font-size:20px}.learner-evidence-close{width:34px;height:34px;border:0;border-radius:50%;background:#eef1f4;font-size:19px;cursor:pointer}.learner-evidence-modal-body{padding:19px 20px}.learner-evidence-modal-body p{font-size:11px;color:#657181;line-height:1.55}.learner-evidence-feedback{margin:14px 0;padding:12px 13px;background:#fff3f4;border:1px solid #f1c9ce;border-radius:10px;color:#8f1827;font-size:11px;line-height:1.5}.learner-evidence-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.learner-evidence-modal-actions button{border:0;border-radius:8px;padding:10px 12px;font-size:10px;font-weight:850;cursor:pointer}.learner-evidence-cancel{background:#eef1f4;color:#303a46}.learner-evidence-upload{background:#b20f22;color:#fff}
       .learner-evidence-nav-badge{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#d92d20;color:#fff;font-size:9px;font-weight:900;display:inline-grid;place-items:center;box-shadow:0 0 0 2px #1b222c}
+      .learner-read-marker{display:block;margin-top:5px;color:#667085;font-size:8px;font-weight:800}
       @media(max-width:650px){.learner-action-item{grid-template-columns:1fr}.learner-action-btn{width:100%}.learner-evidence-modal-actions{flex-direction:column-reverse}.learner-evidence-modal-actions button{width:100%}}
     `;
     document.head.appendChild(s);
@@ -69,7 +70,7 @@
     let badge=link.querySelector('.learner-evidence-nav-badge');
     if(!count){badge?.remove();return}
     if(!badge){badge=document.createElement('span');badge.className='learner-evidence-nav-badge';link.appendChild(badge)}
-    badge.textContent=count>99?'99+':String(count);badge.title=`${count} evidence request${count===1?'':'s'} need attention`;
+    badge.textContent=count>99?'99+':String(count);badge.title=`${count} unread Academy feedback notification${count===1?'':'s'}`;
   }
 
   function injectOverview(rejected){
@@ -79,7 +80,7 @@
     if(!rejected.length)return;
     const panel=document.createElement('section');
     panel.id='learnerEvidenceActionPanel';panel.className='learner-action-panel';
-    panel.innerHTML=`<div class="learner-action-panel-head"><div><div class="eyebrow">Evidence Action Required</div><h3>${rejected.length===1?'1 submission needs your attention':`${rejected.length} submissions need your attention`}</h3><p>The Training Academy has returned evidence to you. Read the feedback and upload replacement evidence.</p></div><span class="learner-action-count">${rejected.length}</span></div><div class="learner-action-list">${rejected.map(r=>`<div class="learner-action-item"><div><strong>${esc(r.qualification_name||'Qualification')}</strong><p class="learner-action-note">Academy feedback: ${esc(r.reviewer_note||'Please upload suitable replacement evidence.')}</p></div><button type="button" class="learner-action-btn" data-replace-evidence="${esc(r.id)}">Upload replacement evidence</button></div>`).join('')}</div>`;
+    panel.innerHTML=`<div class="learner-action-panel-head"><div><div class="eyebrow">Evidence Action Required</div><h3>${rejected.length===1?'1 submission needs your attention':`${rejected.length} submissions need your attention`}</h3><p>The Training Academy has returned evidence to you. Read the feedback and upload replacement evidence.</p></div><span class="learner-action-count">${rejected.length}</span></div><div class="learner-action-list">${rejected.map(r=>`<div class="learner-action-item"><div><strong>${esc(r.qualification_name||'Qualification')}</strong><p class="learner-action-note">Academy feedback: ${esc(r.reviewer_note||'Please upload suitable replacement evidence.')}</p>${r.learner_read_at?'<span class="learner-read-marker">Feedback read</span>':''}</div><button type="button" class="learner-action-btn" data-replace-evidence="${esc(r.id)}">Upload replacement evidence</button></div>`).join('')}</div>`;
     const welcome=host.querySelector('.welcome-grid');
     if(welcome)welcome.insertAdjacentElement('afterend',panel);else host.prepend(panel);
     panel.querySelectorAll('[data-replace-evidence]').forEach(b=>b.onclick=()=>{const r=rejected.find(x=>String(x.id)===String(b.dataset.replaceEvidence));if(r)openActionModal(r)});
@@ -113,23 +114,45 @@
     });
   }
 
+  function evidenceRequestsVisible(){
+    if(location.hash==='#requests')return true;
+    const body=document.getElementById('requestBody');
+    return !!body?.closest('.view')?.classList.contains('active');
+  }
+
+  async function markFeedbackRead(){
+    if(markingRead||!db||!evidenceRequestsVisible())return;
+    const latest=latestByQualification();
+    const unread=[...latest.values()].filter(r=>r.status==='rejected'&&!r.learner_read_at);
+    if(!unread.length)return;
+    markingRead=true;
+    for(const r of unread){
+      const {data,error}=await db.rpc('mark_evidence_feedback_read',{request_id:r.id});
+      if(!error){r.learner_read_at=data||new Date().toISOString();const original=rows.find(x=>String(x.id)===String(r.id));if(original)original.learner_read_at=r.learner_read_at}
+    }
+    markingRead=false;
+    apply();
+  }
+
   function apply(){
     const latest=latestByQualification();
     const rejected=[...latest.values()].filter(r=>r.status==='rejected');
-    updateEvidenceNavBadge(rejected.length);
+    const unread=rejected.filter(r=>!r.learner_read_at);
+    updateEvidenceNavBadge(unread.length);
     injectOverview(rejected);enhanceCompliance(latest);enhanceRequests(latest);
   }
 
   async function boot(attempt=0){
     if(!window.supabase?.createClient){if(attempt<30)return setTimeout(()=>boot(attempt+1),200);return}
     addStyles();
-    const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
+    db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
     const {data:u}=await db.auth.getUser();if(!u?.user)return;
-    const {data,error}=await db.from('evidence_review_requests').select('id,learner_id,qualification_name,awarding_body,status,reviewer_note,submitted_at,reviewed_at').eq('learner_id',u.user.id).order('submitted_at',{ascending:false});
+    const {data,error}=await db.from('evidence_review_requests').select('id,learner_id,qualification_name,awarding_body,status,reviewer_note,submitted_at,reviewed_at,learner_read_at').eq('learner_id',u.user.id).order('submitted_at',{ascending:false});
     if(error)return;
     rows=data||[];apply();
-    const obs=new MutationObserver(()=>requestAnimationFrame(apply));obs.observe(document.body,{subtree:true,childList:true});
-    window.addEventListener('hashchange',()=>setTimeout(apply,80));
+    setTimeout(markFeedbackRead,250);
+    const obs=new MutationObserver(()=>requestAnimationFrame(()=>{apply();markFeedbackRead()}));obs.observe(document.body,{subtree:true,childList:true});
+    window.addEventListener('hashchange',()=>setTimeout(()=>{apply();markFeedbackRead()},120));
   }
   boot();
 })();
