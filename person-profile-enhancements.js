@@ -42,7 +42,7 @@
 
   function wireInlineEditor(){
     const edit=document.getElementById('editProfileBtn2');if(!edit)return;
-    document.getElementById('profileAccessHeaderActions')?.remove();
+    const oldGroup=document.getElementById('profileAccessHeaderActions');if(oldGroup){oldGroup.parentElement.insertBefore(edit,oldGroup);oldGroup.remove()}
     edit.textContent='Edit Profile';edit.className='btn secondary small';edit.disabled=false;edit.title='Edit all displayed profile details';edit.onclick=e=>{e.preventDefault();e.stopImmediatePropagation();enterInlineEdit()};
     document.getElementById('cancelInlineProfileEdit')?.remove();document.getElementById('inlineProfileSaveMsg')?.remove();
   }
