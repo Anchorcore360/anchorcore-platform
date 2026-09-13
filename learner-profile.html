@@ -64,9 +64,9 @@ async function refresh(){await loadData();await render()}
 document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('tab-'+btn.dataset.tab).classList.add('active')}));const topEdit=document.getElementById('editProfileBtn');if(topEdit)topEdit.onclick=openProfileModal;document.getElementById('editProfileBtn2').onclick=openProfileModal;document.querySelectorAll('[data-open-modal]').forEach(b=>b.onclick=()=>({accreditation:openAccModal,assignment:openAssignmentModal,certificate:openCertificateModal,document:openDocumentModal,note:openNoteModal}[b.dataset.openModal])());document.getElementById('photoUploadBtn').onclick=()=>document.getElementById('photoInput').click();document.getElementById('photoInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(file.size>5*1024*1024){alert('Please choose a photo under 5 MB.');return}const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=`${learnerId}/profile.${ext}`;const up=await db.storage.from('learner-photos').upload(path,file,{upsert:true,contentType:file.type});if(up.error){alert(up.error.message);return}if(learner.photo_path&&learner.photo_path!==path)await db.storage.from('learner-photos').remove([learner.photo_path]);const {error}=await db.from('profiles').update({photo_path:path}).eq('id',learnerId);if(error){alert(error.message);return}e.target.value='';await refresh()};
 (async()=>{try{await requireTrainer();await refresh()}catch(err){document.getElementById('profileApp').classList.add('hidden');const box=document.getElementById('profileError');box.textContent=err.message||'Unable to load learner profile.';box.classList.remove('hidden')}})();
 </script>
-<script src="profile-managers.js"></script>
+<script src="profile-managers.js?v=20260913-6"></script>
 <script src="accreditation-catalog.js"></script>
 <script src="verification-features.js"></script>
-<script src="compliance-profile.js?v=20260913-5"></script>
+<script src="compliance-profile.js?v=20260913-6"></script>
 <script src="training-records.js"></script>
 </body></html>
