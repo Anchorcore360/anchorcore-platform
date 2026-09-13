@@ -13,14 +13,14 @@
     if(document.getElementById('profileQuickActionStyles'))return;
     const s=document.createElement('style');s.id='profileQuickActionStyles';s.textContent=`
       .profile-hero{position:relative}
-      .profile-quick-actions{position:absolute;top:14px;right:14px;display:flex;gap:7px;align-items:center;z-index:12;padding:5px;background:rgba(255,255,255,.94);border:1px solid #e1e5ea;border-radius:11px;box-shadow:0 4px 14px rgba(18,24,33,.07)}
+      .profile-quick-actions{position:absolute;top:50%;right:194px;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;z-index:12;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none}
       .profile-icon-action{position:relative;width:38px;height:38px;min-width:38px;padding:0!important;border:1px solid #d8dde4!important;border-radius:9px!important;background:#fff!important;color:#26313d!important;display:grid!important;place-items:center!important;cursor:pointer;box-shadow:none!important}
       .profile-icon-action:hover{background:#f6f7f8!important;border-color:#bdc5cf!important;color:#9d0b1a!important}
       .profile-icon-action svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
       .profile-icon-action::after{content:attr(data-tooltip);position:absolute;right:0;top:46px;white-space:nowrap;background:#18202a;color:#fff;font-size:11px;font-weight:700;padding:7px 9px;border-radius:7px;opacity:0;visibility:hidden;transform:translateY(-2px);transition:.15s;pointer-events:none;z-index:50}
       .profile-icon-action:hover::after,.profile-icon-action:focus-visible::after{opacity:1;visibility:visible;transform:translateY(0)}
       .profile-topbar #verificationActions{display:none!important}
-      @media(max-width:900px){.profile-quick-actions{position:static;margin:0 0 14px auto;width:max-content}.profile-hero{padding-top:18px}}
+      @media(max-width:900px){.profile-quick-actions{position:static;transform:none;flex-direction:row;margin:0 0 14px auto;width:max-content}.profile-hero{padding-top:18px}}
     `;document.head.appendChild(s);
   }
 
