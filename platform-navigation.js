@@ -72,7 +72,7 @@
         ["Assessments", "assess", "customer-service-assessment.html"],
         ["Accreditations", "award", "bulk-accreditation-upload.html"],
         ["Certificates", "award", "reports.html#certificates"],
-        ["Reviews & Requests", "request", "requests-review.html"],
+        ["Reviews & Requests <span class=\"portal-nav-badge\" data-review-badge>0</span>", "request", "requests-review.html"],
       ],
     },
     { type: "link", label: "Reports", icon: "report", href: "reports.html" },
@@ -227,4 +227,53 @@
     icon,
     menus: { academy, workforce, learner },
   };
+
+  async function refreshReviewBadge(client) {
+    try {
+      const [profileReqs, evidenceReqs] = await Promise.all([
+        client
+          .from("profile_change_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending"),
+        client
+          .from("evidence_review_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending"),
+      ]);
+      if (profileReqs.error || evidenceReqs.error) return;
+      const total = (profileReqs.count || 0) + (evidenceReqs.count || 0);
+      document.querySelectorAll("[data-review-badge]").forEach((badge) => {
+        badge.textContent = total > 99 ? "99+" : String(total);
+        badge.classList.toggle("show", total > 0);
+        badge.setAttribute(
+          "aria-label",
+          `${total} pending review${total === 1 ? "" : "s"}`,
+        );
+      });
+    } catch (_) {}
+  }
+
+  function startReviewBadge(attempt = 0) {
+    if (document.body?.dataset.portalNav !== "academy") return;
+    if (!window.supabase?.createClient) {
+      if (attempt < 24)
+        setTimeout(() => startReviewBadge(attempt + 1), 250);
+      return;
+    }
+    if (window.__rrtaReviewBadgeStarted) return;
+    window.__rrtaReviewBadgeStarted = true;
+    const client = window.supabase.createClient(
+      "https://qgbpotjqggeodxqcwkgj.supabase.co",
+      "sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS",
+    );
+    const run = () => refreshReviewBadge(client);
+    setTimeout(run, 0);
+    setInterval(run, 60000);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) run();
+    });
+    window.addEventListener("focus", run);
+  }
+
+  startReviewBadge();
 })();
