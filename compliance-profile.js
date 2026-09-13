@@ -59,5 +59,5 @@ async function loadComplianceSnapshot(){
 }
 const complianceOriginalRender=render;render=async function(){await complianceOriginalRender();await loadComplianceSnapshot();};
 
-// Keep History and person-profile presentation separate from the core learner profile.
-(function(){const h=document.createElement('script');h.src='learner-history.js?v=20260912-1';document.body.appendChild(h);const p=document.createElement('script');p.src='person-profile-enhancements.js?v=20260913-1';document.body.appendChild(p)})();
+// Keep History, person-profile presentation and Smart Awards details separate from the core learner profile.
+(function(){const h=document.createElement('script');h.src='learner-history.js?v=20260912-1';document.body.appendChild(h);const p=document.createElement('script');p.src='person-profile-enhancements.js?v=20260913-1';document.body.appendChild(p);const s=document.createElement('script');s.src='smart-awards-profile.js?v=20260913-1';document.body.appendChild(s)})();
