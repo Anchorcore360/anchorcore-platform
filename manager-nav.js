@@ -15,7 +15,7 @@
     body[data-portal-nav="learner"] #certificates.list .cert-actions{right:14px!important;bottom:50%!important;transform:translateY(50%)!important}
   `;document.head.appendChild(style);
   const pageNow=(location.pathname.split('/').pop()||'').toLowerCase();
-  const loadCase=()=>{if(document.querySelector('script[data-training-request-case]'))return;const c=document.createElement('script');c.src='training-request-case.js?v=20260913-1';c.dataset.trainingRequestCase='1';document.head.appendChild(c)};
+  const loadCase=()=>{if(!document.querySelector('script[data-training-request-case]')){const c=document.createElement('script');c.src='training-request-case.js?v=20260913-1';c.dataset.trainingRequestCase='1';document.head.appendChild(c)}if(!document.querySelector('script[data-training-request-read-receipts]')){const r=document.createElement('script');r.src='training-request-read-receipts.js?v=20260913-1';r.dataset.trainingRequestReadReceipts='1';document.head.appendChild(r)}};
   if(pageNow==='manager-team.html'){
     if(!document.querySelector('script[data-manager-team-compliance]')){const s=document.createElement('script');s.src='manager-team-compliance.js?v=20260913-1';s.dataset.managerTeamCompliance='1';document.head.appendChild(s)}
     if(!document.querySelector('script[data-manager-team-request-dashboard]')){const r=document.createElement('script');r.src='manager-team-request-dashboard.js?v=20260913-1';r.dataset.managerTeamRequestDashboard='1';document.head.appendChild(r)}
