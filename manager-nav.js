@@ -17,11 +17,15 @@
   const pageNow=(location.pathname.split('/').pop()||'').toLowerCase();
   if(pageNow==='manager-team.html'&&!document.querySelector('script[data-manager-team-compliance]')){const s=document.createElement('script');s.src='manager-team-compliance.js?v=20260913-1';s.dataset.managerTeamCompliance='1';document.head.appendChild(s)}
   if(pageNow==='manager-member.html'){
-    if(!document.querySelector('script[data-manager-member-evidence]')){const e=document.createElement('script');e.src='manager-member-evidence.js?v=20260913-1';e.dataset.managerMemberEvidence='1';document.head.appendChild(e)}
+    if(!document.querySelector('script[data-manager-member-evidence]')){const e=document.createElement('script');e.src='manager-member-evidence.js?v=20260913-3';e.dataset.managerMemberEvidence='1';document.head.appendChild(e)}
+    if(!document.querySelector('script[data-accreditation-history]')){const h=document.createElement('script');h.src='accreditation-history.js?v=20260913-1';h.dataset.accreditationHistory='1';document.head.appendChild(h)}
     const polish=()=>document.querySelectorAll('#certificates [data-cert-path]').forEach(b=>{if(b.dataset.eyeReady)return;b.dataset.eyeReady='1';b.setAttribute('aria-label','View certificate');b.setAttribute('title','View certificate');b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>'});
     new MutationObserver(()=>requestAnimationFrame(polish)).observe(document.body,{childList:true,subtree:true});setTimeout(polish,250);setTimeout(polish,900);
   }
-  if(pageNow==='learner-portal.html'&&!document.querySelector('script[data-manager-evidence-notifications]')){const n=document.createElement('script');n.src='learner-manager-evidence-notifications.js?v=20260913-1';n.dataset.managerEvidenceNotifications='1';document.head.appendChild(n)}
+  if(pageNow==='learner-portal.html'){
+    if(!document.querySelector('script[data-manager-evidence-notifications]')){const n=document.createElement('script');n.src='learner-manager-evidence-notifications.js?v=20260913-1';n.dataset.managerEvidenceNotifications='1';document.head.appendChild(n)}
+    if(!document.querySelector('script[data-accreditation-history]')){const h=document.createElement('script');h.src='accreditation-history.js?v=20260913-1';h.dataset.accreditationHistory='1';document.head.appendChild(h)}
+  }
   const wait=(n=0)=>{if(!window.supabase?.createClient){if(n<30)setTimeout(()=>wait(n+1),200);return}boot()};
   async function boot(){
     const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
