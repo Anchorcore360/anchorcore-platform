@@ -5,64 +5,45 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Rapid Response Platform</title>
 <style>
-:root{--red:#e31b23;--red2:#b70f17;--bg:#06111a;--panel:#111a23;--line:rgba(255,255,255,.18);--muted:#c5ccd3;--white:#fff}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#05090d;color:#fff}.hidden{display:none!important}body{min-height:100vh}.page{min-height:100vh;position:relative;overflow:hidden;background:#05090d}
-.page::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,7,11,.97) 0%,rgba(5,11,17,.83) 35%,rgba(6,14,21,.48) 58%,rgba(4,9,14,.88) 100%),linear-gradient(180deg,rgba(5,10,15,.12),rgba(5,10,15,.45)),url('assets/login-telecoms-background.svg') center 44%/cover no-repeat;filter:saturate(.72) contrast(1.12) brightness(.78);transform:scale(1.018)}
-.page::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(133deg,rgba(120,0,8,.28) 0 18%,transparent 18.15% 100%),linear-gradient(133deg,transparent 0 19.2%,rgba(230,24,33,.92) 19.25% 19.52%,transparent 19.6% 100%),linear-gradient(142deg,transparent 0 87.5%,rgba(230,24,33,.85) 87.62% 87.9%,transparent 88% 100%)}
-.shell{position:relative;z-index:2;min-height:100vh;padding:34px 5.4vw 28px;display:grid;grid-template-rows:auto 1fr auto}
-.top{display:flex;align-items:flex-start;justify-content:space-between}.group-brand{display:flex;align-items:center;gap:14px}.group-r{width:78px;height:78px;overflow:hidden}.group-r img{width:100%;height:100%;object-fit:cover;object-position:left center;transform:scale(1.55);transform-origin:left center}.group-copy{font-weight:900;font-size:26px;line-height:.88;letter-spacing:-1px}.group-copy span{display:block;color:var(--red);font-size:16px;letter-spacing:.02em;margin-top:5px}.platform-tag{margin-top:8px;font-size:12px;text-transform:uppercase;letter-spacing:.24em;font-weight:900;color:#dce1e6;padding-bottom:14px;position:relative}.platform-tag::after{content:"";position:absolute;right:0;bottom:0;width:74%;height:2px;background:linear-gradient(90deg,var(--red),rgba(227,27,35,0))}
-.main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(390px,.74fr);gap:5.5vw;align-items:center;padding-top:1.5vh}.intro{max-width:860px}.eyebrow{color:#ff2730;font-weight:900;font-size:12px;letter-spacing:.25em;text-transform:uppercase}.headline{font-size:clamp(58px,6.4vw,104px);line-height:.9;letter-spacing:-4px;margin:16px 0 26px;font-weight:900}.headline .white{display:block;color:#fff}.headline .red{display:block;color:#f0212a;text-shadow:0 4px 18px rgba(255,0,15,.12)}.intro-copy{max-width:760px;font-size:18px;line-height:1.55;color:#e0e4e8;margin:0 0 34px}.brands{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;max-width:860px}.brand-card{height:132px;border:1px solid rgba(255,255,255,.22);border-radius:12px;background:linear-gradient(180deg,rgba(12,21,29,.72),rgba(5,10,15,.68));box-shadow:inset 0 1px rgba(255,255,255,.05),0 10px 24px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;padding:14px;overflow:hidden}.brand-card img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 8px 15px rgba(0,0,0,.28))}.traffic-logo{width:100%;display:flex;align-items:center;justify-content:center;gap:12px}.traffic-mark{font-size:64px;line-height:.8;font-weight:1000;font-style:italic;color:#d71920;text-shadow:2px 0 #c7ccd1,-1px 0 #c7ccd1,0 4px 10px rgba(0,0,0,.38)}.traffic-name{font-size:19px;font-weight:1000;line-height:.9;text-transform:uppercase;color:#fff}.traffic-name small{display:block;color:#f51e2b;font-size:11px;letter-spacing:.01em;margin-top:6px}.login-shell{justify-self:end;width:min(500px,100%)}.login-card{background:linear-gradient(180deg,rgba(17,26,35,.97),rgba(7,13,19,.97));border:1px solid rgba(255,255,255,.20);border-top:4px solid var(--red);border-radius:17px;padding:35px 35px 30px;box-shadow:0 32px 90px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.04)}.login-card h2{font-size:32px;margin:8px 0 10px}.sub{font-size:14px;line-height:1.55;color:#c0c8d0;margin:0 0 24px}.login-form{display:grid;gap:17px}.login-form label{font-size:12px;font-weight:900;color:#fff}.field-wrap{position:relative;margin-top:8px}.field-wrap::before{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;color:#bcc4cc;opacity:.95}.field-wrap.email::before{content:"✉"}.field-wrap.password::before{content:"▣"}.login-form input{width:100%;height:54px;border:1px solid rgba(255,255,255,.32);border-radius:9px;background:rgba(255,255,255,.025);color:#fff;padding:0 44px;font-size:15px;outline:none}.login-form input::placeholder{color:#9da7b1}.login-form input:focus{border-color:#ef2b33;box-shadow:0 0 0 3px rgba(227,27,35,.12)}.login-form button{height:57px;border:1px solid #f2343b;border-radius:9px;background:linear-gradient(135deg,#e31b23,#b20b13);color:#fff;font-size:15px;font-weight:1000;cursor:pointer;box-shadow:0 14px 30px rgba(199,14,24,.25)}.login-form button:hover{filter:brightness(1.07)}.login-error{margin-top:13px;color:#ff8589;font-size:12px;font-weight:800}.trust{margin-top:26px;padding-top:22px;border-top:1px solid rgba(255,255,255,.18);font-size:11px;font-weight:900;letter-spacing:.23em;text-transform:uppercase;color:#e6ebef}.bottom{display:flex;align-items:center;gap:26px;padding-top:22px;border-top:1px solid rgba(255,255,255,.25);max-width:860px;font-size:10px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:#d7dde2}.bottom .item{display:flex;align-items:center;gap:10px}.bottom .icon{font-size:18px;color:#fff}.divider{width:1px;height:20px;background:rgba(255,255,255,.22)}
-.session{position:absolute;right:5.4vw;top:26px;z-index:10;display:flex;align-items:center;gap:12px;text-align:right;color:#bbc4cc;font-size:11px;background:rgba(5,8,12,.86);padding:10px 12px;border:1px solid rgba(255,255,255,.14);border-radius:10px}.session strong{display:block;color:#fff;font-size:13px}.session button{border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:800;cursor:pointer}
-.workspace{position:relative;z-index:4;min-height:100vh;padding:9vh 6vw 7vh;background:linear-gradient(rgba(5,8,12,.88),rgba(5,8,12,.95))}.workspace-head{max-width:1240px;margin:0 auto 26px}.workspace-head h1{font-size:42px;margin:8px 0}.workspace-head p{margin:0;color:#c0c8cf}.grid{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.portal{display:flex;flex-direction:column;text-decoration:none;color:#17202a;background:#fff;border-radius:16px;padding:25px;min-height:285px;border-top:4px solid var(--red);box-shadow:0 20px 55px rgba(0,0,0,.35);transition:.18s}.portal:hover{transform:translateY(-4px)}.portal .tag{color:#b20f22;text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:900}.portal h2{font-size:22px;margin:8px 0 10px}.portal p,.portal li{color:#66717c;font-size:13px;line-height:1.55}.portal ul{padding-left:18px;margin:12px 0 18px}.portal .go{margin-top:auto;color:#b20f22;font-weight:900;font-size:12px}.workspace-foot{max-width:1240px;margin:18px auto 0;color:#b4bdc6;font-size:11px}
-@media(max-width:1100px){.shell{padding:26px 30px}.main{grid-template-columns:1fr;padding-top:60px}.login-shell{justify-self:start;width:min(560px,100%);margin-top:28px}.platform-tag{display:none}.bottom{margin-top:30px}.grid{grid-template-columns:1fr}.headline{font-size:64px}.brands{grid-template-columns:1fr 1fr 1fr}}
-@media(max-width:760px){.shell{padding:22px 18px}.group-copy{font-size:20px}.group-copy span{font-size:13px}.group-r{width:58px;height:58px}.main{padding-top:38px}.headline{font-size:48px;letter-spacing:-2px}.intro-copy{font-size:15px}.brands{grid-template-columns:1fr}.brand-card{height:110px}.login-card{padding:26px 22px}.bottom{flex-wrap:wrap}.workspace{padding:80px 20px 30px}}
+:root{--red:#e31b23;--panel:rgba(10,18,26,.94);--line:rgba(255,255,255,.22);--muted:#bec7d0}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#05090d;color:#fff}.hidden{display:none!important}body{min-height:100vh}
+.page{min-height:100vh;background:#05090d url('assets/portal-background.svg') center center/cover no-repeat fixed;position:relative;overflow:hidden}
+.login-stage{min-height:100vh;position:relative;padding:5vh 5vw}
+.brand-strip{position:absolute;left:5vw;top:5vh;width:min(820px,57vw);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;z-index:2}
+.brand-card{aspect-ratio:16/9;border:1px solid rgba(255,255,255,.20);border-radius:12px;overflow:hidden;background:rgba(5,9,13,.72);box-shadow:0 16px 36px rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center}.brand-card img{width:100%;height:100%;object-fit:cover;display:block}
+.login-shell{position:absolute;right:5.5vw;top:50%;transform:translateY(-50%);width:min(455px,36vw);min-width:390px;z-index:3}
+.login-card{background:linear-gradient(180deg,rgba(17,27,36,.96),rgba(7,13,19,.97));border:1px solid var(--line);border-top:4px solid var(--red);border-radius:18px;padding:34px 34px 30px;box-shadow:0 32px 90px rgba(0,0,0,.56);backdrop-filter:blur(10px)}
+.eyebrow{color:#ff3038;font-size:11px;letter-spacing:.23em;text-transform:uppercase;font-weight:900}.login-card h1{margin:8px 0 10px;font-size:32px;line-height:1.05}.sub{margin:0 0 24px;color:var(--muted);font-size:14px;line-height:1.5}.login-form{display:grid;gap:17px}.login-form label{font-size:12px;font-weight:900;color:#fff}.field{position:relative;margin-top:8px}.login-form input{width:100%;height:54px;border:1px solid rgba(255,255,255,.30);border-radius:10px;background:rgba(255,255,255,.035);color:#fff;padding:0 15px;font-size:15px;outline:none}.login-form input::placeholder{color:#939eaa}.login-form input:focus{border-color:#ef3038;box-shadow:0 0 0 3px rgba(227,27,35,.13)}.login-form button{height:56px;border:1px solid #f23b42;border-radius:10px;background:linear-gradient(135deg,#df171f,#ad0c13);color:#fff;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 13px 28px rgba(190,15,24,.28)}.login-form button:hover{filter:brightness(1.07)}.login-error{margin-top:13px;color:#ff8589;font-size:12px;font-weight:800}
+.session{position:absolute;right:5vw;top:22px;z-index:10;display:flex;align-items:center;gap:12px;text-align:right;color:#bbc4cc;font-size:11px;background:rgba(5,8,12,.88);padding:10px 12px;border:1px solid rgba(255,255,255,.14);border-radius:10px}.session strong{display:block;color:#fff;font-size:13px}.session button{border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:800;cursor:pointer}
+.workspace{position:relative;z-index:4;min-height:100vh;padding:8vh 6vw 7vh;background:linear-gradient(rgba(5,8,12,.91),rgba(5,8,12,.96))}.workspace-head{max-width:1240px;margin:0 auto 28px}.workspace-head h1{font-size:42px;margin:8px 0}.workspace-head p{margin:0;color:#c0c8cf}.grid{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.portal{display:flex;flex-direction:column;text-decoration:none;color:#17202a;background:#fff;border-radius:16px;padding:25px;min-height:285px;border-top:4px solid var(--red);box-shadow:0 20px 55px rgba(0,0,0,.35);transition:.18s}.portal:hover{transform:translateY(-4px)}.portal .tag{color:#b20f22;text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:900}.portal h2{font-size:22px;margin:8px 0 10px}.portal p,.portal li{color:#66717c;font-size:13px;line-height:1.55}.portal ul{padding-left:18px;margin:12px 0 18px}.portal .go{margin-top:auto;color:#b20f22;font-weight:900;font-size:12px}.workspace-foot{max-width:1240px;margin:18px auto 0;color:#b4bdc6;font-size:11px}
+@media(max-width:1080px){.page{background-position:60% center}.brand-strip{width:62vw}.login-shell{right:4vw;width:400px;min-width:0}.grid{grid-template-columns:1fr}}
+@media(max-width:760px){.page{overflow:auto;background-position:67% center;background-attachment:scroll}.login-stage{min-height:100vh;padding:20px}.brand-strip{position:relative;left:auto;top:auto;width:100%;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:28px}.brand-card{border-radius:8px}.login-shell{position:relative;right:auto;top:auto;transform:none;width:100%;min-width:0;margin-top:32vh}.login-card{padding:26px 22px}.workspace{padding:70px 18px 30px}}
 </style>
 </head>
 <body>
 <main class="page">
   <div id="sessionBox" class="session hidden"><div><strong id="sessionName">Signed In</strong><span id="sessionRole">Platform Access</span></div><button id="signOutBtn" type="button">Sign Out</button></div>
-  <section id="loginZone" class="shell">
-    <header class="top">
-      <div class="group-brand">
-        <div class="group-r"><img src="assets/rrt-learner-brand.webp" alt="Rapid Response"></div>
-        <div class="group-copy">RAPID<br>RESPONSE<span>GROUP</span></div>
-      </div>
-      <div class="platform-tag">One Connected Platform</div>
-    </header>
 
-    <div class="main">
-      <div class="intro">
-        <div class="eyebrow">Rapid Response Group</div>
-        <h1 class="headline"><span class="white">Integrity</span><span class="red">Breeds Trust.</span></h1>
-        <p class="intro-copy">One secure login for the Rapid Response businesses. Sign in once and the platform will show only the workspaces your account is authorised to use.</p>
-        <div class="brands">
-          <div class="brand-card"><img src="assets/rrt-learner-brand.webp" alt="Rapid Response Telecoms"></div>
-          <div class="brand-card"><div class="traffic-logo" aria-label="Rapid Response Traffic Management"><div class="traffic-mark">R</div><div class="traffic-name">Rapid<br>Response<small>Traffic Management</small></div></div></div>
-          <div class="brand-card"><img src="rrta-logo.png" alt="Rapid Response Training Academy"></div>
-        </div>
-      </div>
-
-      <div class="login-shell">
-        <div class="login-card">
-          <div class="eyebrow">Secure Access</div>
-          <h2>Welcome back</h2>
-          <p class="sub">Use your Rapid Response account to access your permitted portals.</p>
-          <form id="platformLoginForm" class="login-form">
-            <label>Email address<div class="field-wrap email"><input id="platformEmail" type="email" autocomplete="username" placeholder="Enter your email address" required></div></label>
-            <label>Password<div class="field-wrap password"><input id="platformPassword" type="password" autocomplete="current-password" placeholder="Enter your password" required></div></label>
-            <button type="submit">Sign in to platform →</button>
-          </form>
-          <div id="loginError" class="login-error hidden"></div>
-          <div class="trust">Integrity Breeds Trust</div>
-        </div>
-      </div>
+  <section id="loginZone" class="login-stage">
+    <div class="brand-strip" aria-label="Rapid Response businesses">
+      <div class="brand-card"><img id="telecomLogo" alt="Rapid Response Telecoms"></div>
+      <div class="brand-card"><img id="trafficLogo" alt="Rapid Response Traffic Management"></div>
+      <div class="brand-card"><img id="academyLogo" alt="Rapid Response Training Academy"></div>
     </div>
 
-    <footer class="bottom">
-      <div class="item"><span class="icon">♢</span>People</div><span class="divider"></span>
-      <div class="item"><span class="icon">⚙</span>Safety</div><span class="divider"></span>
-      <div class="item"><span class="icon">▥</span>Progress</div>
-    </footer>
+    <div class="login-shell">
+      <div class="login-card">
+        <div class="eyebrow">Secure Access</div>
+        <h1>Welcome back</h1>
+        <p class="sub">Use your Rapid Response account to access your permitted portals.</p>
+        <form id="platformLoginForm" class="login-form">
+          <label>Email address<div class="field"><input id="platformEmail" type="email" autocomplete="username" placeholder="Enter your email address" required></div></label>
+          <label>Password<div class="field"><input id="platformPassword" type="password" autocomplete="current-password" placeholder="Enter your password" required></div></label>
+          <button type="submit">Sign in to platform →</button>
+        </form>
+        <div id="loginError" class="login-error hidden"></div>
+      </div>
+    </div>
   </section>
 
   <section id="workspaceZone" class="workspace hidden">
@@ -75,13 +56,63 @@
     <div class="workspace-foot">One account can hold more than one permission. Your available portals are controlled by your platform access settings.</div>
   </section>
 </main>
+<script src="assets/portal-logo-telecoms.js"></script>
+<script src="assets/portal-logo-traffic.js"></script>
+<script src="assets/portal-logo-academy.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const assets=window.RRPortalAssets||{};
+document.getElementById('telecomLogo').src=assets.telecoms||'';
+document.getElementById('trafficLogo').src=assets.traffic||'';
+document.getElementById('academyLogo').src=assets.academy||'';
+
 const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
-const loginZone=document.getElementById('loginZone'),workspaceZone=document.getElementById('workspaceZone'),sessionBox=document.getElementById('sessionBox'),loginError=document.getElementById('loginError');
-async function loadAccess(user){const [{data:p,error:pe},{data:a}]=await Promise.all([db.from('profiles').select('id,full_name,email,role,permission_level,job_title,organisational_access_role,portal_access_role').eq('id',user.id).single(),db.from('portal_access').select('*').eq('user_id',user.id).maybeSingle()]);if(pe||!p)throw new Error('Your profile could not be loaded.');const academy=a?.academy_admin===true||p.permission_level==='super_user'||String(p.role).toLowerCase()==='trainer';const systemRole=String(p.organisational_access_role||p.portal_access_role||'operative').toLowerCase();const workforce=a?.workforce_manager===true||['supervisor','manager','operations_manager'].includes(systemRole)||academy;const learner=a?.learner_portal===true||p.permission_level==='super_user'||String(p.role).toLowerCase()==='learner';academyCard.classList.toggle('hidden',!academy);workforceCard.classList.toggle('hidden',!workforce);learnerCard.classList.toggle('hidden',!learner);sessionName.textContent=p.full_name||p.email||'Signed In';sessionRole.textContent=p.permission_level==='super_user'?'Super User':(p.job_title||p.role||'Platform Access');loginZone.classList.add('hidden');workspaceZone.classList.remove('hidden');sessionBox.classList.remove('hidden')}
-platformLoginForm.addEventListener('submit',async e=>{e.preventDefault();loginError.classList.add('hidden');const email=platformEmail.value.trim().toLowerCase(),password=platformPassword.value;const{data,error}=await db.auth.signInWithPassword({email,password});if(error){loginError.textContent=error.message||'Unable to sign in.';loginError.classList.remove('hidden');return}try{await loadAccess(data.user)}catch(err){await db.auth.signOut();loginError.textContent=err.message||'Unable to load your account.';loginError.classList.remove('hidden')}});
-signOutBtn.onclick=async()=>{await db.auth.signOut();workspaceZone.classList.add('hidden');sessionBox.classList.add('hidden');loginZone.classList.remove('hidden');platformPassword.value=''};(async()=>{const{data}=await db.auth.getUser();if(data?.user){try{await loadAccess(data.user)}catch(_){await db.auth.signOut()}}})();
+const loginZone=document.getElementById('loginZone');
+const workspaceZone=document.getElementById('workspaceZone');
+const sessionBox=document.getElementById('sessionBox');
+const loginError=document.getElementById('loginError');
+const academyCard=document.getElementById('academyCard');
+const workforceCard=document.getElementById('workforceCard');
+const learnerCard=document.getElementById('learnerCard');
+const sessionName=document.getElementById('sessionName');
+const sessionRole=document.getElementById('sessionRole');
+const platformLoginForm=document.getElementById('platformLoginForm');
+const platformEmail=document.getElementById('platformEmail');
+const platformPassword=document.getElementById('platformPassword');
+const signOutBtn=document.getElementById('signOutBtn');
+
+async function loadAccess(user){
+  const [{data:p,error:pe},{data:a}]=await Promise.all([
+    db.from('profiles').select('id,full_name,email,role,permission_level,job_title,organisational_access_role,portal_access_role').eq('id',user.id).single(),
+    db.from('portal_access').select('*').eq('user_id',user.id).maybeSingle()
+  ]);
+  if(pe||!p) throw new Error('Your profile could not be loaded.');
+  const academy=a?.academy_admin===true||p.permission_level==='super_user'||String(p.role).toLowerCase()==='trainer';
+  const systemRole=String(p.organisational_access_role||p.portal_access_role||'operative').toLowerCase();
+  const workforce=a?.workforce_manager===true||['supervisor','manager','operations_manager'].includes(systemRole)||academy;
+  const learner=a?.learner_portal===true||p.permission_level==='super_user'||String(p.role).toLowerCase()==='learner';
+  academyCard.classList.toggle('hidden',!academy);
+  workforceCard.classList.toggle('hidden',!workforce);
+  learnerCard.classList.toggle('hidden',!learner);
+  sessionName.textContent=p.full_name||p.email||'Signed In';
+  sessionRole.textContent=p.permission_level==='super_user'?'Super User':(p.job_title||p.role||'Platform Access');
+  loginZone.classList.add('hidden');
+  workspaceZone.classList.remove('hidden');
+  sessionBox.classList.remove('hidden');
+}
+
+platformLoginForm.addEventListener('submit',async e=>{
+  e.preventDefault();
+  loginError.classList.add('hidden');
+  const email=platformEmail.value.trim().toLowerCase();
+  const password=platformPassword.value;
+  const {data,error}=await db.auth.signInWithPassword({email,password});
+  if(error){loginError.textContent=error.message||'Unable to sign in.';loginError.classList.remove('hidden');return;}
+  try{await loadAccess(data.user)}catch(err){await db.auth.signOut();loginError.textContent=err.message||'Unable to load your account.';loginError.classList.remove('hidden');}
+});
+
+signOutBtn.onclick=async()=>{await db.auth.signOut();workspaceZone.classList.add('hidden');sessionBox.classList.add('hidden');loginZone.classList.remove('hidden');platformPassword.value='';};
+(async()=>{const {data}=await db.auth.getUser();if(data?.user){try{await loadAccess(data.user)}catch(_){await db.auth.signOut();}}})();
 </script>
 </body>
 </html>
