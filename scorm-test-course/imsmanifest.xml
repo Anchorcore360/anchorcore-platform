@@ -1,20 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="RRTA_SCORM_TEST" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <metadata>
-    <schema>ADL SCORM</schema>
-    <schemaversion>1.2</schemaversion>
-  </metadata>
+<manifest identifier="RRTA_FIBRE_SAFETY_DEMO" version="1.0" xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>
   <organizations default="RRTA_ORG">
-    <organization identifier="RRTA_ORG">
-      <title>RRTA SCORM 1.2 Test Course</title>
-      <item identifier="RRTA_ITEM" identifierref="RRTA_RESOURCE">
-        <title>SCORM Connection &amp; Safety Awareness Test</title>
-      </item>
-    </organization>
+    <organization identifier="RRTA_ORG"><title>RRTA Working Safely Around Fibre Installations</title><item identifier="RRTA_ITEM" identifierref="RRTA_RESOURCE"><title>Working Safely Around Fibre Installations</title></item></organization>
   </organizations>
-  <resources>
-    <resource identifier="RRTA_RESOURCE" type="webcontent" adlcp:scormtype="sco" href="index.html">
-      <file href="index.html" />
-    </resource>
-  </resources>
+  <resources><resource identifier="RRTA_RESOURCE" type="webcontent" adlcp:scormtype="sco" href="index.html"><file href="index.html" /></resource></resources>
 </manifest>
