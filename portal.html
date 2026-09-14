@@ -15,7 +15,7 @@
 .login-card{background:linear-gradient(180deg,rgba(17,27,36,.96),rgba(7,13,19,.97));border:1px solid var(--line);border-top:4px solid var(--red);border-radius:18px;padding:34px 34px 30px;box-shadow:0 32px 90px rgba(0,0,0,.56);backdrop-filter:blur(10px)}
 .eyebrow{color:#ff3038;font-size:11px;letter-spacing:.23em;text-transform:uppercase;font-weight:900}.login-card h1{margin:8px 0 10px;font-size:32px;line-height:1.05}.sub{margin:0 0 24px;color:var(--muted);font-size:14px;line-height:1.5}.login-form{display:grid;gap:17px}.login-form label{font-size:12px;font-weight:900;color:#fff}.field{position:relative;margin-top:8px}.login-form input{width:100%;height:54px;border:1px solid rgba(255,255,255,.30);border-radius:10px;background:rgba(255,255,255,.035);color:#fff;padding:0 15px;font-size:15px;outline:none}.login-form input::placeholder{color:#939eaa}.login-form input:focus{border-color:#ef3038;box-shadow:0 0 0 3px rgba(227,27,35,.13)}.login-form button{height:56px;border:1px solid #f23b42;border-radius:10px;background:linear-gradient(135deg,#df171f,#ad0c13);color:#fff;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 13px 28px rgba(190,15,24,.28)}.login-form button:hover{filter:brightness(1.07)}.login-error{margin-top:13px;color:#ff8589;font-size:12px;font-weight:800}
 .session{position:absolute;right:5vw;top:22px;z-index:10;display:flex;align-items:center;gap:12px;text-align:right;color:#bbc4cc;font-size:11px;background:rgba(5,8,12,.88);padding:10px 12px;border:1px solid rgba(255,255,255,.14);border-radius:10px}.session strong{display:block;color:#fff;font-size:13px}.session button{border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:800;cursor:pointer}
-.workspace{position:relative;z-index:4;min-height:100vh;padding:8vh 6vw 7vh;background:linear-gradient(rgba(5,8,12,.91),rgba(5,8,12,.96))}.workspace-head{max-width:1240px;margin:0 auto 28px}.workspace-head h1{font-size:42px;margin:8px 0}.workspace-head p{margin:0;color:#c0c8cf}.grid{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.portal{display:flex;flex-direction:column;text-decoration:none;color:#17202a;background:#fff;border-radius:16px;padding:25px;min-height:285px;border-top:4px solid var(--red);box-shadow:0 20px 55px rgba(0,0,0,.35);transition:.18s}.portal:hover{transform:translateY(-4px)}.portal .tag{color:#b20f22;text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:900}.portal h2{font-size:22px;margin:8px 0 10px}.portal p,.portal li{color:#66717c;font-size:13px;line-height:1.55}.portal ul{padding-left:18px;margin:12px 0 18px}.portal .go{margin-top:auto;color:#b20f22;font-weight:900;font-size:12px}.workspace-foot{max-width:1240px;margin:18px auto 0;color:#b4bdc6;font-size:11px}
+.workspace{position:relative;z-index:4;min-height:100vh;padding:8vh 6vw 7vh;background:linear-gradient(rgba(5,8,12,.91),rgba(5,8,12,.96))}.workspace-head{max-width:1240px;margin:0 auto 28px}.workspace-head h1{font-size:42px;margin:8px 0}.workspace-head p{margin:0;color:#c0c8cf}.grid{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.portal{display:flex;flex-direction:column;text-decoration:none;color:#17202a;background:#fff;border-radius:16px;padding:25px;min-height:285px;border-top:4px solid var(--red);box-shadow:0 20px 55px rgba(0,0,0,.35);transition:.18s}.portal:hover{transform:translateY(-4px)}.portal .tag{color:#b20f22;text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:900}.portal h2{font-size:22px;margin:8px 0 10px}.portal p,.portal li{color:#66717c;font-size:13px;line-height:1.55}.portal ul{padding-left:18px;margin:12px 0 18px}.portal .go{margin-top:auto;color:#b20f22;font-weight:900;font-size:12px}.workspace-foot{max-width:1240px;margin:18px auto 0;color:#b4bdc6;font-size:11px}
 @media(max-width:1080px){.page{background-position:60% center}.brand-strip{width:62vw}.login-shell{right:4vw;width:400px;min-width:0}.grid{grid-template-columns:1fr}}
 @media(max-width:760px){.page{overflow:auto;background-position:67% center;background-attachment:scroll}.login-stage{min-height:100vh;padding:20px}.brand-strip{position:relative;left:auto;top:auto;width:100%;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:28px}.brand-card{border-radius:8px}.login-shell{position:relative;right:auto;top:auto;transform:none;width:100%;min-width:0;margin-top:32vh}.login-card{padding:26px 22px}.workspace{padding:70px 18px 30px}}
 </style>
@@ -47,13 +47,12 @@
   </section>
 
   <section id="workspaceZone" class="workspace hidden">
-    <div class="workspace-head"><div class="eyebrow">Your Access</div><h1>Choose your portal</h1><p>Only the areas assigned to your account are shown below.</p></div>
+    <div class="workspace-head"><div class="eyebrow">Your Access</div><h1>Choose your portal</h1><p>Access the Training Academy or your individual learner record.</p></div>
     <div class="grid">
-      <a id="workforceCard" class="portal" href="workforce.html"><div class="tag">Management</div><h2>Workforce Management</h2><p>Internal staff, subcontractors, managers and workforce compliance.</p><ul><li>Team and staff profiles</li><li>Compliance and job roles</li><li>Training needs and requests</li><li>Cards and QR verification</li></ul><span class="go">Open Workforce Management</span></a>
       <a id="academyCard" class="portal" href="academy-admin.html"><div class="tag">Administration</div><h2>Training Academy</h2><p>Training bookings, customers, delegates, course delivery and LMS administration.</p><ul><li>Internal and external bookings</li><li>Customer and delegate records</li><li>Course delivery and attendance</li><li>Online learning and certificates</li></ul><span class="go">Open Training Academy</span></a>
       <a id="learnerCard" class="portal" href="learner-portal.html"><div class="tag">Individual</div><h2>My Learning</h2><p>Your personal learning, compliance, evidence and training records.</p><ul><li>Profile and compliance</li><li>Training needs</li><li>Accreditations and evidence</li><li>Upcoming training and certificates</li></ul><span class="go">Open My Learning</span></a>
     </div>
-    <div class="workspace-foot">One account can hold more than one permission. Your available portals are controlled by your platform access settings.</div>
+    <div class="workspace-foot">Your account permissions control whether you can access the Training Academy, your individual learner portal, or both.</div>
   </section>
 </main>
 <script src="assets/portal-logo-telecoms.js"></script>
@@ -72,7 +71,6 @@ const workspaceZone=document.getElementById('workspaceZone');
 const sessionBox=document.getElementById('sessionBox');
 const loginError=document.getElementById('loginError');
 const academyCard=document.getElementById('academyCard');
-const workforceCard=document.getElementById('workforceCard');
 const learnerCard=document.getElementById('learnerCard');
 const sessionName=document.getElementById('sessionName');
 const sessionRole=document.getElementById('sessionRole');
@@ -88,11 +86,8 @@ async function loadAccess(user){
   ]);
   if(pe||!p) throw new Error('Your profile could not be loaded.');
   const academy=a?.academy_admin===true||p.permission_level==='super_user'||String(p.role).toLowerCase()==='trainer';
-  const systemRole=String(p.organisational_access_role||p.portal_access_role||'operative').toLowerCase();
-  const workforce=a?.workforce_manager===true||['supervisor','manager','operations_manager'].includes(systemRole)||academy;
   const learner=a?.learner_portal===true||p.permission_level==='super_user'||String(p.role).toLowerCase()==='learner';
   academyCard.classList.toggle('hidden',!academy);
-  workforceCard.classList.toggle('hidden',!workforce);
   learnerCard.classList.toggle('hidden',!learner);
   sessionName.textContent=p.full_name||p.email||'Signed In';
   sessionRole.textContent=p.permission_level==='super_user'?'Super User':(p.job_title||p.role||'Platform Access');
