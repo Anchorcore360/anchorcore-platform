@@ -39,7 +39,7 @@
         <form id="platformLoginForm" class="login-form">
           <label>Email address<div class="field"><input id="platformEmail" type="email" autocomplete="username" placeholder="Enter your email address" required></div></label>
           <label>Password<div class="field"><input id="platformPassword" type="password" autocomplete="current-password" placeholder="Enter your password" required></div></label>
-          <button type="submit">Sign in to platform →</button>
+          <button id="platformLoginButton" type="submit">Sign in to platform →</button>
         </form>
         <div id="loginError" class="login-error hidden"></div>
       </div>
@@ -78,6 +78,7 @@ const platformLoginForm=document.getElementById('platformLoginForm');
 const platformEmail=document.getElementById('platformEmail');
 const platformPassword=document.getElementById('platformPassword');
 const signOutBtn=document.getElementById('signOutBtn');
+const platformLoginButton=document.getElementById('platformLoginButton');
 
 async function loadAccess(user){
   const [{data:p,error:pe},{data:a}]=await Promise.all([
@@ -86,7 +87,8 @@ async function loadAccess(user){
   ]);
   if(pe||!p) throw new Error('Your profile could not be loaded.');
   const academy=a?.academy_admin===true||p.permission_level==='super_user'||String(p.role).toLowerCase()==='trainer';
-  const learner=a?.learner_portal===true||p.permission_level==='super_user'||String(p.role).toLowerCase()==='learner';
+  // Every authenticated profile owns an individual learner record.
+  const learner=true;
   academyCard.classList.toggle('hidden',!academy);
   learnerCard.classList.toggle('hidden',!learner);
   sessionName.textContent=p.full_name||p.email||'Signed In';
@@ -101,9 +103,22 @@ platformLoginForm.addEventListener('submit',async e=>{
   loginError.classList.add('hidden');
   const email=platformEmail.value.trim().toLowerCase();
   const password=platformPassword.value;
-  const {data,error}=await db.auth.signInWithPassword({email,password});
-  if(error){loginError.textContent=error.message||'Unable to sign in.';loginError.classList.remove('hidden');return;}
-  try{await loadAccess(data.user)}catch(err){await db.auth.signOut();loginError.textContent=err.message||'Unable to load your account.';loginError.classList.remove('hidden');}
+  platformLoginButton.disabled=true;
+  platformLoginButton.textContent='Signing in…';
+  try{
+    const {data,error}=await db.auth.signInWithPassword({email,password});
+    if(error) throw error;
+    await loadAccess(data.user);
+  }catch(err){
+    if((await db.auth.getUser()).data?.user) await db.auth.signOut();
+    loginError.textContent=/invalid login credentials/i.test(err.message||'')
+      ? 'Email address or password is incorrect.'
+      : (err.message||'Unable to sign in. Please try again.');
+    loginError.classList.remove('hidden');
+  }finally{
+    platformLoginButton.disabled=false;
+    platformLoginButton.textContent='Sign in to platform →';
+  }
 });
 
 signOutBtn.onclick=async()=>{await db.auth.signOut();workspaceZone.classList.add('hidden');sessionBox.classList.add('hidden');loginZone.classList.remove('hidden');platformPassword.value='';};
