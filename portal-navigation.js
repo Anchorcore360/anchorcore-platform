@@ -41,8 +41,8 @@
     const brand = side.querySelector(".brand");
     if (!brand || brand.dataset.rrtaBrand === "1") return;
     brand.dataset.rrtaBrand = "1";
-    const subtitle = type === "learner" ? "Learner Portal" : type === "workforce" ? "Workforce Platform" : "Training Academy";
-    brand.innerHTML = `<a class="rrta-brand-lockup" href="${type === "learner" ? "learner-portal.html" : type === "workforce" ? "workforce.html" : "academy-admin.html"}" aria-label="Rapid Response ${subtitle}"><svg class="rrta-brand-mark" viewBox="0 0 42 42" role="img" aria-hidden="true"><defs><linearGradient id="rrtaBrandGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e4243b"/><stop offset="1" stop-color="#980d1d"/></linearGradient></defs><path d="M6 3h24l6 6v24l-6 6H6L2 35V7z" fill="url(#rrtaBrandGradient)"/><path d="M12 11h12.2c5.2 0 8.8 2.8 8.8 7.4 0 3.3-1.9 5.7-5.2 6.8L34 32h-7.1l-5.3-6.1h-3.2V32H12V11zm6.4 5.3v4.6h5.2c1.9 0 3-.8 3-2.3 0-1.5-1.1-2.3-3-2.3h-5.2z" fill="#fff"/></svg><span class="rrta-brand-copy"><strong>RAPID <span class="rrta-brand-accent" style="display:inline;color:#ef4056">RESPONSE</span></strong><span>${subtitle}</span></span></a>`;
+    const subtitle = type === "learner" ? "Learner Portal" : "Training Academy";
+    brand.innerHTML = `<a class="rrta-brand-lockup" href="${type === "learner" ? "learner-portal.html" : "academy-admin.html"}" aria-label="Rapid Response ${subtitle}"><svg class="rrta-brand-mark" viewBox="0 0 42 42" role="img" aria-hidden="true"><defs><linearGradient id="rrtaBrandGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e4243b"/><stop offset="1" stop-color="#980d1d"/></linearGradient></defs><path d="M6 3h24l6 6v24l-6 6H6L2 35V7z" fill="url(#rrtaBrandGradient)"/><path d="M12 11h12.2c5.2 0 8.8 2.8 8.8 7.4 0 3.3-1.9 5.7-5.2 6.8L34 32h-7.1l-5.3-6.1h-3.2V32H12V11zm6.4 5.3v4.6h5.2c1.9 0 3-.8 3-2.3 0-1.5-1.1-2.3-3-2.3h-5.2z" fill="#fff"/></svg><span class="rrta-brand-copy"><strong>RAPID <span class="rrta-brand-accent" style="display:inline;color:#ef4056">RESPONSE</span></strong><span>${subtitle}</span></span></a>`;
   }
 
   function wireLearnerAccreditationExperience() {
@@ -213,9 +213,7 @@
     const switches =
       type === "academy"
         ? `${link("My Learning", "course", "learner-portal.html")}${link("Portal Home", "dashboard", "portal.html")}`
-        : type === "workforce"
-          ? `${link("Academy Administration", "course", "academy-admin.html", "academyLink")}${link("Portal Home", "dashboard", "portal.html")}`
-          : "";
+        : "";
     side
       .querySelectorAll(
         ".nav,.label,.side-title,.course-sub,.portal-switch,.portal-nav,.portal-nav-label,.portal-nav-group",
@@ -225,7 +223,7 @@
       account = side.querySelector(".account,.user-box"),
       logout = side.querySelector("#logout,#logoutBtn");
     const box = document.createElement("div");
-    box.innerHTML = `<div class="portal-nav-label">${type === "academy" ? "Academy Control Centre" : type === "workforce" ? "RRT Workforce Management" : "RRT Learner Portal"}</div><nav class="portal-nav">${menu}</nav>${switches ? `<div class="portal-switch"><nav class="portal-nav">${switches}</nav></div>` : ""}`;
+    box.innerHTML = `<div class="portal-nav-label">${type === "academy" ? "Academy Control Centre" : "RRT Learner Portal"}</div><nav class="portal-nav">${menu}</nav>${switches ? `<div class="portal-switch"><nav class="portal-nav">${switches}</nav></div>` : ""}`;
     const frag = document.createDocumentFragment();
     while (box.firstChild) frag.appendChild(box.firstChild);
     const anchor = spacer || account || logout;
@@ -390,7 +388,7 @@
       const p = panel.querySelector("p.muted");
       if (p)
         p.innerHTML =
-          "<strong>Academy Administration</strong> has full control. <strong>Workforce Management</strong> is the restricted manager view. <strong>Learner Portal</strong> is the individual self-service view.";
+          "<strong>Training Academy Portal</strong> provides academy administration and compliance control. <strong>Individual Learner Portal</strong> gives each person access to their own learning, evidence and accreditation record.";
     }
   }
   const s = document.createElement("script");
