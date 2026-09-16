@@ -51,6 +51,9 @@ function ensureVerificationActions(){
   if(edit){const holder=document.createElement('div');holder.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center';edit.replaceWith(holder);holder.append(wrap,edit);}else bar.appendChild(wrap);
   document.getElementById('openVerificationBtn').onclick=()=>window.open(verificationUrl(),'_blank','noopener');
   document.getElementById('downloadAccPdfBtn').onclick=downloadAccreditationPdf;
+  if(learner?.worker_type==='direct_staff'&&['rrt','rapid response telecoms'].includes(String(learner.organisation||'').trim().toLowerCase())){
+    const card=document.createElement('a');card.className='btn secondary';card.textContent='Employee card';card.href='employee-card-preview.html?id='+encodeURIComponent(learner.id);wrap.appendChild(card);
+  }
 }
 
 async function renderAccreditationRecords(){

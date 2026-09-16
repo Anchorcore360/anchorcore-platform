@@ -21,6 +21,7 @@
   const fmt2=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-GB'):'—';
   const codeOf=x=>(String(x||'').toUpperCase().match(/\b(?:SA\d+[A-Z]?|S\d{3}|O\d+|LA|EFAW|IPAF\s*1B)\b/)||[])[0]?.replace(/\s/g,'');
   function findAccred(title){
+    if(typeof rrtaCompliancePick==='function'&&/\bSA00[26]\b/i.test(title))return rrtaCompliancePick(title,accreditationRows,()=>false)||null;
     const code=codeOf(title);
     if(code){const hit=accreditationRows.find(a=>codeOf(a.accreditation_name)===code);if(hit)return hit}
     const norm=x=>String(x||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
