@@ -1,6 +1,7 @@
 (function () {
   const page = location.pathname.split('/').pop();
   const params = new URLSearchParams(location.search);
+  if(page==='learner-compliance.html'){const layout=document.createElement('script');layout.src='certificate-form-layout.js';document.head.appendChild(layout)}
   if(page==='learner-compliance.html'){const groups=document.createElement('script');groups.src='nrswa-unit-groups.js';document.head.appendChild(groups)}
   if (page === 'learner-compliance.html') {
     const style = document.createElement('style');
