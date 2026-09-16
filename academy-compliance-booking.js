@@ -1,6 +1,7 @@
 (function () {
   const page = location.pathname.split('/').pop();
   const params = new URLSearchParams(location.search);
+  if(page==='learner-compliance.html'){const groups=document.createElement('script');groups.src='nrswa-unit-groups.js';document.head.appendChild(groups)}
   if (page === 'learner-compliance.html') {
     const style = document.createElement('style');
     style.textContent = '#requirements .req{grid-template-columns:minmax(0,1.4fr) .5fr .7fr auto}.accreditation-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;white-space:nowrap}.accreditation-actions .btn{padding:7px 10px;font-size:11px}.accreditation-upload{width:32px;height:32px;border:1px solid #b20f22;color:#b20f22;background:#fff;border-radius:8px;display:grid;place-items:center;cursor:pointer}.accreditation-upload svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9}@media(max-width:900px){#requirements .req{grid-template-columns:1fr}.accreditation-actions{justify-self:end}}';
