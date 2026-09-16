@@ -5,14 +5,21 @@
     const style = document.createElement('style');
     style.textContent = '#requirements .req{grid-template-columns:minmax(0,1.4fr) .5fr .7fr auto}.accreditation-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;white-space:nowrap}.accreditation-actions .btn{padding:7px 10px;font-size:11px}.accreditation-upload{width:32px;height:32px;border:1px solid #b20f22;color:#b20f22;background:#fff;border-radius:8px;display:grid;place-items:center;cursor:pointer}.accreditation-upload svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9}@media(max-width:900px){#requirements .req{grid-template-columns:1fr}.accreditation-actions{justify-self:end}}';
     document.head.appendChild(style);
+    style.textContent += '#requirements .req{grid-template-columns:minmax(0,1fr) 110px 170px 150px}#requirements .badge{justify-self:start}.accreditation-actions{width:150px;justify-self:end}@media(max-width:900px){#requirements .req{grid-template-columns:minmax(0,1fr) 100px}.accreditation-actions{grid-column:1/-1;justify-self:end}}@media(max-width:550px){#requirements .req{grid-template-columns:1fr}}';
     const root = document.getElementById('requirements');
     function decorate() {
       root.querySelectorAll('.req').forEach(row => {
         if (row.querySelector('.accreditation-actions')) return;
         const requirement = row.querySelector('strong').textContent.trim();
+        const certificate = row.children[2];
+        const missingFile = !certificate.textContent.includes('Certificate uploaded');
+        if (certificate.textContent.trim() === '—') certificate.textContent = '';
+        row.querySelectorAll('.muted').forEach(note => {
+          if (note.textContent.trim() === 'No matching accreditation logged') note.remove();
+        });
         const actions = document.createElement('div');
         actions.className = 'accreditation-actions';
-        if (row.querySelector('.missing,.expired,.expiring')) {
+        if (row.querySelector('.missing,.expired,.expiring') || missingFile) {
         const link = document.createElement('a');
         link.className = 'btn dark book-course';
         link.textContent = 'Book Course';
