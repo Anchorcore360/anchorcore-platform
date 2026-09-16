@@ -22,6 +22,26 @@
 
   const customerSelect=document.getElementById('externalCustomer');
   if(customerSelect?.closest('label')) customerSelect.closest('label').firstChild.textContent='Company name / saved customer';
+  if(customerSelect?.closest('label')){
+    const companyLabel=customerSelect.closest('label');
+    companyLabel.classList.add('full');
+    const forenameLabel=document.getElementById('externalForename')?.closest('label');
+    const surnameLabel=document.getElementById('externalSurname')?.closest('label');
+    if(forenameLabel&&surnameLabel) companyLabel.after(forenameLabel,surnameLabel);
+  }
+  document.getElementById('externalRetention')?.closest('label')?.remove();
+
+  // Change this policy here if a different review period is agreed later.
+  const RETENTION_REVIEW_YEARS=4;
+  function reviewDate(now=new Date()){
+    const year=now.getUTCFullYear()+RETENTION_REVIEW_YEARS,month=now.getUTCMonth();
+    const day=Math.min(now.getUTCDate(),new Date(Date.UTC(year,month+1,0)).getUTCDate());
+    return new Date(Date.UTC(year,month,day)).toISOString().slice(0,10);
+  }
+  async function renewReviewDate(delegateId){
+    const {error}=await db.from('external_delegates').update({retention_review_date:reviewDate()}).eq('id',delegateId);
+    if(error) alert('The learner was booked, but the retention review date could not be updated: '+error.message);
+  }
 
   // Replace the new-external save action so the reusable record contains the requested booking fields.
   const addNew=document.getElementById('addNewExternal');
@@ -41,7 +61,7 @@
         email:document.getElementById('externalEmail').value.trim()||null,
         phone:document.getElementById('externalPhone').value.trim()||null,
         date_of_birth:document.getElementById('externalDob').value||null,
-        retention_review_date:document.getElementById('externalRetention').value||null,
+        retention_review_date:reviewDate(),
         lawful_basis:'contract'
       };
       const {data:x,error}=await db.from('external_delegates').insert(payload).select().single();
@@ -61,7 +81,6 @@
       document.getElementById('externalEmail').value='';
       document.getElementById('externalPhone').value='';
       document.getElementById('externalDob').value='';
-      document.getElementById('externalRetention').value='';
       await load();
       await syncCount();
     };
@@ -85,6 +104,7 @@
         date_of_birth:x.date_of_birth||null
       });
       if(error)return alert(error.message);
+      await renewReviewDate(x.id);
       await load();
       await syncCount();
     };
