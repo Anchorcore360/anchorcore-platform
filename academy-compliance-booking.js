@@ -33,6 +33,28 @@
         upload.setAttribute('aria-label', upload.title);
         upload.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 14v6h14v-6"/></svg>';
         upload.onclick = () => openAccModal(requirement);
+        if (row.querySelector('.badge.valid') && !missingFile) {
+          upload.title = 'View certificate for ' + requirement;
+          upload.setAttribute('aria-label', upload.title);
+          upload.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+          upload.onclick = async () => {
+            const record = roleData[selected]?.reqs.find(item => item.name === requirement)?.match;
+            if (!record?.certificate_url) return alert('Certificate file is not available.');
+            const tab = window.open('about:blank', '_blank');
+            if (tab) tab.opener = null;
+            try {
+              let url = record.certificate_url;
+              if (!/^https?:\/\//i.test(url)) {
+                const path = url.replace(/^\/+/, '').replace(/^learner-documents\//, '');
+                const {data, error} = await db.storage.from('learner-documents').createSignedUrl(path, 300);
+                if (error) throw error;
+                url = data.signedUrl;
+              }
+              if (tab) tab.location.href = url;
+              else alert('Please allow pop-ups to view the certificate.');
+            } catch (error) { if (tab) tab.close(); alert(error.message || 'Unable to open certificate.'); }
+          };
+        }
         actions.appendChild(upload);
         row.appendChild(actions);
       });
