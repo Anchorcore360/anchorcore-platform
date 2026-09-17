@@ -1,6 +1,14 @@
 (function () {
   if (window.__rrtaPortalNavigationLoaded) return;
   window.__rrtaPortalNavigationLoaded = true;
+  // Legacy Manage People uses bare element globals. `status` collides with window.status in browsers,
+  // which stops the page before its Supabase load() runs. Bind the expected globals to the real controls.
+  if ((location.pathname.split('/').pop() || '').toLowerCase() === 'manage-people.html') {
+    ['search','company','manager','status'].forEach(function(id){
+      var el=document.getElementById(id); if(!el)return;
+      try{Object.defineProperty(window,id,{value:el,writable:true,configurable:true});}catch(e){try{window[id]=el;}catch(_){}}
+    });
+  }
   function addSharedPolish(){if(document.getElementById('rrta-shared-polish'))return;const s=document.createElement('style');s.id='rrta-shared-polish';s.textContent=`.rrta-account-panel{margin-top:auto;border-top:1px solid rgba(255,255,255,.10);padding:12px 4px 3px;color:#fff}.rrta-account-user{padding:8px 9px 10px}.rrta-account-user strong{display:block;font-size:11px}.rrta-account-user span{display:block;color:#8f9aaa;font-size:8px;margin-top:4px}.rrta-account-actions{display:grid;gap:4px}.rrta-account-actions a,.rrta-account-actions button{display:flex;align-items:center;gap:9px;border:0;background:transparent;color:#c7ced8;text-decoration:none;padding:9px;border-radius:8px;font:inherit;font-size:10px;font-weight:800;cursor:pointer;text-align:left}.rrta-account-actions a:hover,.rrta-account-actions button:hover{background:rgba(255,255,255,.07);color:#fff}.rrta-portal-choices{display:none;padding:3px 8px 7px}.rrta-portal-choices.open{display:grid;gap:4px}`;document.head.appendChild(s)}
   function ensureSide(type){let side=type==='learner'?document.querySelector('aside.sidebar,.sidebar'):document.querySelector('aside.side,.side,aside.booking-side,.booking-side,.shell > aside.sidebar,.portal-shell > aside.sidebar');if(side)return side;const shell=document.querySelector('.shell,.portal-shell,.rrta-generated-shell');if(!shell)return null;side=document.createElement('aside');side.className=type==='learner'?'sidebar':'side';shell.insertBefore(side,shell.firstChild);return side}
   function brand(side,type){let b=side.querySelector('.brand,.rrta-shared-brand');if(!b){b=document.createElement('div');b.className='brand';side.insertBefore(b,side.firstChild)}else{b.className='brand'}b.innerHTML=`<a class="rrta-brand-image-link academy" href="${type==='learner'?'learner-portal.html':'academy-admin.html'}" aria-label="RRTA"><span class="rrta-3d-logo"></span></a>`}
