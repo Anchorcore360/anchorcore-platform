@@ -3,7 +3,7 @@
   window.__rrtaPortalNavigationLoaded = true;
   const currentPage=(location.pathname.split('/').pop()||'').toLowerCase();
   if (currentPage === 'booked-courses.html') {
-    const loadBookingPolish=()=>{if(!document.querySelector('script[data-rrta-booking-polish]')){const s=document.createElement('script');s.src='booking-ui-polish.js?v=20260917-3';s.dataset.rrtaBookingPolish='1';document.body.appendChild(s)}};
+    const loadBookingPolish=()=>{if(!document.querySelector('script[data-rrta-booking-polish]')){const s=document.createElement('script');s.src='booking-ui-polish.js?v=20260917-4';s.dataset.rrtaBookingPolish='1';document.body.appendChild(s)}};
     if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',loadBookingPolish,{once:true});else loadBookingPolish();
   }
   if (currentPage === 'manage-people.html') {
