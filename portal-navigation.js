@@ -3,7 +3,8 @@
   window.__rrtaPortalNavigationLoaded = true;
   const currentPage=(location.pathname.split('/').pop()||'').toLowerCase();
   const loadArchivedGuard=()=>{if(document.querySelector('script[data-rrta-archive-guard]'))return;const s=document.createElement('script');s.src='archived-selector-guard.js?v=20260917-1';s.dataset.rrtaArchiveGuard='1';document.body.appendChild(s)};
-  if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',loadArchivedGuard,{once:true});else loadArchivedGuard();
+  const loadPersonLinks=()=>{if(document.querySelector('script[data-rrta-person-links]'))return;const s=document.createElement('script');s.src='person-profile-links.js?v=20260917-1';s.dataset.rrtaPersonLinks='1';document.body.appendChild(s)};
+  if(document.readyState==='loading'){window.addEventListener('DOMContentLoaded',loadArchivedGuard,{once:true});window.addEventListener('DOMContentLoaded',loadPersonLinks,{once:true})}else{loadArchivedGuard();loadPersonLinks()}
   if (currentPage === 'certification-queue.html') {
     const loadCompletedTools=()=>{
       if(!document.querySelector('script[data-rrta-company-pills]')){const s=document.createElement('script');s.src='completed-bookings-company-pill.js?v=20260917-1';s.dataset.rrtaCompanyPills='1';document.body.appendChild(s)}
