@@ -9,80 +9,17 @@
     document.head.appendChild(style);
     style.textContent += '#requirements .req{grid-template-columns:minmax(0,1fr) 110px 170px 150px}#requirements .badge{justify-self:start}.accreditation-actions{width:150px;justify-self:end}@media(max-width:900px){#requirements .req{grid-template-columns:minmax(0,1fr) 100px}.accreditation-actions{grid-column:1/-1;justify-self:end}}@media(max-width:550px){#requirements .req{grid-template-columns:1fr}}';
     const root = document.getElementById('requirements');
-    function decorate() {
-      root.querySelectorAll('.req').forEach(row => {
-        if (row.querySelector('.accreditation-actions')) return;
-        const requirement = row.querySelector('strong').textContent.trim();
-        const certificate = row.children[2];
-        const missingFile = !certificate.textContent.includes('Certificate uploaded');
-        if (certificate.textContent.trim() === '—') certificate.textContent = '';
-        row.querySelectorAll('.muted').forEach(note => {
-          if (note.textContent.trim() === 'No matching accreditation logged') note.remove();
-        });
-        const actions = document.createElement('div');
-        actions.className = 'accreditation-actions';
-        if (row.querySelector('.missing,.expired,.expiring') || missingFile) {
-        const link = document.createElement('a');
-        link.className = 'btn dark book-course';
-        link.textContent = 'Book Course';
-        link.href = 'training-schedule.html?' + new URLSearchParams({person: params.get('id'), requirement});
-        actions.appendChild(link);
-        }
-        const upload = document.createElement('button');
-        upload.type = 'button';
-        upload.className = 'accreditation-upload';
-        upload.title = 'Upload certificate for ' + requirement;
-        upload.setAttribute('aria-label', upload.title);
-        upload.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 14v6h14v-6"/></svg>';
-        upload.onclick = () => openAccModal(requirement);
-        if (row.querySelector('.badge.valid') && !missingFile) {
-          upload.title = 'View certificate for ' + requirement;
-          upload.setAttribute('aria-label', upload.title);
-          upload.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
-          upload.onclick = async () => {
-            const record = roleData[selected]?.reqs.find(item => item.name === requirement)?.match;
-            if (!record?.certificate_url) return alert('Certificate file is not available.');
-            const tab = window.open('about:blank', '_blank');
-            if (tab) tab.opener = null;
-            try {
-              let url = record.certificate_url;
-              if (!/^https?:\/\//i.test(url)) {
-                const path = url.replace(/^\/+/, '').replace(/^learner-documents\//, '');
-                const {data, error} = await db.storage.from('learner-documents').createSignedUrl(path, 300);
-                if (error) throw error;
-                url = data.signedUrl;
-              }
-              if (tab) tab.location.href = url;
-              else alert('Please allow pop-ups to view the certificate.');
-            } catch (error) { if (tab) tab.close(); alert(error.message || 'Unable to open certificate.'); }
-          };
-        }
-        actions.appendChild(upload);
-        row.appendChild(actions);
-      });
-    }
-    new MutationObserver(decorate).observe(root, {childList:true, subtree:true});
-    decorate();
+    function decorate() { root.querySelectorAll('.req').forEach(row => { if (row.querySelector('.accreditation-actions')) return; const requirement = row.querySelector('strong').textContent.trim(); const certificate = row.children[2]; const missingFile = !certificate.textContent.includes('Certificate uploaded'); if (certificate.textContent.trim() === '—') certificate.textContent = ''; row.querySelectorAll('.muted').forEach(note => { if (note.textContent.trim() === 'No matching accreditation logged') note.remove(); }); const actions = document.createElement('div'); actions.className = 'accreditation-actions'; if (row.querySelector('.missing,.expired,.expiring') || missingFile) { const link = document.createElement('a'); link.className = 'btn dark book-course'; link.textContent = 'Book Course'; link.href = 'training-schedule.html?' + new URLSearchParams({person: params.get('id'), requirement}); actions.appendChild(link); } const upload = document.createElement('button'); upload.type = 'button'; upload.className = 'accreditation-upload'; upload.title = 'Upload certificate for ' + requirement; upload.setAttribute('aria-label', upload.title); upload.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 14v6h14v-6"/></svg>'; upload.onclick = () => openAccModal(requirement); if (row.querySelector('.badge.valid') && !missingFile) { upload.title = 'View certificate for ' + requirement; upload.setAttribute('aria-label', upload.title); upload.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>'; upload.onclick = async () => { const record = roleData[selected]?.reqs.find(item => item.name === requirement)?.match; if (!record?.certificate_url) return alert('Certificate file is not available.'); const tab = window.open('about:blank', '_blank'); if (tab) tab.opener = null; try { let url = record.certificate_url; if (!/^https?:\/\//i.test(url)) { const path = url.replace(/^\/+/, '').replace(/^learner-documents\//, ''); const {data, error} = await db.storage.from('learner-documents').createSignedUrl(path, 300); if (error) throw error; url = data.signedUrl; } if (tab) tab.location.href = url; else alert('Please allow pop-ups to view the certificate.'); } catch (error) { if (tab) tab.close(); alert(error.message || 'Unable to open certificate.'); } }; } actions.appendChild(upload); row.appendChild(actions); }); }
+    new MutationObserver(decorate).observe(root, {childList:true, subtree:true}); decorate();
   }
   if (page === 'training-schedule.html' && params.get('person')) {
-    const notice = document.createElement('div');
-    notice.className = 'panel';
-    notice.textContent = 'Booking training for requirement: ' + (params.get('requirement') || 'Selected training') + '. Choose a suitable course date, then confirm the employee on Add Learners. If no date is available, add a scheduled course or arrange external training.';
-    document.getElementById('scheduleRoot').before(notice);
-    const back = document.createElement('a');
-    back.className = 'btn secondary';
-    back.textContent = 'Back to compliance';
-    back.href = 'learner-compliance.html?' + new URLSearchParams({id:params.get('person')});
-    notice.appendChild(document.createElement('br'));
-    notice.appendChild(back);
+    const style=document.createElement('style');style.textContent=`.rrta-request-banner{background:#eef4fb!important;border-color:#cfdaea!important}.rrta-request-row{background:#f7f9fc!important}.rrta-request-row.match{background:#f1faf4!important}.rrta-request-row.full{background:#fff2f3!important}.rrta-place-pill{display:inline-flex;margin-top:6px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;background:#e9eef6;color:#40536d}.rrta-place-pill.available{background:#def3e5;color:#176b37}.rrta-place-pill.low{background:#fff0bf;color:#765500}.rrta-place-pill.full{background:#fbe5e8;color:#98222e}.rrta-request-place{background:#e7f5eb!important;color:#176b37!important;border-color:#b9ddc4!important}.rrta-request-place:disabled{background:#f1f2f4!important;color:#98a2b3!important;border-color:#e1e4e8!important;cursor:not-allowed}`;document.head.appendChild(style);
+    const notice = document.createElement('div'); notice.className = 'panel rrta-request-banner'; notice.innerHTML=`<strong>Book training from Compliance</strong><div class="muted" style="margin-top:5px">Requirement: ${String(params.get('requirement')||'Selected training').replace(/[<>]/g,'')}. Choose a suitable scheduled course below. Live places are shown from the operational booking.</div>`; document.getElementById('scheduleRoot').before(notice); const back = document.createElement('a'); back.className = 'btn secondary'; back.style.marginTop='10px'; back.textContent = 'Back to compliance'; back.href = 'learner-compliance.html?' + new URLSearchParams({id:params.get('person')}); notice.appendChild(back);
+    let availability={}; async function loadAvailability(){try{const [{data:s},{data:b},{data:a}]=await Promise.all([db.from('training_schedule').select('id,course_id,course_title,max_places,status,booking_id,start_date'),db.from('bookings').select('id,schedule_id,status'),db.from('booking_attendees').select('booking_id,id')]);const bookings=Object.fromEntries((b||[]).map(x=>[x.id,x]));availability={};(s||[]).forEach(x=>{const bk=x.booking_id?bookings[x.booking_id]:(b||[]).find(z=>z.schedule_id===x.id);const used=bk?(a||[]).filter(z=>z.booking_id===bk.id).length:0,max=Number(x.max_places||0),left=max?Math.max(0,max-used):null;availability[x.id]={...x,booking:bk,used,max,left}});decorateSchedule()}catch(e){console.error(e)}}
+    function matchesRequirement(r){const req=(params.get('requirement')||'').toLowerCase().replace(/[^a-z0-9]/g,''),title=(r.course_title||'').toLowerCase().replace(/[^a-z0-9]/g,'');if(!req)return true;const code=(params.get('requirement')||'').match(/[a-z]{1,4}\d{2,4}[a-z]?/i)?.[0]?.toLowerCase();return code?title.includes(code):title.includes(req)||req.includes(title)}
+    async function submitRequest(r){if(r.left===0)return alert('This course is full. Please choose another scheduled date.');const {data:u}=await db.auth.getUser();if(!u?.user)return alert('Please sign in again.');const payload={requester_id:u.user.id,requested_for_profile_id:params.get('person'),request_type:'course_booking',requirement:params.get('requirement')||r.course_title,reason:'Requested from Compliance',priority:'normal',status:'pending',preferred_date:r.start_date,preferred_schedule_id:r.id,availability_response:r.booking?`${r.left===null?'Capacity not set':r.left+' places remaining'} on selected ${r.booking.status||'booking'}`:'Selected planned course; Academy confirmation required',waiting_on:'academy'};const {error}=await db.from('training_requests').insert(payload);if(error)return alert(error.message);alert('Training request sent to the Training Academy for approval. The place is not confirmed until the Academy approves it.');location.href='learner-compliance.html?'+new URLSearchParams({id:params.get('person')})}
+    function decorateSchedule(){document.querySelectorAll('#scheduleRoot tbody tr').forEach(tr=>{const del=tr.querySelector('[data-delete]');if(!del)return;const id=del.dataset.delete,r=availability[id];if(!r)return;tr.classList.add('rrta-request-row');if(matchesRequirement(r))tr.classList.add('match');if(r.left===0)tr.classList.add('full');const cap=tr.querySelector('.capacity');if(cap&&!cap.querySelector('.rrta-place-pill')){const p=document.createElement('div');const cls=r.left===0?'full':r.left!==null&&r.left<=2?'low':'available';p.className='rrta-place-pill '+cls;p.textContent=r.booking?(r.left===null?`${r.used} booked · capacity not set`:`${r.used}/${r.max} booked · ${r.left} place${r.left===1?'':'s'} left`):'Planned · request a place';cap.appendChild(p)}const actions=del.parentElement;if(matchesRequirement(r)&&!actions.querySelector('[data-request-place]')){const btn=document.createElement('button');btn.className='small rrta-request-place';btn.dataset.requestPlace=id;btn.textContent=r.left===0?'Course Full':r.booking?'Request Place':'Request Planned Date';btn.disabled=r.left===0;btn.onclick=()=>submitRequest(r);actions.insertBefore(btn,actions.firstChild)}})}
+    let timer;new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(decorateSchedule,100)}).observe(document.getElementById('scheduleRoot'),{childList:true,subtree:true});setTimeout(loadAvailability,350);
   }
-  if (page === 'add-learners.html' && params.get('person')) {
-    const select = document.getElementById('internalLearner');
-    function preselect() {
-      const person = params.get('person');
-      if ([...select.options].some(option => option.value === person)) select.value = person;
-    }
-    new MutationObserver(preselect).observe(select, {childList:true});
-    preselect();
-  }
+  if (page === 'add-learners.html' && params.get('person')) { const select = document.getElementById('internalLearner'); function preselect() { const person = params.get('person'); if ([...select.options].some(option => option.value === person)) select.value = person; } new MutationObserver(preselect).observe(select, {childList:true}); preselect(); }
 })();
