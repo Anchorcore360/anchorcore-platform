@@ -9,6 +9,7 @@
       if(!document.querySelector('script[data-rrta-company-pills]')){const s=document.createElement('script');s.src='completed-bookings-company-pill.js?v=20260917-1';s.dataset.rrtaCompanyPills='1';document.body.appendChild(s)}
       if(!document.querySelector('script[data-rrta-certificate-upload]')){const s=document.createElement('script');s.src='completed-bookings-certificate-upload.js?v=20260917-1';s.dataset.rrtaCertificateUpload='1';document.body.appendChild(s)}
       if(!document.querySelector('script[data-rrta-bulk-dates]')){const s=document.createElement('script');s.src='completed-bookings-bulk-dates.js?v=20260917-1';s.dataset.rrtaBulkDates='1';document.body.appendChild(s)}
+      if(!document.querySelector('script[data-rrta-process-fix]')){const s=document.createElement('script');s.src='completed-bookings-process-fix.js?v=20260917-1';s.dataset.rrtaProcessFix='1';document.body.appendChild(s)}
     };
     if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',loadCompletedTools,{once:true});else loadCompletedTools();
   }
