@@ -5,8 +5,11 @@
   const loadArchivedGuard=()=>{if(document.querySelector('script[data-rrta-archive-guard]'))return;const s=document.createElement('script');s.src='archived-selector-guard.js?v=20260917-1';s.dataset.rrtaArchiveGuard='1';document.body.appendChild(s)};
   if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',loadArchivedGuard,{once:true});else loadArchivedGuard();
   if (currentPage === 'certification-queue.html') {
-    const loadCompanyPills=()=>{if(document.querySelector('script[data-rrta-company-pills]'))return;const s=document.createElement('script');s.src='completed-bookings-company-pill.js?v=20260917-1';s.dataset.rrtaCompanyPills='1';document.body.appendChild(s)};
-    if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',loadCompanyPills,{once:true});else loadCompanyPills();
+    const loadCompletedTools=()=>{
+      if(!document.querySelector('script[data-rrta-company-pills]')){const s=document.createElement('script');s.src='completed-bookings-company-pill.js?v=20260917-1';s.dataset.rrtaCompanyPills='1';document.body.appendChild(s)}
+      if(!document.querySelector('script[data-rrta-certificate-upload]')){const s=document.createElement('script');s.src='completed-bookings-certificate-upload.js?v=20260917-1';s.dataset.rrtaCertificateUpload='1';document.body.appendChild(s)}
+    };
+    if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',loadCompletedTools,{once:true});else loadCompletedTools();
   }
   if (currentPage === 'booked-courses.html') {
     const loadBookingPolish=()=>{if(!document.querySelector('script[data-rrta-booking-polish]')){const s=document.createElement('script');s.src='booking-ui-polish.js?v=20260917-4';s.dataset.rrtaBookingPolish='1';document.body.appendChild(s)}if(!document.querySelector('script[data-rrta-simple-ji]')){const j=document.createElement('script');j.src='joining-instructions-simple.js?v=20260917-1';j.dataset.rrtaSimpleJi='1';document.body.appendChild(j)}};
