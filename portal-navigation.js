@@ -3,7 +3,8 @@
   window.__rrtaPortalNavigationLoaded = true;
   const currentPage=(location.pathname.split('/').pop()||'').toLowerCase();
   if (currentPage === 'booked-courses.html') {
-    window.addEventListener('load',()=>{if(!document.querySelector('script[data-rrta-booking-polish]')){const s=document.createElement('script');s.src='booking-ui-polish.js?v=20260917-1';s.dataset.rrtaBookingPolish='1';document.body.appendChild(s)}},{once:true});
+    const loadBookingPolish=()=>{if(!document.querySelector('script[data-rrta-booking-polish]')){const s=document.createElement('script');s.src='booking-ui-polish.js?v=20260917-3';s.dataset.rrtaBookingPolish='1';document.body.appendChild(s)}};
+    if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',loadBookingPolish,{once:true});else loadBookingPolish();
   }
   if (currentPage === 'manage-people.html') {
     ['search','company','manager','status'].forEach(function(id){var el=document.getElementById(id);if(!el)return;try{Object.defineProperty(window,id,{value:el,writable:true,configurable:true});}catch(e){try{window[id]=el;}catch(_){}}});
