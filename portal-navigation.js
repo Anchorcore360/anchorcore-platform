@@ -2,6 +2,9 @@
   if (window.__rrtaPortalNavigationLoaded) return;
   window.__rrtaPortalNavigationLoaded = true;
   const currentPage=(location.pathname.split('/').pop()||'').toLowerCase();
+  if (currentPage === 'booked-courses.html') {
+    window.addEventListener('load',()=>{if(!document.querySelector('script[data-rrta-booking-polish]')){const s=document.createElement('script');s.src='booking-ui-polish.js?v=20260917-1';s.dataset.rrtaBookingPolish='1';document.body.appendChild(s)}},{once:true});
+  }
   if (currentPage === 'manage-people.html') {
     ['search','company','manager','status'].forEach(function(id){var el=document.getElementById(id);if(!el)return;try{Object.defineProperty(window,id,{value:el,writable:true,configurable:true});}catch(e){try{window[id]=el;}catch(_){}}});
     const loadPeopleTools=()=>{[['duplicate-record-guard.js?v=20260917-1','rrtaDup'],['manage-people-delete.js?v=20260917-1','rrtaDelete'],['leaver-notifications.js?v=20260917-2','rrtaLeaver']].forEach(([src,key])=>{if(document.querySelector(`script[data-${key.toLowerCase()}]`))return;const s=document.createElement('script');s.src=src;s.dataset[key]='1';document.body.appendChild(s)})};
