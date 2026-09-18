@@ -3,8 +3,8 @@
   window.__rrtaProfileTeamManagement=true;
   let directory=[],directReports=[];
 
-  const roleOf=p=>String(p?.organisational_access_role||p?.portal_access_role||'operative').toLowerCase();
-  const roleLabel=v=>({operative:'Operative',supervisor:'Supervisor',manager:'Manager',operations_manager:'Operations Manager'}[String(v||'').toLowerCase()]||'Operative');
+  const roleOf=p=>String(p?.organisational_access_role||p?.portal_access_role||'operator').toLowerCase().replace('operative','operator').replace('academy','academy_staff');
+  const roleLabel=v=>({operator:'Operator',supervisor:'Supervisor',manager:'Manager',rrt_subcontractor_manager:'RRT Subcontractor Manager',rrt_subcontractor_operator:'RRT Subcontractor Operator',external:'External',health_safety:'Health & Safety',operations_manager:'Operations Manager',administrator:'Administrator',academy_staff:'Academy Staff'}[String(v||'').toLowerCase().replace('operative','operator').replace('academy','academy_staff')]||'Operator');
 
   async function loadTeam(){
     if(typeof db==='undefined'||typeof learnerId==='undefined'||!learnerId)return;
@@ -17,9 +17,9 @@
   function allowedCandidate(p,currentRole){
     if(p.id===learnerId||p.manager_1_id===learnerId)return false;
     const role=roleOf(p);
-    if(currentRole==='supervisor')return role==='operative';
-    if(currentRole==='manager')return role==='supervisor'||role==='operative';
-    if(currentRole==='operations_manager')return role==='manager'||role==='supervisor'||role==='operative';
+    if(currentRole==='supervisor')return role==='operator'||role==='rrt_subcontractor_operator';
+    if(currentRole==='manager')return ['supervisor','operator','rrt_subcontractor_operator'].includes(role);
+    if(currentRole==='rrt_subcontractor_manager')return role==='rrt_subcontractor_operator';
     return false;
   }
 
@@ -28,7 +28,7 @@
     if(!overview||typeof learner==='undefined'||!learner)return null;
     const currentRole=roleOf(learner);
     let panel=document.getElementById('profileTeamPanel');
-    if(!['supervisor','manager','operations_manager'].includes(currentRole)){
+    if(!['supervisor','manager','rrt_subcontractor_manager'].includes(currentRole)){
       panel?.remove();
       return null;
     }
@@ -40,7 +40,7 @@
       const personal=document.getElementById('editProfileBtn2')?.closest('.panel-card');
       if(personal)personal.insertAdjacentElement('afterend',panel);else overview.prepend(panel);
     }
-    panel.innerHTML=`<div class="panel-head-row"><div><h2>Team & Reporting</h2><p class="muted">${currentRole==='supervisor'?'Add operatives who report to this supervisor.':'Add supervisors or operatives who report to this manager.'}</p></div><button type="button" class="btn dark small" id="addTeamMemberBtn">+ Add Team Member</button></div><div class="record-list">${directReports.length?directReports.map(p=>`<div class="record"><div><strong>${esc(p.full_name||'Unnamed person')}</strong><small>${esc(roleLabel(roleOf(p)))} · ${esc(p.job_title||'Job title not set')}</small></div><button type="button" class="btn secondary small" data-remove-team="${p.id}">Remove</button></div>`).join(''):'<div class="empty">No people currently report to this person.</div>'}</div>`;
+    panel.innerHTML=`<div class="panel-head-row"><div><h2>Team & Reporting</h2><p class="muted">${currentRole==='supervisor'?'Add operators who report to this supervisor.':currentRole==='rrt_subcontractor_manager'?'Add RRT subcontractor operators who report to this manager.':'Add supervisors or operators who report to this manager.'}</p></div><button type="button" class="btn dark small" id="addTeamMemberBtn">+ Add Team Member</button></div><div class="record-list">${directReports.length?directReports.map(p=>`<div class="record"><div><strong>${esc(p.full_name||'Unnamed person')}</strong><small>${esc(roleLabel(roleOf(p)))} · ${esc(p.job_title||'Job title not set')}</small></div><button type="button" class="btn secondary small" data-remove-team="${p.id}">Remove</button></div>`).join(''):'<div class="empty">No people currently report to this person.</div>'}</div>`;
     panel.querySelector('#addTeamMemberBtn').onclick=()=>openAddTeamMember(currentRole);
     panel.querySelectorAll('[data-remove-team]').forEach(btn=>btn.onclick=()=>removeTeamMember(btn.dataset.removeTeam));
     return panel;
