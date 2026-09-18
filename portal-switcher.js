@@ -6,8 +6,8 @@
   `;document.head.appendChild(style);
   const current=()=>document.body?.dataset.portalNav||'';
   function targetFooter(){const sign=[...document.querySelectorAll('a,button')].find(el=>/^sign out$/i.test((el.textContent||'').trim()));if(!sign)return null;return sign.parentElement||null}
-  async function build(){if(document.querySelector('.rrta-switch-wrap'))return;const footer=targetFooter();if(!footer)return;let db=null,user=null,me=null;try{if(window.supabase?.createClient){db=window.supabase.createClient(SUPA,KEY);const au=await db.auth.getUser();user=au.data?.user;if(user){const pr=await db.from('profiles').select('role,permission_level').eq('id',user.id).maybeSingle();me=pr.data||{}}}}catch(_){ }
-    const isAcademy=String(me?.role||'').toLowerCase()==='trainer'||me?.permission_level==='super_user';
+  async function build(){if(document.querySelector('.rrta-switch-wrap'))return;const footer=targetFooter();if(!footer)return;let db=null,user=null,me=null;try{if(window.supabase?.createClient){db=window.supabase.createClient(SUPA,KEY);const au=await db.auth.getUser();user=au.data?.user;if(user){const pr=await db.from('profiles').select('role,permission_level,portal_access_role,organisational_access_role').eq('id',user.id).maybeSingle();me=pr.data||{}}}}catch(_){ }
+    const access=String(me?.organisational_access_role||me?.portal_access_role||'').toLowerCase();const isAcademy=['academy_staff','academy','health_safety','operations_manager','administrator'].includes(access)||me?.permission_level==='super_user';
     const items=[{key:'learner',label:'My Learning',sub:'Personal learner portal',href:'learner-portal.html',icon:'👤'}];
     if(isAcademy)items.push({key:'academy',label:'Training Academy',sub:'Academy administration',href:'academy-admin.html',icon:'🎓'});
     if(items.length<2)return;
