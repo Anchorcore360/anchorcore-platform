@@ -349,12 +349,13 @@
         }
         const { data: p } = await db
           .from("profiles")
-          .select("id,role,permission_level")
+          .select("id,role,permission_level,portal_access_role,organisational_access_role")
           .eq("id", u.user.id)
           .single();
+        const access = String(p?.organisational_access_role || p?.portal_access_role || "").toLowerCase();
         if (
           !p ||
-          (String(p.role).toLowerCase() !== "trainer" &&
+          (!["academy_staff","academy","health_safety","operations_manager","administrator"].includes(access) &&
             p.permission_level !== "super_user")
         ) {
           location.href = "portal.html";
