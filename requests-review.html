@@ -344,7 +344,7 @@
       async function auth() {
         const { data: u } = await db.auth.getUser();
         if (!u?.user) {
-          location.href = "trainer.html";
+          location.href = "portal.html";
           return false;
         }
         const { data: p } = await db
