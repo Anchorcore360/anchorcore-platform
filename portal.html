@@ -89,7 +89,7 @@ async function loadAccess(user){
   if(pe||!p) throw new Error('Your profile could not be loaded.');
   const systemRole=String(p.organisational_access_role||p.portal_access_role||'').toLowerCase();
   const noAccess=systemRole==='external'||p.account_status==='archived';
-  const academy=a?.academy_admin===true||p.permission_level==='super_user'||systemRole==='academy_staff'||systemRole==='academy'||String(p.role).toLowerCase()==='trainer';
+  const academy=a?.academy_admin===true||p.permission_level==='super_user'||['academy_staff','academy','health_safety','operations_manager','administrator'].includes(systemRole);
   if(noAccess) throw new Error('This account does not currently have platform access.');
   academyCard.classList.toggle('hidden',!academy);
   learnerCard.classList.remove('hidden');
