@@ -46,15 +46,9 @@ const rewireProfileEditors=()=>{const top=document.getElementById('editProfileBt
 (function installProfileShell(){
   if(document.body.dataset.profileShellReady==='1')return;document.body.dataset.profileShellReady='1';
   document.body.dataset.portalNav='academy';
-  document.querySelector('.site-header')?.remove();
   let css=document.querySelector('link[href="portal-navigation.css"]');if(!css){css=document.createElement('link');css.rel='stylesheet';css.href='portal-navigation.css';document.head.appendChild(css)}
-  const app=document.getElementById('profileApp'),errorBox=document.getElementById('profileError');if(!app)return;
-  const shell=document.createElement('div');shell.className='profile-platform-shell portal-shell';
-  const side=document.createElement('aside');side.className='side portal-side';side.innerHTML='<div class="brand"><img src="rrta-logo.png" alt="RRTA"></div><nav id="portalNav" class="portal-nav"></nav><div class="spacer"></div>';
-  const main=document.createElement('main');main.className='profile-platform-main';
-  const top=document.createElement('header');top.className='profile-platform-top';top.innerHTML='<strong>RRTA Training Academy Administration</strong><span>Person Profile</span>';
-  const host=document.createElement('div');host.className='profile-platform-content';
-  app.parentNode.insertBefore(shell,app);shell.append(side,main);main.append(top,host);host.appendChild(app);if(errorBox)host.appendChild(errorBox);
-  const back=app.querySelector('.profile-topbar a.text-btn');if(back){back.href='manage-people.html';back.textContent='← Back To Manage People'}
-  if(!document.querySelector('script[src="portal-navigation.js"]')){const script=document.createElement('script');script.src='portal-navigation.js';document.head.appendChild(script)}
+  const app=document.getElementById('profileApp');if(!app)return;
+  const existingShell=app.closest('.profile-platform-shell');
+  if(existingShell){existingShell.classList.add('portal-shell');let side=existingShell.querySelector('aside');if(side)side.classList.add('portal-side')}
+  if(!document.querySelector('script[src^="portal-navigation.js"]')){const script=document.createElement('script');script.src='portal-navigation.js?v=20260918-1235';document.head.appendChild(script)}
 })();
