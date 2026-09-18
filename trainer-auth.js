@@ -104,15 +104,18 @@
   async function acEnterPortal(userId) {
     const p = await acLoadProfile(userId);
 
-    if (p.role === 'trainer') {
+    const systemAccess = String(p.organisational_access_role || p.portal_access_role || '').toLowerCase();
+    const hasAcademyAccess = p.permission_level === 'super_user' || ['academy_staff','academy','health_safety','operations_manager','administrator'].includes(systemAccess);
+
+    if (hasAcademyAccess) {
       await acLoadTrainerData();
-      setHeaderUser(p.full_name, 'trainer');
+      setHeaderUser(p.full_name, 'academy');
       acRenderTrainer();
       showScreen('trainer');
       return;
     }
 
-    if (p.role === 'learner') {
+    if (p.role === 'learner' || !hasAcademyAccess) {
       await loadLearnerData(userId);
       setHeaderUser(profile.full_name, 'learner');
       renderLearner();
