@@ -82,12 +82,15 @@ const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co'
 const loginZone=document.getElementById('loginZone'),workspaceZone=document.getElementById('workspaceZone'),sessionBox=document.getElementById('sessionBox'),loginError=document.getElementById('loginError'),academyCard=document.getElementById('academyCard'),learnerCard=document.getElementById('learnerCard'),sessionName=document.getElementById('sessionName'),sessionRole=document.getElementById('sessionRole'),platformLoginForm=document.getElementById('platformLoginForm'),platformEmail=document.getElementById('platformEmail'),platformPassword=document.getElementById('platformPassword'),platformLoginButton=document.getElementById('platformLoginButton'),signOutBtn=document.getElementById('signOutBtn');
 async function loadAccess(user){
   const results=await Promise.all([
-    db.from('profiles').select('id,full_name,email,role,permission_level,job_title').eq('id',user.id).single(),
+    db.from('profiles').select('id,full_name,email,role,permission_level,job_title,organisational_access_role,portal_access_role,account_status').eq('id',user.id).single(),
     db.from('portal_access').select('*').eq('user_id',user.id).maybeSingle()
   ]);
   const p=results[0].data,pe=results[0].error,a=results[1].data;
   if(pe||!p) throw new Error('Your profile could not be loaded.');
-  const academy=a?.academy_admin===true||p.permission_level==='super_user'||String(p.role).toLowerCase()==='trainer';
+  const systemRole=String(p.organisational_access_role||p.portal_access_role||'').toLowerCase();
+  const noAccess=systemRole==='external'||p.account_status==='archived';
+  const academy=a?.academy_admin===true||p.permission_level==='super_user'||systemRole==='academy_staff'||systemRole==='academy'||String(p.role).toLowerCase()==='trainer';
+  if(noAccess) throw new Error('This account does not currently have platform access.');
   academyCard.classList.toggle('hidden',!academy);
   learnerCard.classList.remove('hidden');
   sessionName.textContent=p.full_name||p.email||'Signed In';
