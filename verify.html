@@ -43,10 +43,9 @@ body{background:#f4f6f7;color:#1f2933}.verify-shell{max-width:1320px;margin:0 au
   </section>
   <div id="verifyError" class="error-box hidden"></div>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-const verifyBrandLogo=document.getElementById('verifyBrandLogo');if(window.RRPortalAssets?.telecoms)verifyBrandLogo.src=window.RRPortalAssets.telecoms;\nconst db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
+const verifyBrandLogo=document.getElementById('verifyBrandLogo');if(window.RRPortalAssets?.telecoms)verifyBrandLogo.src=window.RRPortalAssets.telecoms;\nconst db={rpc:async function(name,args){const r=await fetch('https://qgbpotjqggeodxqcwkgj.supabase.co/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS'},body:JSON.stringify(args)});const data=await r.json();return r.ok?{data,error:null}:{data:null,error:new Error(data?.message||'Unable to load verification record.')}}};
 const token=new URLSearchParams(location.search).get('t');
 const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const fmt=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-GB'):'—';
