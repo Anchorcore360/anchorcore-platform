@@ -4,3 +4,7 @@
 
 /* Reserve the Academy navigation before JS boot to prevent legacy first-paint flash */
 html.rrta-nav-pending body[data-portal-nav="academy"] .shell>aside.side,html.rrta-nav-pending body[data-portal-nav="academy"] .shell>aside.portal-side{width:258px!important;background:linear-gradient(180deg,#151a22,#1e2530)!important;visibility:hidden!important}html.rrta-nav-ready body[data-portal-nav="academy"] .shell>aside.side,html.rrta-nav-ready body[data-portal-nav="academy"] .shell>aside.portal-side{visibility:visible!important}
+
+/* Prevent legacy shell/page flash before shared navigation is ready */
+html.rrta-nav-pending body[data-portal-nav="academy"]{visibility:hidden!important}
+html.rrta-nav-ready body[data-portal-nav="academy"]{visibility:visible!important}
