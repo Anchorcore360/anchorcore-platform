@@ -928,7 +928,7 @@
           db
             .from("booking_attendees")
             .select(
-              "attendance_status,outcome,bookings(id,course_title,start_date,end_date,start_time,location,status)",
+              "attendance_status,outcome,joining_instructions_sent_at,joining_instructions_viewed_at,joining_instructions_acknowledged_at,joining_instruction_access_token,bookings(id,course_title,start_date,end_date,start_time,end_time,location,location_address,location_postcode,status,joining_instructions_sent_at)",
             )
             .eq("profile_id", p.id),
         ]);
@@ -942,6 +942,10 @@
             ...x.bookings,
             attendance_status: x.attendance_status,
             outcome: x.outcome,
+            joining_instructions_sent_at: x.joining_instructions_sent_at,
+            joining_instructions_viewed_at: x.joining_instructions_viewed_at,
+            joining_instructions_acknowledged_at: x.joining_instructions_acknowledged_at,
+            joining_instruction_access_token: x.joining_instruction_access_token,
           }))
           .filter((x) => x.id);
         const roleRows = roles.data || [];
@@ -1086,10 +1090,13 @@
         overviewBookings.innerHTML = upcoming.length
           ? upcoming
               .slice(0, 4)
-              .map(
-                (b) =>
-                  `<div class="status-row"><div><strong>${esc(b.course_title || "Training Course")}</strong><div class="muted">${fmt(b.start_date)} · ${esc(b.location || "Location TBC")}</div></div><span class="pill good">Booked</span></div>`,
-              )
+              .map((b) => {
+                const confirmed = String(b.status || "").toLowerCase() === "confirmed";
+                const released = !!(b.joining_instructions_sent_at || b.bookings_joining_instructions_sent_at);
+                const token = b.joining_instruction_access_token;
+                const joiningHref = token ? `joining-instructions.html?token=${encodeURIComponent(token)}` : `learner-portal.html#training`;
+                return `<div class="status-row"><div><strong>${esc(b.course_title || "Training Course")}</strong><div class="muted">${fmt(b.start_date)} · ${esc(b.location || "Location TBC")}</div><div class="muted">${confirmed ? "Booking confirmed" : esc(b.status || "Booked")}${released ? " · Joining instructions ready" : " · Joining instructions not yet released"}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="pill good">${confirmed ? "Confirmed" : "Booked"}</span>${released && token ? `<a class="btn" href="${joiningHref}">View Joining Instructions</a>` : ""}</div></div>`;
+              })
               .join("")
           : '<div class="empty">No upcoming courses booked.</div>';
         overviewLearning.innerHTML = activeLearning.length
