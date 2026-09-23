@@ -1083,7 +1083,7 @@
                 const confirmed = String(b.status || "").toLowerCase() === "confirmed";
                 const hasCourseInstructions = !!b.courses?.joining_instructions_path;
                 const released = !!(b.joining_instructions_sent_at || b.bookings_joining_instructions_sent_at || hasCourseInstructions);
-                const joiningHref = hasCourseInstructions ? `course-joining-instructions.html?booking=${encodeURIComponent(b.id)}` : `joining-instructions-view.html?booking=${encodeURIComponent(b.id)}`;
+                const joiningHref = hasCourseInstructions ? `learner-joining-file.html?booking=${encodeURIComponent(b.id)}` : `joining-instructions-view.html?booking=${encodeURIComponent(b.id)}`;
                 return `<div class="status-row"><div class="course-row-main">${released ? `<a class="btn joining-btn course-row-action" href="${joiningHref}">View Joining Instructions</a>` : ""}<div><strong>${esc(b.course_title || "Training Course")}</strong><div class="muted">${fmt(b.start_date)} · ${esc(b.location || "Location TBC")}</div><div class="muted">${confirmed ? "Booking confirmed" : esc(b.status || "Booked")}${released ? " · Joining instructions ready" : " · Joining instructions not yet released"}</div></div></div><span class="pill good">${confirmed ? "Confirmed" : "Booked"}</span></div>`;
               })
               .join("")
