@@ -282,6 +282,16 @@
         font-weight: 850;
         cursor: pointer;
       }
+      .learner-accreditation-head,.learner-accreditation-row{display:grid;grid-template-columns:minmax(280px,1.45fr) minmax(145px,.65fr) 115px 115px 90px minmax(150px,.65fr);gap:14px;align-items:center}
+      .learner-accreditation-head{padding:0 14px 8px;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.05em;color:#6b7788}
+      .learner-accreditation-list{display:grid;gap:8px;margin-top:14px}
+      .learner-accreditation-row{min-height:60px;padding:12px 14px;border:1px solid #dce3ea;border-radius:10px;background:#f4f5f6}
+      .learner-accreditation-title{font-size:11px;font-weight:850;color:#263746}
+      .learner-accreditation-cell{font-size:10px;color:#526477}
+      .learner-cert-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+      .learner-cert-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid #cbd5df;border-radius:8px;background:#fff;color:#263746;text-decoration:none;font-size:9px;font-weight:850}
+      .learner-cert-btn:hover{background:#eef3f7}.learner-cert-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.9}
+      @media(max-width:900px){.learner-accreditation-head{display:none}.learner-accreditation-row{grid-template-columns:1fr 1fr}.learner-accreditation-row>div:first-child,.learner-cert-actions{grid-column:1/-1}}
       .empty {
         padding: 25px;
         text-align: center;
@@ -991,7 +1001,7 @@
           }),
         );
         accreditationBody.innerHTML = accs.length
-          ? `<table class="table"><thead><tr><th>Accreditation</th><th>Awarding Body</th><th>Issue</th><th>Expiry</th><th>Status</th><th>Certificate</th></tr></thead><tbody>${accreditationRows.join("")}</tbody></table>`
+          ? `<div class="learner-accreditation-head"><span>Accreditation</span><span>Awarding Body</span><span>Issue</span><span>Expiry</span><span>Status</span><span>Certificate</span></div><div class="learner-accreditation-list">${(await Promise.all(accs.map(async (a) => { const st=statusAcc(a); const url=await signed("learner-documents",a.certificate_url); const eye='<svg viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>'; const down='<svg viewBox="0 0 24 24"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5M5 20h14"/></svg>'; return `<div class="learner-accreditation-row"><div class="learner-accreditation-title">${esc(a.accreditation_name)}</div><div class="learner-accreditation-cell">${esc(a.awarding_body||"—")}</div><div class="learner-accreditation-cell">${fmt(a.issue_date)}</div><div class="learner-accreditation-cell">${fmt(a.expiry_date)}</div><div><span class="pill ${st[1]}">${st[0]}</span></div><div class="learner-cert-actions">${url?`<a class="learner-cert-btn" href="${url}" target="_blank" rel="noopener">${eye}<span>View</span></a><a class="learner-cert-btn" href="${url}" download>${down}<span>Download</span></a>`:"—"}</div></div>`; }))).join("")}</div>`
           : '<div class="empty">No accreditations recorded.</div>';
         const certificateRows = await Promise.all(
           certs.map(async (c) => {
