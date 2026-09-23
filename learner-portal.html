@@ -582,16 +582,11 @@
               </section>
             </div>
             <div class="stats" id="overviewStats"></div>
-            <div class="grid">
+            <div class="grid" style="grid-template-columns:1fr">
               <section class="panel" style="margin-top: 0">
                 <div class="eyebrow">Upcoming</div>
-                <h2>Booked Courses</h2>
+                <h2>Upcoming Courses</h2>
                 <div id="overviewBookings"></div>
-              </section>
-              <section class="panel" style="margin-top: 0">
-                <div class="eyebrow">Learning</div>
-                <h2>Assigned Courses</h2>
-                <div id="overviewLearning"></div>
               </section>
             </div>
           </section>
@@ -1068,14 +1063,7 @@
             ? "Your recorded accreditations are current"
             : "Your record is ready to be built";
         const upcoming = bookingRows
-          .filter(
-            (b) =>
-              b.start_date &&
-              new Date(b.start_date + "T23:59:59") >= new Date() &&
-              !["cancelled", "completed"].includes(
-                String(b.status || "").toLowerCase(),
-              ),
-          )
+          .filter((b) => String(b.status || "").toLowerCase() === "confirmed")
           .sort((a, b) =>
             String(a.start_date).localeCompare(String(b.start_date)),
           );
@@ -1085,7 +1073,7 @@
               String(a.status || "").toLowerCase(),
             ),
         );
-        overviewStats.innerHTML = `<div class="stat"><span>Valid Accreditations</span><strong>${valid}</strong></div><div class="stat"><span>Expiring Soon</span><strong>${expiring}</strong></div><div class="stat"><span>Booked Courses</span><strong>${upcoming.length}</strong></div><div class="stat"><span>Assigned Learning</span><strong>${activeLearning.length}</strong></div>`;
+        overviewStats.innerHTML = `<div class="stat"><span>Valid Accreditations</span><strong>${valid}</strong></div><div class="stat"><span>Expiring Soon</span><strong>${expiring}</strong></div><div class="stat"><span>Upcoming Courses</span><strong>${upcoming.length}</strong></div>`;
         attentionList.innerHTML = `<div class="status-row"><span>Expired accreditations</span><span class="pill ${expired ? "bad" : "good"}">${expired}</span></div><div class="status-row"><span>Expiring within 30 days</span><span class="pill ${expiring ? "warn" : "good"}">${expiring}</span></div><div class="status-row"><span>Evidence awaiting review</span><span class="pill ${evidenceRows.some((x) => x.status === "pending") ? "warn" : "good"}">${evidenceRows.filter((x) => x.status === "pending").length}</span></div>`;
         overviewBookings.innerHTML = upcoming.length
           ? upcoming
@@ -1099,15 +1087,7 @@
               })
               .join("")
           : '<div class="empty">No upcoming courses booked.</div>';
-        overviewLearning.innerHTML = activeLearning.length
-          ? activeLearning
-              .slice(0, 4)
-              .map(
-                (a) =>
-                  `<div class="status-row"><div><strong>${esc(a.courses?.title || "Assigned Learning")}</strong><div class="muted">${esc(a.status || "Assigned")}</div></div><button class="btn" type="button" onclick="show('assessments')">Open</button></div>`,
-              )
-              .join("")
-          : '<div class="empty">No outstanding assigned learning.</div>';
+        
       }
       async function downloadAccreditationSummary() {
         const button = document.getElementById("downloadSummary");
