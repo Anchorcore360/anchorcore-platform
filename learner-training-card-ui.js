@@ -6,8 +6,8 @@
   .learner-training-head,.learner-training-row{display:grid;grid-template-columns:minmax(300px,1.6fr) 125px minmax(180px,.8fr) 115px minmax(155px,.7fr);gap:16px;align-items:center}
   .learner-training-head{padding:0 14px 8px;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.05em;color:#6b7788}
   .learner-training-list{display:grid;gap:8px}
-  .learner-training-row{min-height:64px;padding:12px 14px;border:1px solid #dce3ea;border-radius:10px;background:#eef6ff}
-  .learner-training-row:nth-child(even){background:#fff1f2}
+  .learner-training-row{min-height:64px;padding:12px 14px;border:1px solid #dce3ea;border-radius:10px;background:#f4f5f6}
+  .learner-training-row:nth-child(even){background:#f4f5f6}
   .learner-training-title{font-size:12px;font-weight:850;color:#263746}
   .learner-training-meta{font-size:9px;color:#667085;margin-top:4px}
   .learner-training-date,.learner-training-location{font-size:11px;font-weight:750;color:#526477}
