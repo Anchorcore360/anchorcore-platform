@@ -413,6 +413,7 @@
       .status-row:last-child {
         border-bottom: 0;
       }
+      .course-row-main{display:flex;align-items:flex-start;gap:12px;min-width:0}.course-row-action{flex:0 0 auto}.joining-btn{background:var(--red);white-space:nowrap}
       .form-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -923,7 +924,7 @@
           db
             .from("booking_attendees")
             .select(
-              "attendance_status,outcome,joining_instructions_sent_at,joining_instructions_viewed_at,joining_instructions_acknowledged_at,joining_instruction_access_token,bookings(id,course_title,start_date,end_date,start_time,end_time,location,location_address,location_postcode,status,joining_instructions_sent_at)",
+              "attendance_status,outcome,joining_instructions_sent_at,joining_instructions_viewed_at,joining_instructions_acknowledged_at,joining_instruction_access_token,bookings(id,course_id,course_title,start_date,end_date,start_time,end_time,location,location_address,location_postcode,status,joining_instructions_sent_at,courses(joining_instructions_path))",
             )
             .eq("profile_id", p.id),
         ]);
@@ -1080,10 +1081,10 @@
               .slice(0, 4)
               .map((b) => {
                 const confirmed = String(b.status || "").toLowerCase() === "confirmed";
-                const released = !!(b.joining_instructions_sent_at || b.bookings_joining_instructions_sent_at);
-                const token = b.joining_instruction_access_token;
-                const joiningHref = token ? `joining-instructions.html?token=${encodeURIComponent(token)}` : `learner-portal.html#training`;
-                return `<div class="status-row"><div><strong>${esc(b.course_title || "Training Course")}</strong><div class="muted">${fmt(b.start_date)} · ${esc(b.location || "Location TBC")}</div><div class="muted">${confirmed ? "Booking confirmed" : esc(b.status || "Booked")}${released ? " · Joining instructions ready" : " · Joining instructions not yet released"}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="pill good">${confirmed ? "Confirmed" : "Booked"}</span>${released && token ? `<a class="btn" href="${joiningHref}">View Joining Instructions</a>` : ""}</div></div>`;
+                const hasCourseInstructions = !!b.courses?.joining_instructions_path;
+                const released = !!(b.joining_instructions_sent_at || b.bookings_joining_instructions_sent_at || hasCourseInstructions);
+                const joiningHref = hasCourseInstructions ? `learner-course-joining-instructions.html?booking=${encodeURIComponent(b.id)}` : `joining-instructions-view.html?booking=${encodeURIComponent(b.id)}`;
+                return `<div class="status-row"><div class="course-row-main">${released ? `<a class="btn joining-btn course-row-action" href="${joiningHref}">View Joining Instructions</a>` : ""}<div><strong>${esc(b.course_title || "Training Course")}</strong><div class="muted">${fmt(b.start_date)} · ${esc(b.location || "Location TBC")}</div><div class="muted">${confirmed ? "Booking confirmed" : esc(b.status || "Booked")}${released ? " · Joining instructions ready" : " · Joining instructions not yet released"}</div></div></div><span class="pill good">${confirmed ? "Confirmed" : "Booked"}</span></div>`;
               })
               .join("")
           : '<div class="empty">No upcoming courses booked.</div>';
