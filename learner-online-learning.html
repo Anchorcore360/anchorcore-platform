@@ -15,8 +15,8 @@ body{margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:var(
 @media(max-width:1000px){.shell{grid-template-columns:1fr}.side{display:none}.features{grid-template-columns:repeat(2,1fr)}.feature:nth-child(2){border-right:0}}@media(max-width:650px){.content{padding:25px 14px}.coming{padding:30px 12px}h1{font-size:38px}.features{grid-template-columns:1fr}.feature{border-right:0;border-bottom:1px solid rgba(255,255,255,.14);padding:14px}.feature:last-child{border-bottom:0}}
 </style>
 </head>
-<body data-portal-nav="learner">
-<div class="shell"><aside class="side"></aside>
+<body>
+<div class="shell"><aside class="side portal-side"><div class="brand"><a class="rrta-brand-image-link telecom" href="learner-portal.html" aria-label="RRTA"><span class="rrta-3d-logo"></span></a></div><div class="portal-nav-label">RRT Learner Portal</div><nav class="portal-nav" id="staticLearnerNav"></nav><div class="spacer"></div></aside>
 <main class="main"><div class="content"><section class="coming" aria-labelledby="coming-title">
 <div class="learning-icon" aria-hidden="true"><svg viewBox="0 0 160 110"><rect x="24" y="12" width="112" height="72" rx="5"/><path d="M16 91h128l-8 8H24z"/><path class="accent" d="M54 45l26-13 26 13-26 13zM64 51v17c10 7 22 7 32 0V51"/><path d="M106 45v20"/></svg></div>
 <div class="eyebrow">Online Learning</div><h1 id="coming-title">Coming <span>Soon</span></h1>
@@ -24,5 +24,18 @@ body{margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:var(
 <div class="features"><div class="feature"><strong>Interactive Courses</strong>Structured RRTA learning</div><div class="feature"><strong>Guidance &amp; Resources</strong>Supporting course materials</div><div class="feature"><strong>Track Your Progress</strong>Your learning record</div><div class="feature"><strong>Learn Anytime</strong>Access when you need it</div></div>
 <div class="foot">We'll let you know as soon as it's ready.</div><div class="brandline">Rapid Response Telecoms &nbsp; | &nbsp; Training Academy</div><div class="tagline">Integrity Breeds Trust</div>
 </section></div></main></div>
-<script src="platform-navigation.js?v=20260923-1"></script><script src="portal-navigation.js?v=20260923-5"></script>
+<script src="platform-navigation.js?v=20260923-1"></script><script>
+(function(){
+ const side=document.querySelector('.portal-side'), nav=document.getElementById('staticLearnerNav');
+ if(!side||!nav||!window.RRTAPlatformNavigation)return;
+ const here=(location.pathname.split('/').pop()||'').toLowerCase();
+ const icon=window.RRTAPlatformNavigation.icon;
+ nav.innerHTML=window.RRTAPlatformNavigation.menus.learner.filter(x=>x.type==='link').map(x=>{
+   const u=new URL(x.href,location.href), p=(u.pathname.split('/').pop()||'').toLowerCase();
+   const active=p===here?' active':'';
+   return '<a class="portal-nav-link'+active+'" href="'+x.href+'">'+icon(x.icon)+'<span>'+x.label+'</span></a>';
+ }).join('');
+ const account=document.createElement('div'); account.className='rrta-account-panel'; account.innerHTML='<div class="rrta-account-user"><strong>Signed in</strong><span>RRTA account</span></div><div class="rrta-account-actions"><a href="portal.html">↔ Switch Portal</a><a href="learner.html">↪ Sign Out</a></div>'; side.appendChild(account);
+})();
+</script>
 </body></html>
