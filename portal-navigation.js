@@ -3,7 +3,7 @@
   if (window.__rrtaPortalNavigationLoaded) return;
   window.__rrtaPortalNavigationLoaded = true;
   const currentPage=(location.pathname.split('/').pop()||'').toLowerCase();
-  const addScript=(src,key)=>{if(document.querySelector(`script[data-${key}]`))return null;const s=document.createElement('script');s.src=src;s.dataset[key]='1';document.body.appendChild(s);return s};
+  const addScript=(src,key)=>{if(document.querySelector(`script[data-${key}]`))return null;const s=document.createElement('script');s.src=src;s.setAttribute('data-'+key,'1');document.body.appendChild(s);return s};
   const loadArchivedGuard=()=>addScript('archived-selector-guard.js?v=20260917-1','rrta-archive-guard');
   const loadPersonLinks=()=>addScript('person-profile-links.js?v=20260917-2','rrta-person-links');
   if(document.readyState==='loading'){window.addEventListener('DOMContentLoaded',loadArchivedGuard,{once:true});window.addEventListener('DOMContentLoaded',loadPersonLinks,{once:true})}else{loadArchivedGuard();loadPersonLinks()}
