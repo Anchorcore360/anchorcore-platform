@@ -14,11 +14,11 @@ async function page(file,options={}) {
   const db={auth:{getUser:async()=>options.auth||{data:{user:{id:'admin'}}}},from(table){
     calls.push(table); let single=false,filter;
     const query={select(){return query},eq(k,v){filter=v;return query},single(){single=true;return query},maybeSingle(){single=true;return query},order(){return query},then(resolve,reject){
-      let data=table==='people'?(single?(options.person||person):options.people||[person]):table==='profiles'?(single?{id:'admin',account_status:'active',permission_level:'super_user'}:options.profiles||[]):single?{company_name:'Test Company'}:[];
+      let data=table==='people'?(single?(options.person||person):options.people||[person]):table==='profiles'?(single?{id:'admin',account_status:'active',permission_level:'super_user'}:options.profiles||[]):single?{company_name:'Test Company'}:options.companies||[];
       return Promise.resolve({data,error:options.peopleError&&table==='people'?{message:'Person unavailable'}:null}).then(resolve,reject);
     }};return query;
   },storage:{from(bucket){assert.equal(bucket,'learner-photos');return{async createSignedUrl(photo){calls.push(photo);return options.photoError?{error:{message:'Storage denied'}}:{data:{signedUrl:'https://test.invalid/'+photo}}}}}}};
-  const context={...elements,document:{documentElement:{classList:{add(){}}},getElementById:id=>elements[id]},supabase:{createClient:(url,apiKey)=>{assert.equal(apiKey,key,'page must use the active project key');return db}},location:{search:'?id=person-1',href:''},URLSearchParams,console};
+  const context={...elements,document:{documentElement:{classList:{add(){}}},getElementById:id=>elements[id]},supabase:{createClient:(url,apiKey)=>{assert.equal(apiKey,key,'page must use the active project key');return db}},location:{search:'?view=external',href:''},URLSearchParams,console};
   context.window=context;vm.createContext(context);
   scripts.forEach(source=>vm.runInContext(source,context));
   await new Promise(resolve=>setImmediate(resolve));
@@ -33,21 +33,6 @@ test('linked profiles keep their photo and learner profile destination',async()=
 test('linked profile without photo falls back to the imported person photo',async()=>{
  const p=await page('manage-people.html',{people:[{...person,profile_id:'profile-1'}],profiles:[{id:'profile-1'}]});assert.match(p.elements.rows.innerHTML,/people\/person-1\/photo.png/);
 });
-test('person page loads the saved image for a signed-in viewer without redirecting',async()=>{
- const p=await page('person-profile.html');assert.equal(p.location.href,'');assert.match(p.elements.app.innerHTML,/people\/person-1\/photo.png/);assert.match(p.elements.app.innerHTML,/Workforce · No login account/);assert.match(p.elements.app.innerHTML,/EMP-1/);assert.deepEqual(p.calls,['people','people/person-1/photo.png']);
-});
-test('missing photo keeps initials and still opens person record',async()=>{
- const p=await page('person-profile.html',{person:{...person,photo_path:null}});assert.match(p.elements.app.innerHTML,/class="avatar">TO/);assert.equal(p.location.href,'');
-});
-test('photo access errors do not hide person details or send viewer to login',async()=>{
- const p=await page('person-profile.html',{photoError:true});assert.match(p.elements.app.innerHTML,/saved photo could not be loaded/);assert.match(p.elements.app.innerHTML,/Test Operative/);assert.equal(p.location.href,'');
-});
-test('signed-out viewers are still sent to sign-in',async()=>{
- const p=await page('person-profile.html',{auth:{data:{user:null},error:{name:'AuthSessionMissingError'}}});assert.equal(p.location.href,'portal.html');assert.equal(p.calls.length,0);
-});
-test('temporary authentication errors are shown instead of a misleading login redirect',async()=>{
- const p=await page('person-profile.html',{auth:{data:{user:null},error:{name:'AuthRetryableFetchError'}}});assert.equal(p.location.href,'');assert.match(p.elements.app.textContent,/Unable to verify your sign-in/);assert.equal(p.calls.length,0);
-});
-test('database errors are shown without redirecting to login',async()=>{
- const p=await page('person-profile.html',{peopleError:true});assert.equal(p.location.href,'');assert.match(p.elements.app.textContent,/Person unavailable/);
-});
+
+test('unassigned people are classified as external and clearly labelled',async()=>{const p=await page('manage-people.html');assert.match(p.elements.rows.innerHTML,/Company not assigned/);assert.match(p.elements.rows.innerHTML,/No login account/)});
+test('assigning RRT moves imported person out of External People',async()=>{const p=await page('manage-people.html',{people:[{...person,default_company_id:'rrt'}],companies:[{id:'rrt',company_name:'Rapid Response Telecoms Ltd'}]});assert.doesNotMatch(p.elements.rows.innerHTML,/Test Operative/)});

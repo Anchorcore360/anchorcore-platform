@@ -1,13 +1,15 @@
 (function(){const db=window.supabase?.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');const cols=['Forename','Surname','Personal Email','Work Email','Mobile','Employee Number','Person Type','Company','Employment Type','Job Title','Primary Job Role','Manager','Start Date','DOB','Smart Awards Learner ID','Smart Awards Card ID','Smart Awards User ID','Smart Awards Email','Photo Filename','Notes'];let parsed=[],photoMap=new Map();const norm=v=>String(v||'').trim().toLowerCase(),dateVal=v=>{if(!v)return null;if(v instanceof Date&&!isNaN(v))return v.toISOString().slice(0,10);const d=new Date(v);return isNaN(d)?null:d.toISOString().slice(0,10)},safe=v=>String(v||'photo').replace(/[^a-zA-Z0-9._-]+/g,'-');
-document.getElementById('template').onclick=()=>{const ws=XLSX.utils.aoa_to_sheet([cols,['Example','Person','person@example.com','','07123456789','','workforce','Rapid Response Telecoms Ltd','Direct','Operative','Operative','','','','','','','person@example.com','example-person.jpg','']]);ws['!cols']=cols.map(x=>({wch:Math.max(16,x.length+3)}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'People Import');const help=XLSX.utils.aoa_to_sheet([['RRTA Bulk People Upload'],['Required','Forename, Surname and at least one email address.'],['Person Type','workforce, induction or external_customer. Only workforce appears in Manage People.'],['Personal Email','Retained even after a work email is added.'],['Work Email','Leave blank during induction if not yet issued.'],['DOB','Optional. Leave blank if unknown.'],['Login','Importing a person does NOT create a login account.'],['Photos','Use the exact image filename in Photo Filename and select the matching images/folder before import. JPEG, PNG and WebP only, maximum 5MB each.'],['Duplicates','Email, employee number, Smart Awards IDs and likely name matches are checked first.']]);XLSX.utils.book_append_sheet(wb,help,'Instructions');XLSX.writeFile(wb,'RRTA_Bulk_People_Upload_Template.xlsx')};
-const ui = Object.fromEntries(['sheet','photos','photo-folder','clear-photos','photo-summary','upload-status','review','retry-review','rows','ready','warnings','blocked','preview','import'].map(id => [id, document.getElementById(id)]));
+document.getElementById('template').onclick=()=>{const ws=XLSX.utils.aoa_to_sheet([cols,['Example','Person','person@example.com','','07123456789','','workforce','Rapid Response Telecoms Ltd','Direct','Operative','Operative','','','','','','','person@example.com','example-person.jpg','']]);ws['!cols']=cols.map(x=>({wch:Math.max(16,x.length+3)}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'People Import');const help=XLSX.utils.aoa_to_sheet([['RRTA Bulk People Upload'],['Required','Forename, Surname and at least one email address.'],['Person Type','workforce, induction or external_customer. Only workforce appears in Manage People.'],['Personal Email','Retained even after a work email is added.'],['Work Email','Leave blank during induction if not yet issued.'],['DOB','Optional. Leave blank if unknown.'],['Company','Optional. Blank company appears under External People and requires acknowledgement. Enter the exact name of an existing company.'],['Login','Importing a person does NOT create a login account.'],['Photos','Use the exact image filename in Photo Filename and select the matching images/folder before import. JPEG, PNG and WebP only, maximum 5MB each.'],['Duplicates','Email, employee number, Smart Awards IDs and likely name matches are checked first.']]);XLSX.utils.book_append_sheet(wb,help,'Instructions');XLSX.writeFile(wb,'RRTA_Bulk_People_Upload_Template.xlsx')};
+const ui = Object.fromEntries(['ack-no-company','sheet','photos','photo-folder','clear-photos','photo-summary','upload-status','review','retry-review','rows','ready','warnings','blocked','preview','import'].map(id => [id, document.getElementById(id)]));
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let records = null, checkVersion = 0, sheetVersion = 0, checking = false, reading = false, selecting = false, importing = false;
 let checkError = '', photoUrls = [];
 const message = (text, error = false) => { ui['upload-status'].textContent = text; ui['upload-status'].className = error ? 'bad' : ''; };
+ui['ack-no-company'].onchange = () => updateControls();
+const companyNorm = v => norm(v).replace(/\s+/g,' ').replace(/\s+(ltd\.?|limited)$/,'');
 const busy = () => importing || reading || selecting;
 function updateControls() {
-  ui.import.disabled = busy() || checking || !records || !!checkError || !parsed.some(r => r.__state === 'ready' && !r.__personId && !r.__uncertain);
+  ui.import.disabled = busy() || checking || (parsed.some(r=>r.__state==='ready'&&r.__companyWarning)&&!ui['ack-no-company'].checked) || !records || !!checkError || !parsed.some(r => r.__state === 'ready' && !r.__personId && !r.__uncertain);
   for (const id of ['sheet','photos','photo-folder']) ui[id].disabled = busy();
   ui['clear-photos'].disabled = busy() || !photoMap.size;
   ui['retry-review'].disabled = busy() || checking;
@@ -53,10 +55,15 @@ function validateRows() {
     if (employee && batchEmp.get(employee) > 1) issues.push('Employee number repeated in spreadsheet');
     if (ids.some(x => batchSmart.get(x) > 1)) issues.push('Smart Awards ID repeated in spreadsheet');
     if (names.has(norm(forename+' '+surname))) warns.push('Name already exists — review possible duplicate');
+    const companyName=norm(r.Company);
+    const matches=(records?.companies||[]).filter(c=>c.active!==false&&companyNorm(c.company_name)===companyNorm(companyName));
+    r.__companyId=companyName&&matches.length===1?matches[0].id:null;
+    r.__companyWarning=!companyName;
+    if(companyName&&records&&matches.length!==1)issues.push(matches.length?'Company name is ambiguous — use a unique company name':'Company not found — correct the name or leave blank');
     const photo = photoFor(r);
     if (photo.issue) issues.push(photo.issue);
     Object.assign(r, {__row:i+2,__issues:issues,__warnings:warns,__type:type});
-    r.__state = r.__personId ? (r.__photoError ? 'photo-error' : 'imported') : r.__uncertain ? 'uncertain' : r.__importError ? 'failed' : issues.length ? 'blocked' : warns.length ? 'warning' : 'ready';
+    r.__state = r.__personId ? ((r.__photoError||r.__companyError) ? 'photo-error' : 'imported') : r.__uncertain ? 'uncertain' : r.__importError ? 'failed' : issues.length ? 'blocked' : warns.length ? 'warning' : 'ready';
   });
 }
 function renderReview() {
@@ -64,13 +71,14 @@ function renderReview() {
   ui.review.hidden = !parsed.length;
   ui.rows.textContent = parsed.length;
   ui.ready.textContent = parsed.filter(r => r.__state === 'ready').length;
-  ui.warnings.textContent = parsed.filter(r => r.__state === 'warning' || r.__state === 'photo-error').length;
+  ui.warnings.textContent = parsed.filter(r => r.__state === 'warning' || r.__state === 'photo-error' || (r.__companyWarning&&!r.__personId)).length;
   ui.blocked.textContent = parsed.filter(r => ['blocked','failed','uncertain'].includes(r.__state)).length;
   ui.preview.innerHTML = parsed.map(r => {
     const photo = photoFor(r);
     if (r.__photoError) { photo.label = 'Photo upload failed'; photo.css = 'bad'; }
-    let result = checking ? 'Checking existing people…' : checkError ? 'Checks unavailable — retry checks' : r.__state === 'ready' ? 'Ready' : [...r.__issues,...r.__warnings].join('; ');
+    let result = checking ? 'Checking existing people…' : checkError ? 'Checks unavailable — retry checks' : r.__state === 'ready' ? (r.__companyWarning?'Ready — No company assigned; will appear under External People':'Ready') : [...r.__issues,...r.__warnings].join('; ');
     if (r.__personId) result = r.__photoError ? 'Person imported; photo failed: '+r.__photoError+'. Open View people to add the photo.' : 'Imported';
+    if(r.__companyError)result='Person imported; company could not be saved: '+r.__companyError+'. Open Profile to assign the company; do not import again.';
     if (r.__importError) result = 'Import failed: '+r.__importError;
     if (r.__uncertain) result = 'Import status unknown. Check View people before trying again.';
     const css = r.__state === 'ready' || r.__state === 'imported' ? 'ok' : r.__state === 'warning' ? 'warn' : 'bad';
@@ -121,6 +129,7 @@ ui.sheet.onchange = async event => {
   const version = ++sheetVersion;
   ++checkVersion; checking = false; reading = true; parsed = []; records = null; checkError = '';
   ui['retry-review'].hidden = true;
+  ui['ack-no-company'].checked=false;
   renderReview(); message('Reading spreadsheet…');
   try {
     if (!window.XLSX) throw new Error('The spreadsheet reader did not load. Refresh the page and try again.');
@@ -144,13 +153,14 @@ async function checkExistingPeople() {
   ui['retry-review'].hidden = true;
   renderReview(); message('Checking people and photo matches…');
   try {
-    const [a,b] = await Promise.all([
+    const [a,b,c] = await Promise.all([
       db.from('people').select('id,full_name,forename,surname,email,personal_email,work_email,employee_number,smart_awards_learner_id,smart_awards_card_id,smart_awards_user_id,status'),
-      db.from('profiles').select('id,full_name,forename,surname,email,employee_number,smart_quartz_learner_id,smart_nops_card_id,smart_nops_user_id,account_status')
+      db.from('profiles').select('id,full_name,forename,surname,email,employee_number,smart_quartz_learner_id,smart_nops_card_id,smart_nops_user_id,account_status'),
+      db.from('external_customers').select('id,company_name,active')
     ]);
     if (version !== checkVersion) return;
-    if (a.error || b.error) throw (a.error || b.error);
-    records = {people:a.data || [],profiles:b.data || []};
+    if (a.error || b.error || c.error) throw (a.error || b.error || c.error);
+    records = {people:a.data || [],profiles:b.data || [],companies:c.data || []};
     message('Review the table below, then choose Import Ready People. Files are not saved until you import.');
   } catch (error) {
     if (version !== checkVersion) return;
@@ -176,7 +186,7 @@ async function uploadPhoto(personId,row) {
 ui.import.onclick = async () => {
   if (ui.import.disabled || busy()) return;
   const list = parsed.filter(r => r.__state === 'ready' && !r.__personId && !r.__uncertain);
-  if (!list.length || !confirm(`Import ${list.length} ready people? This creates person records only and does not create login accounts.`)) return;
+  if (!list.length || !confirm(`Import ${list.length} ready people? ${list.filter(r=>r.__companyWarning).length} without a company will appear under External People. This creates person records only and does not create login accounts.`)) return;
   importing = true; ui.import.textContent = 'Importing…'; updateControls();
   let done = 0, failures = 0;
   try {
@@ -195,12 +205,17 @@ ui.import.onclick = async () => {
       if (response.error) { r.__importError = response.error.message; failures++; renderReview(); continue; }
       if (!response.data) { r.__uncertain = true; failures++; renderReview(); continue; }
       r.__personId = response.data; r.__photoEntry = (photoMap.get(norm(r['Photo Filename'])) || [])[0]; done++;
+      if(r.__companyId){
+        try{const saved=await db.from('people').update({default_company_id:r.__companyId}).eq('id',r.__personId).select('id').single();if(saved.error||!saved.data)throw saved.error||Error('Company update not confirmed');}
+        catch(error){r.__companyError=error.message||'Connection failed';}
+      }
       try { await uploadPhoto(r.__personId,r); }
       catch (error) { r.__photoError = error.message || 'Upload failed'; }
       renderReview();
     }
+    const companyFailures=list.filter(r=>r.__companyError).length;
     const photoFailures = list.filter(r => r.__photoError).length;
-    message(`${done} people imported. ${failures} could not be confirmed.${photoFailures ? ` ${photoFailures} photo upload(s) failed — see the table before leaving.` : ' Review the saved results below.'}`,failures > 0 || photoFailures > 0);
+    message(`${done} people imported. ${failures} could not be confirmed.${companyFailures?` ${companyFailures} company assignment(s) failed — open Profile to correct them.`:''}${photoFailures ? ` ${photoFailures} photo upload(s) failed — see the table before leaving.` : ' Review the saved results below.'}`,failures > 0 || photoFailures > 0 || companyFailures > 0);
   } finally { importing = false; ui.import.textContent = 'Import Ready People'; renderReview(); }
 };
 window.addEventListener('beforeunload',event => {
@@ -212,3 +227,4 @@ if (!window.XLSX || !db) {
   document.getElementById('template').disabled = !window.XLSX;
 }
 })();
+

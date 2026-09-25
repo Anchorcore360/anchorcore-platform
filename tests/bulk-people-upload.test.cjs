@@ -15,7 +15,7 @@ function app(options={}) {
   };
   const calls = [], revoked = [];
   const db = {
-    from: table => ({ select: async () => options.lookup ? options.lookup(table) : {data:[],error:null} }),
+    from: table => ({ select: async () => options.lookup ? options.lookup(table) : {data:table==='external_customers'?[{id:'rrt',company_name:'Rapid Response Telecoms Ltd',active:true}]:[],error:null},update:patch=>({eq:()=>({select:()=>({single:async()=>{calls.push({name:'company-update',args:patch});return options.companyError?{error:{message:'Save denied'}}:{data:{id:'person-1'}}}})})}) }),
     rpc: async (name,args) => {
       calls.push({name,args});
       if (options.rpc) return options.rpc(name,args);
@@ -34,7 +34,7 @@ function app(options={}) {
   vm.runInNewContext(source,context);
   return {
     get,calls,revoked,
-    sheet:rows=>get('sheet').onchange({target:{files:[{arrayBuffer:async()=>JSON.stringify(rows)}]}}),
+    sheet:async rows=>{await get('sheet').onchange({target:{files:[{arrayBuffer:async()=>JSON.stringify(rows)}]}});if(!options.noAck){get('ack-no-company').checked=true;get('ack-no-company').onchange();}},
     photos:files=>get('photos').onchange({target:{files,value:'selected'}}),
     folder:files=>get('photo-folder').onchange({target:{files,value:'selected'}})
   };
@@ -82,7 +82,7 @@ test('lookup failure stays visible and fails closed; retry recovers',async()=>{
 });
 test('old lookup completion cannot replace the newer spreadsheet review',async()=>{
   let resolveOld, count=0;
-  const a=app({lookup:()=>++count<=2?new Promise(resolve=>{const old=resolveOld;resolveOld=()=>{old?.();resolve({data:[{email:'new@example.test'}]})}}):{data:[]}});
+  const a=app({lookup:()=>++count<=3?new Promise(resolve=>{const old=resolveOld;resolveOld=()=>{old?.();resolve({data:[{email:'new@example.test'}]})}}):{data:[]}});
   const first=a.sheet([person()]); await new Promise(r=>setImmediate(r));
   await a.sheet([person({'Personal Email':'new@example.test'})]);
   resolveOld(); await first;
@@ -123,3 +123,8 @@ test('uncertain import does not retry blindly',async()=>{
   const a=app({rpc:()=>{throw Error('Connection lost')}}); await a.sheet([person()]); await a.get('import').onclick();
   assert.match(a.get('preview').innerHTML,/Import status unknown/); assert.equal(a.get('import').disabled,true);
 });
+
+test('blank company requires acknowledgement before importing',async()=>{const a=app({noAck:true});await a.sheet([person()]);assert.match(a.get('preview').innerHTML,/No company assigned; will appear under External People/);assert.equal(a.get('import').disabled,true);a.get('ack-no-company').checked=true;a.get('ack-no-company').onchange();assert.equal(a.get('import').disabled,false)});
+test('known company is saved after person creation',async()=>{const a=app({noAck:true});await a.sheet([person({Company:'Rapid Response Telecoms'})]);assert.equal(a.get('import').disabled,false);await a.get('import').onclick();assert.equal(a.calls.find(c=>c.name==='company-update').args.default_company_id,'rrt')});
+test('unknown company blocks import',async()=>{const a=app();await a.sheet([person({Company:'Unknown Co'})]);assert.equal(a.get('import').disabled,true);assert.match(a.get('preview').innerHTML,/Company not found/)});
+test('company save failure preserves created row and cannot duplicate it',async()=>{const a=app({companyError:true});await a.sheet([person({Company:'Rapid Response Telecoms Ltd'})]);await a.get('import').onclick();assert.match(a.get('preview').innerHTML,/company could not be saved/);assert.equal(a.get('import').disabled,true);assert.equal(a.calls.filter(c=>c.name==='bulk_import_person').length,1)});
