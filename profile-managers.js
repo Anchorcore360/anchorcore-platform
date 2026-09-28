@@ -10,7 +10,7 @@ loadData=async function(){
     db.from('profiles').select('id,full_name,forename,surname,employee_number,job_title,role,account_status,organisational_access_role,portal_access_role').order('full_name'),
     db.from('job_roles').select('id,division,name,active').eq('active',true).order('division').order('name'),
     sourcePerson?db.from('person_job_roles').select('person_id,job_role_id,is_primary').eq('person_id',personRecord.id):db.from('profile_job_roles').select('profile_id,job_role_id,is_primary').eq('profile_id',learnerId),
-    db.from('external_customers').select('id,company_name,is_internal_rrt,active,archived_at').eq('active',true).is('archived_at',null).order('company_name')
+    db.from('external_customers').select('id,company_name,is_internal_rrt,active').eq('active',true).order('company_name')
   ]);
   if(peopleRes.error)throw peopleRes.error;
   if(rolesRes.error)throw rolesRes.error;
