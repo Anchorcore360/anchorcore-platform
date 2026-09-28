@@ -1,5 +1,5 @@
 (function(){
-  const accessLabel=v=>({operative:'Operative',supervisor:'Supervisor',manager:'Manager',operations_manager:'Operations Manager'}[String(v||'').toLowerCase()]||'Operative');
+  const accessLabel=v=>({operative:'Operative',operator:'Operative',supervisor:'Supervisor',manager:'Manager',rrt_subcontractor_manager:'RRT Subcontractor Manager',rrt_subcontractor_operator:'RRT Subcontractor Operator',external:'External - No Access',health_safety:'Health & Safety',operations_manager:'Operations Manager',administrator:'Administrator',academy:'Academy Staff',academy_staff:'Academy Staff'}[String(v||'').toLowerCase()]||'No Portal Access');
   const fieldStyle='width:100%;height:38px;border:1px solid #b8c1cc;border-radius:7px;background:#fff;padding:0 10px;font:inherit;font-size:13px;font-weight:700;color:#18202a';
 
   function hideTopEdit(){const top=document.getElementById('editProfileBtn');if(top)top.style.display='none'}
@@ -53,8 +53,7 @@
     const eyebrow=document.querySelector('.profile-topbar .eyebrow');if(eyebrow)eyebrow.textContent='Person Record';
     const backLink=document.querySelector('.profile-topbar .text-btn');if(backLink){backLink.href='manage-people.html';backLink.textContent='← Back to Manage People'}
     const jobTitleValue=document.getElementById('jobTitle');if(jobTitleValue)jobTitleValue.textContent=learner.job_title||'Not set';
-    let accessSpan=document.getElementById('systemRoleHeader');if(!accessSpan){const meta=document.querySelector('.profile-meta');if(meta){accessSpan=document.createElement('span');accessSpan.id='systemRoleHeader';accessSpan.innerHTML='<strong>System Access:</strong> <span id="systemRoleValue"></span>';const emailSpan=[...meta.children].find(x=>x.textContent.trim().startsWith('Email:'));if(emailSpan)meta.insertBefore(accessSpan,emailSpan);else meta.appendChild(accessSpan)}}
-    const systemRoleValue=document.getElementById('systemRoleValue');if(systemRoleValue)systemRoleValue.textContent=accessLabel(learner.organisational_access_role||learner.portal_access_role||'operative');
+    const duplicateAccess=document.getElementById('systemRoleHeader');if(duplicateAccess)duplicateAccess.remove();
     renderSystemAccessCard();wireInlineEditor();
     let complianceSpan=document.getElementById('primaryComplianceRoleHeader');if(!complianceSpan){const meta=document.querySelector('.profile-meta');if(meta){complianceSpan=document.createElement('span');complianceSpan.id='primaryComplianceRoleHeader';complianceSpan.innerHTML='<strong>Primary Compliance Role:</strong> <span id="primaryComplianceRoleValue">Loading…</span>';const emailSpan=[...meta.children].find(x=>x.textContent.trim().startsWith('Email:'));if(emailSpan)meta.insertBefore(complianceSpan,emailSpan);else meta.appendChild(complianceSpan)}}
     const roleValue=document.getElementById('primaryComplianceRoleValue');if(roleValue){try{const{data,error}=await db.from('profile_job_roles').select('job_role_id,is_primary,job_roles(name,division)').eq('profile_id',learner.id).order('is_primary',{ascending:false}).limit(1);if(error)throw error;const role=data?.[0]?.job_roles;roleValue.textContent=role?.name||'Not Assigned'}catch(e){roleValue.textContent='Not Assigned'}}
