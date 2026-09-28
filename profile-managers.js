@@ -9,7 +9,7 @@ loadData=async function(){
   const [peopleRes,rolesRes,linksRes,companiesRes]=await Promise.all([
     db.from('profiles').select('id,full_name,forename,surname,employee_number,job_title,role,account_status,organisational_access_role,portal_access_role').order('full_name'),
     db.from('job_roles').select('id,division,name,active').eq('active',true).order('division').order('name'),
-    sourcePerson?db.from('person_job_roles').select('person_id,job_role_id,is_primary').eq('person_id',personRecord.id):db.from('profile_job_roles').select('profile_id,job_role_id,is_primary').eq('profile_id',learnerId),
+    sourcePerson?db.from('person_job_roles').select('person_id,job_role_id,is_primary').eq('person_id',personRecord.id):db.from('person_job_roles').select('person_id,job_role_id,is_primary').eq('person_id','00000000-0000-0000-0000-000000000000'),
     db.from('external_customers').select('id,company_name,is_internal_rrt,active').order('company_name')
   ]);
   if(peopleRes.error)throw peopleRes.error;
