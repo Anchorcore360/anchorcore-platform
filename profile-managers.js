@@ -21,6 +21,8 @@ loadData=async function(){
   learnerJobRoles=linksRes.data||[];
   companyDirectory=companiesRes.data||[];
 };
+const originalRender=render;
+render=async function(){await originalRender();try{renderManagers();renderJobRoles()}catch(err){console.error('Profile enhancement render failed',err)}};
 function managerDisplayName(id){if(!id)return'Not assigned';const p=managerDirectory.find(x=>x.id===id);return p?.full_name||[p?.forename,p?.surname].filter(Boolean).join(' ')||'Unknown employee'}
 function managerMeta(id){if(!id)return'';const p=managerDirectory.find(x=>x.id===id);if(!p)return'';return[p.job_title,p.employee_number?`Employee ${p.employee_number}`:''].filter(Boolean).join(' · ')}
 function formatDob(value){if(!value)return'—';const[y,m,d]=String(value).split('-');return y&&m&&d?`${d}/${m}/${y}`:value}
