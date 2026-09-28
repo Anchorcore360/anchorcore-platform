@@ -35,9 +35,9 @@
     edit.disabled=true;edit.textContent='Saving…';
     let msg=document.getElementById(msgId);if(!msg){msg=document.createElement('span');msg.id=msgId;msg.style.cssText='font-size:11px;color:#667085;margin-right:8px';edit.insertAdjacentElement('beforebegin',msg)}
     const patch={forename,surname,full_name:(forename+' '+surname).trim(),email:(get('email')||'').toLowerCase()||null,employee_number:get('employee_number'),date_of_birth:get('date_of_birth'),job_title:get('job_title'),organisation:get('organisation'),account_status:get('account_status')||'active',organisational_access_role:role,portal_access_role:role,updated_at:new Date().toISOString()};
-    const {data,error}=await db.from('profiles').update(patch).eq('id',learner.id).select('*').single();
+    let data,error;if(typeof personRecord!=='undefined'&&personRecord&&!personRecord.profile_id){const personPatch={forename,surname,full_name:patch.full_name,email:patch.email,employee_number:patch.employee_number,job_title:patch.job_title,status:patch.account_status,updated_at:patch.updated_at};const result=await db.from('people').update(personPatch).eq('id',personRecord.id).select('*').single();data=result.data;error=result.error;if(!error){personRecord=data;learner={...learner,...data,account_status:data.status,organisation:learner.organisation,organisational_access_role:'external',portal_access_role:'external'}}}else{const result=await db.from('profiles').update(patch).eq('id',learner.id).select('*').single();data=result.data;error=result.error;if(!error)learner=data}
     if(error){msg.textContent=error.message||'Unable to save profile.';msg.style.color='#b42318';edit.disabled=false;edit.textContent='Save Changes';return}
-    learner=data;msg.textContent='Saved';msg.style.color='#176b37';await refresh();
+    msg.textContent='Saved';msg.style.color='#176b37';await refresh();
   }
 
   function wireInlineEditor(){
@@ -56,7 +56,7 @@
     const duplicateAccess=document.getElementById('systemRoleHeader');if(duplicateAccess)duplicateAccess.remove();
     renderSystemAccessCard();wireInlineEditor();
     let complianceSpan=document.getElementById('primaryComplianceRoleHeader');if(!complianceSpan){const meta=document.querySelector('.profile-meta');if(meta){complianceSpan=document.createElement('span');complianceSpan.id='primaryComplianceRoleHeader';complianceSpan.innerHTML='<strong>Primary Compliance Role:</strong> <span id="primaryComplianceRoleValue">Loading…</span>';const emailSpan=[...meta.children].find(x=>x.textContent.trim().startsWith('Email:'));if(emailSpan)meta.insertBefore(complianceSpan,emailSpan);else meta.appendChild(complianceSpan)}}
-    const roleValue=document.getElementById('primaryComplianceRoleValue');if(roleValue){try{const{data,error}=await db.from('profile_job_roles').select('job_role_id,is_primary,job_roles(name,division)').eq('profile_id',learner.id).order('is_primary',{ascending:false}).limit(1);if(error)throw error;const role=data?.[0]?.job_roles;roleValue.textContent=role?.name||'Not Assigned'}catch(e){roleValue.textContent='Not Assigned'}}
+    const roleValue=document.getElementById('primaryComplianceRoleValue');if(roleValue){try{const sourceIsPerson=typeof personRecord!=='undefined'&&personRecord&&!personRecord.profile_id;const roleQuery=sourceIsPerson?db.from('person_job_roles').select('job_role_id,is_primary,job_roles(name,division)').eq('person_id',personRecord.id):db.from('profile_job_roles').select('job_role_id,is_primary,job_roles(name,division)').eq('profile_id',learner.id);const{data,error}=await roleQuery.order('is_primary',{ascending:false}).limit(1);if(error)throw error;const role=data?.[0]?.job_roles;roleValue.textContent=role?.name||'Not Assigned'}catch(e){roleValue.textContent='Not Assigned'}}
     const qr=document.querySelector('.qr-slot');if(qr){const small=qr.querySelector('small');if(small)small.textContent='Person ID / verification'}
   }
 
