@@ -34,7 +34,7 @@ async function saveManagerRelationship(personId,companyId){
  const managerId=val('manager');if(!managerId)return;
  const r=await db.from('person_relationships').insert({
   person_id:personId,manager_profile_id:managerId,company_id:companyId||null,
-  relationship_type:'manager',active:true,started_at:new Date().toISOString(),updated_at:new Date().toISOString()
+  relationship_type:'manager',active:true,started_at:new Date().toISOString().slice(0,10),updated_at:new Date().toISOString()
  });if(r.error)throw r.error;
 }
 form.onsubmit=async e=>{
@@ -49,7 +49,7 @@ form.onsubmit=async e=>{
     full_name:full,forename:fn,surname:sn,email:emailValue,phone:val('phone')||null,date_of_birth:val('dob')||null,
     default_company_id:companyId,status:'active',person_type:'workforce',employee_number:val('employee')||null,
     job_title:val('job')||null,department:val('department')||null,work_location:val('location')||null,
-    continuous_service_date:val('serviceDate')||null,current_role_start_date:val('roleStart')||null,
+    start_date:val('serviceDate')||null,current_role_start_date:val('roleStart')||null,
     notes:val('notes')||null,updated_at:new Date().toISOString()
   }).select('id').single();
   if(pr.error)throw pr.error;
