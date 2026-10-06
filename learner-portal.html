@@ -882,9 +882,12 @@
             .eq("user_id", u.user.id)
             .maybeSingle(),
         ]);
+        const systemRole=String(p?.organisational_access_role||p?.portal_access_role||"").toLowerCase();
         if (
           error ||
           !p ||
+          systemRole==="external" ||
+          p.account_status==="archived" ||
           (!access?.learner_portal &&
             String(p.role).toLowerCase() !== "learner" &&
             p.permission_level !== "super_user")
