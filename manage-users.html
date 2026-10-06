@@ -51,10 +51,10 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 <div class="toggle-row"><div class="toggle-copy"><strong>Academy Administration</strong><span>Access to the Academy administration portal where permitted by role.</span></div><label class="switch"><input type="checkbox" id="academyToggle"><span class="slider"></span></label></div>
 <div class="toggle-row"><div class="toggle-copy"><strong>Workforce Management</strong><span>Access to workforce management functions where permitted.</span></div><label class="switch"><input type="checkbox" id="workforceToggle"><span class="slider"></span></label></div>
 <div class="toggle-row"><div class="toggle-copy"><strong>Manage Users</strong><span>High-trust permission. Allows this user to open Setup → Manage Users and grant or change user access.</span></div><label class="switch"><input type="checkbox" id="manageUsersToggle"><span class="slider"></span></label></div>
-<div class="section-title">Password</div>
-<div class="notice">You can set a new password for this portal account. The new password takes effect immediately.</div>
-<div class="form-row"><label>New Password</label><input id="resetPasswordInput" type="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters"></div>
-<button class="btn light" type="button" id="resetPasswordBtn">Set New Password</button>
+<div class="section-title">Password Reset</div>
+<div class="notice">Issue a temporary password if the user cannot sign in. On their next login they will be required to replace it with a private password of their own.</div>
+<div class="form-row"><label>Temporary Password</label><input id="resetPasswordInput" type="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters"></div>
+<button class="btn light" type="button" id="resetPasswordBtn">Issue Temporary Password</button>
 </div>
 <div id="grantAccessFields" class="grant-box">
 <div class="section-title">Grant Portal Access</div>
@@ -159,13 +159,13 @@ function syncNoAccess(){
 async function resetPassword(){
  if(!selected?.profile)return;
  const pwd=resetPasswordInput.value;
- if(pwd.length<8){alert('New password must be at least 8 characters.');return}
+ if(pwd.length<8){alert('Temporary password must be at least 8 characters.');return}
  resetPasswordBtn.disabled=true;resetPasswordBtn.textContent='Updating…';
  try{
   const r=await db.functions.invoke('manage-user-password',{body:{target_user_id:selected.profile.id,password:pwd}});
   if(r.error)throw r.error;if(r.data?.error)throw new Error(r.data.error);
-  resetPasswordInput.value='';alert('Password updated successfully.');
- }catch(e){alert(e.message||'Unable to update password.')}finally{resetPasswordBtn.disabled=false;resetPasswordBtn.textContent='Set New Password'}
+  resetPasswordInput.value='';alert('Temporary password issued. The user must create their own password at next login.');
+ }catch(e){alert(e.message||'Unable to update password.')}finally{resetPasswordBtn.disabled=false;resetPasswordBtn.textContent='Issue Temporary Password'}
 }
 async function grantAccess(){
  if(!selected?.person)return;const pwd=tempPassword.value;if(pwd.length<8){alert('Temporary password must be at least 8 characters.');return}
