@@ -30,5 +30,5 @@
   }
   document.documentElement.classList.remove('rrta-nav-pending');document.documentElement.classList.add('rrta-nav-ready');return true}
   function start(){if(boot())return;let tries=0;const t=setInterval(()=>{tries++;if(boot()||tries>40)clearInterval(t)},100)}
-  if(window.RRTAPlatformNavigation)start();else{const s=document.createElement('script');s.src='platform-navigation.js?v=20260922-10';s.onload=start;document.head.appendChild(s)}
+  if(window.RRTAPlatformNavigation)start();else{const s=document.createElement('script');s.src='platform-navigation.js?v=20261006-1';s.onload=start;document.head.appendChild(s)}
 })();
