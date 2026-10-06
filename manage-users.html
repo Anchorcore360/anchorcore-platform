@@ -22,7 +22,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 .actions button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 9px;font-size:9px;font-weight:850;cursor:pointer}.actions button:hover{border-color:var(--red);color:#9d0b1a}
 .footer{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:11px 14px;background:var(--soft);color:var(--muted);font-size:10px}
 .drawer-backdrop{position:fixed;inset:0;background:rgba(15,20,28,.36);z-index:40;display:none}.drawer-backdrop.open{display:block}.drawer{position:absolute;right:0;top:0;height:100%;width:min(470px,94vw);background:#fff;box-shadow:-18px 0 55px rgba(0,0,0,.18);display:flex;flex-direction:column}.drawer-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.drawer-head h2{margin:0;font-size:19px}.close{border:0;background:transparent;font-size:24px;cursor:pointer}.drawer-body{padding:18px 20px;overflow:auto}.user-card{display:flex;gap:12px;align-items:center;padding-bottom:15px;border-bottom:1px solid var(--line);margin-bottom:16px}.user-card .avatar{width:48px;height:48px;flex-basis:48px}.user-card strong{display:block;font-size:14px}.section-title{font-size:11px;font-weight:900;margin:18px 0 8px}.form-row{margin-bottom:12px}.form-row label{display:block;font-size:10px;font-weight:850;margin-bottom:5px}.form-row select,.form-row input{width:100%}.toggle-row{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #edf0f3}.toggle-copy strong{display:block;font-size:11px}.toggle-copy span{display:block;color:var(--muted);font-size:9px;margin-top:3px}.switch{position:relative;width:38px;height:22px;flex:0 0 38px}.switch input{display:none}.slider{position:absolute;inset:0;background:#cfd5dc;border-radius:999px;cursor:pointer}.slider:after{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.16s}.switch input:checked+.slider{background:#2f7de1}.switch input:checked+.slider:after{transform:translateX(16px)}
-.drawer-actions{margin-top:auto;padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;background:#fff}.notice{background:#f7f8fa;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:10px;color:#475467}.grant-box{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.grant-box.open{display:block}
+.drawer-actions{margin-top:auto;padding:14px 20px 62px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;background:#fff}.notice{background:#f7f8fa;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:10px;color:#475467}.grant-box{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.grant-box.open{display:block}
 @media(max-width:1000px){.shell{grid-template-columns:1fr}.side{position:relative;height:auto}.filters{grid-template-columns:1fr 1fr}.content{padding:20px 14px}}@media(max-width:650px){.filters{grid-template-columns:1fr}.head{display:block}.head-actions{margin-top:12px}}
 </style>
 </head>
@@ -51,6 +51,10 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 <div class="toggle-row"><div class="toggle-copy"><strong>Academy Administration</strong><span>Access to the Academy administration portal where permitted by role.</span></div><label class="switch"><input type="checkbox" id="academyToggle"><span class="slider"></span></label></div>
 <div class="toggle-row"><div class="toggle-copy"><strong>Workforce Management</strong><span>Access to workforce management functions where permitted.</span></div><label class="switch"><input type="checkbox" id="workforceToggle"><span class="slider"></span></label></div>
 <div class="toggle-row"><div class="toggle-copy"><strong>Manage Users</strong><span>High-trust permission. Allows this user to open Setup → Manage Users and grant or change user access.</span></div><label class="switch"><input type="checkbox" id="manageUsersToggle"><span class="slider"></span></label></div>
+<div class="section-title">Password</div>
+<div class="notice">You can set a new password for this portal account. The new password takes effect immediately.</div>
+<div class="form-row"><label>New Password</label><input id="resetPasswordInput" type="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters"></div>
+<button class="btn light" type="button" id="resetPasswordBtn">Set New Password</button>
 </div>
 <div id="grantAccessFields" class="grant-box">
 <div class="section-title">Grant Portal Access</div>
@@ -134,18 +138,34 @@ function openUser(key){
  const {person,profile}=row,name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—';
  drawerAvatar.innerHTML=avatarHtml(key,name);drawerName.textContent=name;drawerMeta.textContent=(companyFor(person,profile))+' · '+(person?.person_type||'Profile');drawerEmail.textContent=email;
  const hasPortal=!!profile;profileAccessFields.style.display=hasPortal?'block':'none';grantAccessFields.classList.toggle('open',!hasPortal);saveAccess.style.display=hasPortal?'inline-flex':'none';
- if(hasPortal){const pa=portalFor(profile.id)||{};roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true}
+ if(hasPortal){const pa=portalFor(profile.id)||{};roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true;resetPasswordInput.value=''}
  else{grantRole.value='operative';tempPassword.value=''}
- drawerBackdrop.classList.add('open');
+ syncNoAccess();drawerBackdrop.classList.add('open');
 }
 function closeUser(){drawerBackdrop.classList.remove('open');selected=null}
 async function saveUser(){
  if(!selected?.profile)return;
  saveAccess.disabled=true;saveAccess.textContent='Saving…';
  try{
-  const {error}=await db.rpc('manage_user_access',{target_user_id:selected.profile.id,new_access_role:roleSelect.value,new_academy_admin:academyToggle.checked,new_workforce_manager:workforceToggle.checked,new_learner_portal:learnerToggle.checked,new_manage_users:manageUsersToggle.checked});
+  const noAccess=roleSelect.value==='external';
+  const {error}=await db.rpc('manage_user_access',{target_user_id:selected.profile.id,new_access_role:roleSelect.value,new_academy_admin:noAccess?false:academyToggle.checked,new_workforce_manager:noAccess?false:workforceToggle.checked,new_learner_portal:noAccess?false:learnerToggle.checked,new_manage_users:noAccess?false:manageUsersToggle.checked});
   if(error)throw error;await reloadData();closeUser();
  }catch(e){alert(e.message||'Unable to update access.')}finally{saveAccess.disabled=false;saveAccess.textContent='Save Changes'}
+}
+function syncNoAccess(){
+ const off=roleSelect.value==='external';
+ [learnerToggle,academyToggle,workforceToggle,manageUsersToggle].forEach(x=>{if(off)x.checked=false;x.disabled=off});
+}
+async function resetPassword(){
+ if(!selected?.profile)return;
+ const pwd=resetPasswordInput.value;
+ if(pwd.length<8){alert('New password must be at least 8 characters.');return}
+ resetPasswordBtn.disabled=true;resetPasswordBtn.textContent='Updating…';
+ try{
+  const r=await db.functions.invoke('manage-user-password',{body:{target_user_id:selected.profile.id,password:pwd}});
+  if(r.error)throw r.error;if(r.data?.error)throw new Error(r.data.error);
+  resetPasswordInput.value='';alert('Password updated successfully.');
+ }catch(e){alert(e.message||'Unable to update password.')}finally{resetPasswordBtn.disabled=false;resetPasswordBtn.textContent='Set New Password'}
 }
 async function grantAccess(){
  if(!selected?.person)return;const pwd=tempPassword.value;if(pwd.length<8){alert('Temporary password must be at least 8 characters.');return}
@@ -162,7 +182,7 @@ async function reloadData(){
  people=pe.data||people;profiles=pr.data||profiles;rels=re.data||rels;portalRows=pa.data||portalRows;render();
 }
 [searchBox,companyFilter,accessFilter,portalFilter].forEach(x=>x.addEventListener('input',render));
-closeDrawer.onclick=closeUser;cancelEdit.onclick=closeUser;drawerBackdrop.addEventListener('click',e=>{if(e.target===drawerBackdrop)closeUser()});saveAccess.onclick=saveUser;grantAccessBtn.onclick=grantAccess;
+closeDrawer.onclick=closeUser;cancelEdit.onclick=closeUser;drawerBackdrop.addEventListener('click',e=>{if(e.target===drawerBackdrop)closeUser()});saveAccess.onclick=saveUser;grantAccessBtn.onclick=grantAccess;roleSelect.addEventListener('change',syncNoAccess);resetPasswordBtn.onclick=resetPassword;
 load().catch(e=>{rows.innerHTML='<tr><td colspan="9">Unable to load users: '+esc(e.message)+'</td></tr>'});
 </script>
 </body></html>
