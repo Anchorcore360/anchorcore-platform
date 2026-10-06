@@ -72,7 +72,77 @@ async function renderAccreditationRecords(){
   }));
   list.innerHTML=`${expiredCount?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><label style="display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700"><input type="checkbox" id="showExpiredAccs" ${showExpiredAccreditations?'checked':''}> Show expired (${expiredCount})</label></div>`:''}${rows.length?rows.join(''):empty(showExpiredAccreditations?'No accreditations recorded yet.':'No current accreditations. '+(expiredCount?'Use Show expired to view historic records.':''))}`;
   const toggle=document.getElementById('showExpiredAccs');if(toggle)toggle.onchange=()=>{showExpiredAccreditations=toggle.checked;renderAccreditationRecords();};
+  const downloadAll=document.getElementById('downloadAllAccreditationsBtn');if(downloadAll)downloadAll.onclick=downloadAllAccreditationsZip;
   bindActions();
+}
+
+function safeZipName(value,fallback='accreditation'){
+  const cleaned=String(value||fallback).trim().replace(/[\\/:*?"<>|]+/g,'-').replace(/\s+/g,' ').slice(0,100);
+  return cleaned||fallback;
+}
+
+function fileExtensionFromPath(path){
+  const clean=String(path||'').split('?')[0].split('#')[0];
+  const last=clean.split('/').pop()||'';
+  const match=last.match(/\.([a-zA-Z0-9]{1,8})$/);
+  return match?'.'+match[1].toLowerCase():'.pdf';
+}
+
+async function downloadAllAccreditationsZip(){
+  const btn=document.getElementById('downloadAllAccreditationsBtn');
+  if(!btn)return;
+  const withEvidence=accreditations.filter(a=>a.certificate_url);
+  if(!withEvidence.length)return alert('There are no accreditation certificate files available to download.');
+  const oldText=btn.textContent;btn.disabled=true;btn.textContent='Preparing ZIP…';
+  try{
+    await loadScriptOnce('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js','JSZip');
+    const zip=new JSZip();
+    const manifest=[['Accreditation','Awarding Body','Certificate Number','Issue Date','Expiry Date','Status','File Included'].join(',')];
+    const used=new Set();
+    let added=0;
+    for(let i=0;i<accreditations.length;i++){
+      const a=accreditations[i],status=accreditationStatus(a.expiry_date).label;
+      let included='No';
+      if(a.certificate_url){
+        try{
+          const url=await signed('learner-documents',a.certificate_url);
+          if(url){
+            const res=await fetch(url,{cache:'no-store'});
+            if(!res.ok)throw new Error('Certificate download failed');
+            const blob=await res.blob();
+            const ext=fileExtensionFromPath(a.certificate_url);
+            const base=safeZipName(a.accreditation_name||('Accreditation '+(i+1)));
+            let fileName=base+ext,n=2;
+            while(used.has(fileName.toLowerCase()))fileName=base+' ('+(n++)+')'+ext;
+            used.add(fileName.toLowerCase());
+            zip.file(fileName,blob);
+            included='Yes';added++;
+          }
+        }catch(e){console.warn('Could not add accreditation file to ZIP',a?.id,e)}
+      }
+      const csv=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+      manifest.push([
+        csv(a.accreditation_name||'Accreditation'),
+        csv(a.awarding_body||''),
+        csv(a.certificate_number||''),
+        csv(a.issue_date||''),
+        csv(a.expiry_date||''),
+        csv(status),
+        csv(included)
+      ].join(','));
+    }
+    zip.file('Accreditation Summary.csv',manifest.join('\r\n'));
+    if(!added)throw new Error('None of the certificate files could be downloaded.');
+    const blob=await zip.generateAsync({type:'blob'});
+    const name=[learner?.forename,learner?.surname].filter(Boolean).join(' ')||learner?.full_name||'Learner';
+    const objectUrl=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=objectUrl;a.download=safeZipName(name,'Learner')+' - Accreditations.zip';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(objectUrl),30000);
+  }catch(e){
+    alert(e?.message||'Unable to create the accreditation ZIP file.');
+  }finally{
+    btn.disabled=false;btn.textContent=oldText;
+  }
 }
 
 async function imageUrlToDataUrl(src){
