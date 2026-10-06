@@ -30,7 +30,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 <div class="shell"><aside class="side"><div class="spacer"></div></aside><main class="main">
 <header class="top"><strong>RRTA Training Academy Administration</strong><span class="muted">Setup · Manage Users</span></header>
 <div class="content">
-<div class="head"><div><div class="eyebrow">Setup</div><h1>Manage Users</h1><p class="muted">Every person in one place. View profile access, grant portal access and control user permissions.</p></div><div class="head-actions"><a class="btn dark" href="add-person.html">＋ Create Person</a></div></div>
+<div class="head"><div><div class="eyebrow">Setup</div><h1>Manage Users</h1><p class="muted">Every person in one place. View profile access, grant portal access and control user permissions.</p></div><div class="head-actions"><button class="btn light" type="button" id="exportUsersBtn" title="Export current user audit to Excel" aria-label="Export users to Excel"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M8 13l4 5"></path><path d="M12 13l-4 5"></path></svg> Export Excel</button><a class="btn dark" href="add-person.html">＋ Create Person</a></div></div>
 <section class="panel">
 <div class="filters"><input id="searchBox" placeholder="Search name, email, company, manager or role"><select id="companyFilter"><option value="all">All Companies</option></select><select id="accessFilter"><option value="all">All Access Levels</option></select><select id="portalFilter"><option value="all">All Portal States</option><option value="yes">Portal Access</option><option value="no">No Portal Access</option></select></div>
 <div class="table-wrap"><table><thead><tr><th>Name</th><th>Company</th><th>Job Title</th><th>Manager</th><th>Email</th><th>System Access</th><th>Portal Access</th><th>Status</th><th>Actions</th></tr></thead><tbody id="rows"><tr><td colspan="9">Loading users…</td></tr></tbody></table></div>
@@ -69,6 +69,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 
 <script src="portal-navigation.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -116,9 +117,9 @@ async function load(){
  roleOptions.forEach(([v,l])=>{accessFilter.insertAdjacentHTML('beforeend','<option value="'+v+'">'+esc(l)+'</option>');roleSelect.insertAdjacentHTML('beforeend','<option value="'+v+'">'+esc(l)+'</option>');grantRole.insertAdjacentHTML('beforeend','<option value="'+v+'">'+esc(l)+'</option>')});
  render();
 }
-function render(){
+function filteredUserRows(){
  const q=searchBox.value.trim().toLowerCase(),cf=companyFilter.value,af=accessFilter.value,pf=portalFilter.value;
- const list=personRows().filter(({person,profile})=>{
+ return personRows().filter(({person,profile})=>{
   const name=profile?.full_name||person?.full_name||'',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'',company=companyFor(person,profile),manager=managerFor(person,profile);
   const role=String(profile?.organisational_access_role||profile?.portal_access_role||'external').toLowerCase();
   const hasPortal=!!profile;
@@ -126,6 +127,9 @@ function render(){
   const companyId=person?.default_company_id||profile?.company_id||'';
   return(!q||text.includes(q))&&(cf==='all'||String(companyId)===cf)&&(af==='all'||role===af)&&(pf==='all'||(pf==='yes'?hasPortal:!hasPortal));
  });
+}
+function render(){
+ const list=filteredUserRows();
  const total=list.length,totalPages=Math.max(1,Math.ceil(total/pageSizeValue));
  if(currentPage>totalPages)currentPage=totalPages;
  const start=(currentPage-1)*pageSizeValue,end=Math.min(start+pageSizeValue,total),paged=list.slice(start,end);
@@ -182,12 +186,44 @@ async function grantAccess(){
   await reloadData();closeUser();
  }catch(e){alert(e.message||'Unable to grant portal access.')}finally{grantAccessBtn.disabled=false;grantAccessBtn.textContent='Grant Access'}
 }
+function yesNo(v){return v===true?'Yes':'No'}
+function exportUsersToExcel(){
+ if(!window.XLSX){alert('Excel export is still loading. Please try again in a moment.');return}
+ const list=filteredUserRows();
+ if(!list.length){alert('There are no users to export with the current filters.');return}
+ const audit=list.map(({person,profile})=>{
+  const role=profile?.organisational_access_role||profile?.portal_access_role||'external';
+  const pa=profile?portalFor(profile.id)||{}:{};
+  return {
+   'Name':profile?.full_name||person?.full_name||'',
+   'Company':companyFor(person,profile)==='—'?'':companyFor(person,profile),
+   'Job Title':profile?.job_title||person?.job_title||'',
+   'Manager':managerFor(person,profile)==='—'?'':managerFor(person,profile),
+   'Email':profile?.email||person?.email||person?.work_email||person?.personal_email||'',
+   'System Access':profile?accessLabel(role):'No Portal Access',
+   'Portal Access':profile?'Yes':'No',
+   'Learner Portal':profile?yesNo(pa.learner_portal!==false):'No',
+   'Academy Administration':profile?yesNo(pa.academy_admin===true):'No',
+   'Workforce Management':profile?yesNo(pa.workforce_manager===true):'No',
+   'Manage Users':profile?yesNo(pa.manage_users===true):'No',
+   'Status':profile?.account_status||person?.status||'active'
+  };
+ });
+ const ws=XLSX.utils.json_to_sheet(audit);
+ ws['!cols']=[{wch:24},{wch:28},{wch:24},{wch:24},{wch:38},{wch:26},{wch:14},{wch:16},{wch:22},{wch:22},{wch:16},{wch:12}];
+ const wb=XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb,ws,'User Access Audit');
+ const now=new Date(),pad=n=>String(n).padStart(2,'0');
+ const stamp=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+ XLSX.writeFile(wb,'RRTA User Access Audit '+stamp+'.xlsx');
+}
 async function reloadData(){
  const [pe,pr,re,pa]=await Promise.all([db.from('people').select('*').order('full_name'),db.from('profiles').select('id,full_name,email,forename,surname,photo_path,organisation,company_id,manager_1_id,job_title,account_status,portal_access_role,organisational_access_role,permission_level').order('full_name'),db.from('person_relationships').select('person_id,manager_profile_id,company_id,active'),db.from('portal_access').select('*')]);
  people=pe.data||people;profiles=pr.data||profiles;rels=re.data||rels;portalRows=pa.data||portalRows;render();
 }
 [searchBox,companyFilter,accessFilter,portalFilter].forEach(x=>x.addEventListener('input',()=>{currentPage=1;render()}));
 pageSize.addEventListener('change',()=>{pageSizeValue=Number(pageSize.value)||10;currentPage=1;render()});
+exportUsersBtn.onclick=exportUsersToExcel;
 prevPage.onclick=()=>{if(currentPage>1){currentPage--;render()}};
 nextPage.onclick=()=>{currentPage++;render()};
 closeDrawer.onclick=closeUser;cancelEdit.onclick=closeUser;drawerBackdrop.addEventListener('click',e=>{if(e.target===drawerBackdrop)closeUser()});saveAccess.onclick=saveUser;grantAccessBtn.onclick=grantAccess;roleSelect.addEventListener('change',syncNoAccess);resetPasswordBtn.onclick=resetPassword;
