@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>document.documentElement.classList.add("rrta-nav-pending")</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manage Users | RRTA</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="portal-navigation.css">
+<link rel="stylesheet" href="rrta-uniform-ui.css?v=20260922-4">
+<style>
+:root{--red:#b20f22;--ink:#18202a;--muted:#6f7a88;--line:#e2e6ea;--bg:#f4f6f8;--soft:#f1f3f5;--soft2:#e9ecef}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:var(--ink)}
+.shell{display:grid;grid-template-columns:258px minmax(0,1fr);min-height:100vh}.side{background:linear-gradient(180deg,#151a22,#1e2530);padding:16px 12px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}.spacer{flex:1}.main{min-width:0}
+.top{height:66px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 28px;justify-content:space-between}.content{padding:26px 30px 60px;max-width:1700px;margin:auto}
+.head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}.eyebrow{font-size:10px;color:var(--red);font-weight:900;text-transform:uppercase;letter-spacing:.11em}.head h1{margin:5px 0 6px;font-size:30px}.muted{color:var(--muted)}.head-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:0;border-radius:8px;padding:10px 12px;font-weight:800;font-size:11px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:7px}.primary{background:var(--red);color:#fff}.dark{background:#111820;color:#fff}.light{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 24px rgba(18,24,33,.05);overflow:hidden}.filters{padding:14px;display:grid;grid-template-columns:1.5fr .9fr .9fr .8fr;gap:9px;border-bottom:1px solid var(--line)}
+input,select{height:40px;border:1px solid #d3d9df;border-radius:7px;background:#fff;padding:0 10px;font:inherit;font-size:12px;color:var(--ink)}.table-wrap{overflow:auto}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{background:var(--soft);font-size:10px;text-align:left;color:#475467;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:11px 12px;border-bottom:1px solid #e3e7ec;font-size:11px;vertical-align:middle;background:#fff}tbody tr:nth-child(odd) td{background:#f7f8f9}tbody tr:hover td{background:var(--soft2)}
+.person-cell{display:flex;align-items:center;gap:10px}.avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;display:grid;place-items:center;flex:0 0 38px;background:#e8ebef;border:1px solid #d7dde4;color:#475467;font-weight:850}.person-copy strong{display:block;font-size:12px}.person-copy span{display:block;color:var(--muted);font-size:9px;margin-top:2px}.pill{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:9px;font-weight:850;white-space:nowrap}.ok{background:#e7f6ec;color:#176b37}.no{background:#fdebec;color:#a11b2b}.neutral{background:#edf1f5;color:#344054}.academy{background:#fbe9ec;color:#9d0b1a}.manager{background:#e8f1ff;color:#2457a6}
+.actions button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 9px;font-size:9px;font-weight:850;cursor:pointer}.actions button:hover{border-color:var(--red);color:#9d0b1a}
+.footer{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:11px 14px;background:var(--soft);color:var(--muted);font-size:10px}
+.drawer-backdrop{position:fixed;inset:0;background:rgba(15,20,28,.36);z-index:40;display:none}.drawer-backdrop.open{display:block}.drawer{position:absolute;right:0;top:0;height:100%;width:min(470px,94vw);background:#fff;box-shadow:-18px 0 55px rgba(0,0,0,.18);display:flex;flex-direction:column}.drawer-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.drawer-head h2{margin:0;font-size:19px}.close{border:0;background:transparent;font-size:24px;cursor:pointer}.drawer-body{padding:18px 20px;overflow:auto}.user-card{display:flex;gap:12px;align-items:center;padding-bottom:15px;border-bottom:1px solid var(--line);margin-bottom:16px}.user-card .avatar{width:48px;height:48px;flex-basis:48px}.user-card strong{display:block;font-size:14px}.section-title{font-size:11px;font-weight:900;margin:18px 0 8px}.form-row{margin-bottom:12px}.form-row label{display:block;font-size:10px;font-weight:850;margin-bottom:5px}.form-row select,.form-row input{width:100%}.toggle-row{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #edf0f3}.toggle-copy strong{display:block;font-size:11px}.toggle-copy span{display:block;color:var(--muted);font-size:9px;margin-top:3px}.switch{position:relative;width:38px;height:22px;flex:0 0 38px}.switch input{display:none}.slider{position:absolute;inset:0;background:#cfd5dc;border-radius:999px;cursor:pointer}.slider:after{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.16s}.switch input:checked+.slider{background:#2f7de1}.switch input:checked+.slider:after{transform:translateX(16px)}
+.drawer-actions{margin-top:auto;padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;background:#fff}.notice{background:#f7f8fa;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:10px;color:#475467}.grant-box{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.grant-box.open{display:block}
+@media(max-width:1000px){.shell{grid-template-columns:1fr}.side{position:relative;height:auto}.filters{grid-template-columns:1fr 1fr}.content{padding:20px 14px}}@media(max-width:650px){.filters{grid-template-columns:1fr}.head{display:block}.head-actions{margin-top:12px}}
+</style>
+</head>
+<body data-portal-nav="academy" data-rrta-ui="standard">
+<div class="shell"><aside class="side"><div class="spacer"></div></aside><main class="main">
+<header class="top"><strong>RRTA Training Academy Administration</strong><span class="muted">Setup · Manage Users</span></header>
+<div class="content">
+<div class="head"><div><div class="eyebrow">Setup</div><h1>Manage Users</h1><p class="muted">Every person in one place. View profile access, grant portal access and control user permissions.</p></div><div class="head-actions"><a class="btn dark" href="add-person.html">＋ Create Person</a></div></div>
+<section class="panel">
+<div class="filters"><input id="searchBox" placeholder="Search name, email, company, manager or role"><select id="companyFilter"><option value="all">All Companies</option></select><select id="accessFilter"><option value="all">All Access Levels</option></select><select id="portalFilter"><option value="all">All Portal States</option><option value="yes">Portal Access</option><option value="no">No Portal Access</option></select></div>
+<div class="table-wrap"><table><thead><tr><th>Name</th><th>Company</th><th>Person Type</th><th>Manager</th><th>Email</th><th>System Access</th><th>Portal Access</th><th>Status</th><th>Actions</th></tr></thead><tbody id="rows"><tr><td colspan="9">Loading users…</td></tr></tbody></table></div>
+<div class="footer"><span id="count">—</span><span>Access changes can only be made from this screen.</span></div>
+</section>
+</div></main></div>
+
+<div class="drawer-backdrop" id="drawerBackdrop"><aside class="drawer" role="dialog" aria-modal="true">
+<div class="drawer-head"><h2>Edit User Access</h2><button class="close" id="closeDrawer" aria-label="Close">×</button></div>
+<div class="drawer-body">
+<div class="user-card"><div id="drawerAvatar"></div><div><strong id="drawerName">—</strong><span class="muted" id="drawerMeta">—</span><div class="muted" id="drawerEmail" style="font-size:10px;margin-top:3px">—</div></div></div>
+<div id="profileAccessFields">
+<div class="section-title">Access & Permissions</div>
+<div class="form-row"><label>System Access Level</label><select id="roleSelect"></select></div>
+<div class="notice">Team visibility is still controlled by the manager relationships in Manage People. Changing access here does not change who reports to whom.</div>
+<div class="section-title">Portal Areas</div>
+<div class="toggle-row"><div class="toggle-copy"><strong>Learner Portal</strong><span>Own profile, learning, accreditations and bookings.</span></div><label class="switch"><input type="checkbox" id="learnerToggle"><span class="slider"></span></label></div>
+<div class="toggle-row"><div class="toggle-copy"><strong>Academy Administration</strong><span>Access to the Academy administration portal where permitted by role.</span></div><label class="switch"><input type="checkbox" id="academyToggle"><span class="slider"></span></label></div>
+<div class="toggle-row"><div class="toggle-copy"><strong>Workforce Management</strong><span>Access to workforce management functions where permitted.</span></div><label class="switch"><input type="checkbox" id="workforceToggle"><span class="slider"></span></label></div>
+<div class="toggle-row"><div class="toggle-copy"><strong>Manage Users</strong><span>High-trust permission. Allows this user to open Setup → Manage Users and grant or change user access.</span></div><label class="switch"><input type="checkbox" id="manageUsersToggle"><span class="slider"></span></label></div>
+</div>
+<div id="grantAccessFields" class="grant-box">
+<div class="section-title">Grant Portal Access</div>
+<div class="notice">This person has a profile record but no login. A secure portal account will be created and linked to their existing record.</div>
+<div class="form-row"><label>System Access Level</label><select id="grantRole"></select></div>
+<div class="form-row"><label>Temporary Password</label><input id="tempPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters"></div>
+<button class="btn dark" type="button" id="grantAccessBtn">Grant Access</button>
+</div>
+</div>
+<div class="drawer-actions"><button class="btn light" id="cancelEdit">Cancel</button><button class="btn primary" id="saveAccess">Save Changes</button></div>
+</aside></div>
+
+<script src="portal-navigation.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const roleOptions=[
+ ['operator','Operator'],['operative','Operative'],['supervisor','Supervisor'],['manager','Manager'],
+ ['rrt_subcontractor_operator','RRT Subcontractor Operator'],['rrt_subcontractor_manager','RRT Subcontractor Manager'],
+ ['health_safety','Health & Safety'],['operations_manager','Operations Manager'],['administrator','Administrator'],
+ ['academy_staff','Academy Staff'],['external','External — No Access']
+];
+const accessLabel=v=>Object.fromEntries(roleOptions)[String(v||'').toLowerCase()]||'No Portal Access';
+let people=[],profiles=[],companies=[],rels=[],portalRows=[],photoUrls={},selected=null;
+const byId=(arr,id)=>arr.find(x=>String(x.id)===String(id));
+function companyFor(person,profile){const id=person?.default_company_id||profile?.company_id;return byId(companies,id)?.company_name||profile?.organisation||'—'}
+function managerFor(person,profile){const rel=rels.find(r=>String(r.person_id)===String(person?.id)&&r.active!==false&&r.manager_profile_id);const id=rel?.manager_profile_id||profile?.manager_1_id;return byId(profiles,id)?.full_name||'—'}
+function portalFor(id){return portalRows.find(x=>String(x.user_id)===String(id))||null}
+function initials(name){return String(name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()}
+function avatarHtml(key,name){const url=photoUrls[key];return url?'<img class="avatar" src="'+esc(url)+'" alt="">':'<div class="avatar">'+esc(initials(name))+'</div>'}
+function personRows(){
+ const profileIds=new Set(profiles.map(p=>p.id));
+ const rows=people.map(person=>({person,profile:person.profile_id?byId(profiles,person.profile_id):null,key:person.id}));
+ profiles.filter(p=>!people.some(x=>String(x.profile_id)===String(p.id))).forEach(profile=>rows.push({person:null,profile,key:profile.id}));
+ return rows;
+}
+async function load(){
+ const {data:u}=await db.auth.getUser();if(!u?.user){location.href='portal.html';return}
+ const [{data:me},{data:myAccess}]=await Promise.all([
+  db.from('profiles').select('permission_level,account_status').eq('id',u.user.id).single(),
+  db.from('portal_access').select('manage_users').eq('user_id',u.user.id).maybeSingle()
+ ]);
+ if(!me||me.account_status!=='active'||!(me.permission_level==='super_user'||myAccess?.manage_users===true)){location.href='portal.html';return}
+ const [pe,pr,co,re,pa]=await Promise.all([
+  db.from('people').select('*').order('full_name'),
+  db.from('profiles').select('id,full_name,email,forename,surname,photo_path,organisation,company_id,manager_1_id,job_title,account_status,portal_access_role,organisational_access_role,permission_level').order('full_name'),
+  db.from('external_customers').select('id,company_name,active').order('company_name'),
+  db.from('person_relationships').select('person_id,manager_profile_id,company_id,active'),
+  db.from('portal_access').select('*')
+ ]);
+ for(const x of[pe,pr,co,re,pa])if(x.error)throw x.error;
+ people=pe.data||[];profiles=pr.data||[];companies=co.data||[];rels=re.data||[];portalRows=pa.data||[];
+ const allPhotos=[];
+ people.forEach(x=>{const p=x.profile_id?byId(profiles,x.profile_id):null;if(x.photo_path||p?.photo_path)allPhotos.push({key:x.id,path:x.photo_path||p.photo_path})});
+ profiles.filter(p=>!people.some(x=>String(x.profile_id)===String(p.id))).forEach(p=>{if(p.photo_path)allPhotos.push({key:p.id,path:p.photo_path})});
+ await Promise.all(allPhotos.map(async x=>{const s=await db.storage.from('learner-photos').createSignedUrl(x.path,3600);if(!s.error&&s.data?.signedUrl)photoUrls[x.key]=s.data.signedUrl}));
+ companies.forEach(x=>companyFilter.insertAdjacentHTML('beforeend','<option value="'+esc(x.id)+'">'+esc(x.company_name)+'</option>'));
+ roleOptions.forEach(([v,l])=>{accessFilter.insertAdjacentHTML('beforeend','<option value="'+v+'">'+esc(l)+'</option>');roleSelect.insertAdjacentHTML('beforeend','<option value="'+v+'">'+esc(l)+'</option>');grantRole.insertAdjacentHTML('beforeend','<option value="'+v+'">'+esc(l)+'</option>')});
+ render();
+}
+function render(){
+ const q=searchBox.value.trim().toLowerCase(),cf=companyFilter.value,af=accessFilter.value,pf=portalFilter.value;
+ const list=personRows().filter(({person,profile})=>{
+  const name=profile?.full_name||person?.full_name||'',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'',company=companyFor(person,profile),manager=managerFor(person,profile);
+  const role=String(profile?.organisational_access_role||profile?.portal_access_role||'external').toLowerCase();
+  const hasPortal=!!profile;
+  const text=[name,email,company,manager,role,person?.person_type,profile?.job_title].filter(Boolean).join(' ').toLowerCase();
+  const companyId=person?.default_company_id||profile?.company_id||'';
+  return(!q||text.includes(q))&&(cf==='all'||String(companyId)===cf)&&(af==='all'||role===af)&&(pf==='all'||(pf==='yes'?hasPortal:!hasPortal));
+ });
+ rows.innerHTML=list.length?list.map(({person,profile,key})=>{
+  const name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—',role=profile?.organisational_access_role||profile?.portal_access_role||'external',hasPortal=!!profile,status=profile?.account_status||person?.status||'active';
+  const cls=String(role).includes('academy')?'academy':String(role).includes('manager')?'manager':'neutral';
+  return '<tr><td><div class="person-cell">'+avatarHtml(key,name)+'<div class="person-copy"><strong>'+esc(name)+'</strong><span>'+esc(profile?.job_title||person?.job_title||'')+'</span></div></div></td><td>'+esc(companyFor(person,profile))+'</td><td>'+esc(person?.person_type||'Profile')+'</td><td>'+esc(managerFor(person,profile))+'</td><td>'+esc(email)+'</td><td><span class="pill '+cls+'">'+esc(hasPortal?accessLabel(role):'No Portal Access')+'</span></td><td><span class="pill '+(hasPortal?'ok':'no')+'">'+(hasPortal?'Yes':'No')+'</span></td><td><span class="pill neutral">'+esc(status)+'</span></td><td class="actions"><button onclick="openUser(\''+esc(key)+'\')">'+(hasPortal?'Edit Access':'Grant Access')+'</button></td></tr>'
+ }).join(''):'<tr><td colspan="9">No users match the selected filters.</td></tr>';
+ count.textContent='Showing '+list.length+' of '+personRows().length+' profiles';
+}
+function openUser(key){
+ const row=personRows().find(x=>String(x.key)===String(key));if(!row)return;selected=row;
+ const {person,profile}=row,name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—';
+ drawerAvatar.innerHTML=avatarHtml(key,name);drawerName.textContent=name;drawerMeta.textContent=(companyFor(person,profile))+' · '+(person?.person_type||'Profile');drawerEmail.textContent=email;
+ const hasPortal=!!profile;profileAccessFields.style.display=hasPortal?'block':'none';grantAccessFields.classList.toggle('open',!hasPortal);saveAccess.style.display=hasPortal?'inline-flex':'none';
+ if(hasPortal){const pa=portalFor(profile.id)||{};roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true}
+ else{grantRole.value='operative';tempPassword.value=''}
+ drawerBackdrop.classList.add('open');
+}
+function closeUser(){drawerBackdrop.classList.remove('open');selected=null}
+async function saveUser(){
+ if(!selected?.profile)return;
+ saveAccess.disabled=true;saveAccess.textContent='Saving…';
+ try{
+  const {error}=await db.rpc('manage_user_access',{target_user_id:selected.profile.id,new_access_role:roleSelect.value,new_academy_admin:academyToggle.checked,new_workforce_manager:workforceToggle.checked,new_learner_portal:learnerToggle.checked,new_manage_users:manageUsersToggle.checked});
+  if(error)throw error;await reloadData();closeUser();
+ }catch(e){alert(e.message||'Unable to update access.')}finally{saveAccess.disabled=false;saveAccess.textContent='Save Changes'}
+}
+async function grantAccess(){
+ if(!selected?.person)return;const pwd=tempPassword.value;if(pwd.length<8){alert('Temporary password must be at least 8 characters.');return}
+ grantAccessBtn.disabled=true;grantAccessBtn.textContent='Creating…';
+ try{
+  const r=await db.functions.invoke('enable-portal-access',{body:{person_id:selected.person.id,password:pwd,system_role:grantRole.value}});
+  if(r.error)throw r.error;if(r.data?.error)throw new Error(r.data.error);
+  const {error}=await db.rpc('manage_user_access',{target_user_id:r.data.profile_id,new_access_role:grantRole.value,new_academy_admin:false,new_workforce_manager:false,new_learner_portal:true,new_manage_users:false});if(error)throw error;
+  await reloadData();closeUser();
+ }catch(e){alert(e.message||'Unable to grant portal access.')}finally{grantAccessBtn.disabled=false;grantAccessBtn.textContent='Grant Access'}
+}
+async function reloadData(){
+ const [pe,pr,re,pa]=await Promise.all([db.from('people').select('*').order('full_name'),db.from('profiles').select('id,full_name,email,forename,surname,photo_path,organisation,company_id,manager_1_id,job_title,account_status,portal_access_role,organisational_access_role,permission_level').order('full_name'),db.from('person_relationships').select('person_id,manager_profile_id,company_id,active'),db.from('portal_access').select('*')]);
+ people=pe.data||people;profiles=pr.data||profiles;rels=re.data||rels;portalRows=pa.data||portalRows;render();
+}
+[searchBox,companyFilter,accessFilter,portalFilter].forEach(x=>x.addEventListener('input',render));
+closeDrawer.onclick=closeUser;cancelEdit.onclick=closeUser;drawerBackdrop.addEventListener('click',e=>{if(e.target===drawerBackdrop)closeUser()});saveAccess.onclick=saveUser;grantAccessBtn.onclick=grantAccess;
+load().catch(e=>{rows.innerHTML='<tr><td colspan="9">Unable to load users: '+esc(e.message)+'</td></tr>'});
+</script>
+</body></html>
