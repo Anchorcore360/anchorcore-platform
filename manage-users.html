@@ -33,7 +33,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 <div class="head"><div><div class="eyebrow">Setup</div><h1>Manage Users</h1><p class="muted">Every person in one place. View profile access, grant portal access and control user permissions.</p></div><div class="head-actions"><a class="btn dark" href="add-person.html">＋ Create Person</a></div></div>
 <section class="panel">
 <div class="filters"><input id="searchBox" placeholder="Search name, email, company, manager or role"><select id="companyFilter"><option value="all">All Companies</option></select><select id="accessFilter"><option value="all">All Access Levels</option></select><select id="portalFilter"><option value="all">All Portal States</option><option value="yes">Portal Access</option><option value="no">No Portal Access</option></select></div>
-<div class="table-wrap"><table><thead><tr><th>Name</th><th>Company</th><th>Person Type</th><th>Manager</th><th>Email</th><th>System Access</th><th>Portal Access</th><th>Status</th><th>Actions</th></tr></thead><tbody id="rows"><tr><td colspan="9">Loading users…</td></tr></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>Name</th><th>Company</th><th>Job Title</th><th>Manager</th><th>Email</th><th>System Access</th><th>Portal Access</th><th>Status</th><th>Actions</th></tr></thead><tbody id="rows"><tr><td colspan="9">Loading users…</td></tr></tbody></table></div>
 <div class="footer"><span id="count">—</span><span>Access changes can only be made from this screen.</span></div>
 </section>
 </div></main></div>
@@ -129,14 +129,14 @@ function render(){
  rows.innerHTML=list.length?list.map(({person,profile,key})=>{
   const name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—',role=profile?.organisational_access_role||profile?.portal_access_role||'external',hasPortal=!!profile,status=profile?.account_status||person?.status||'active';
   const cls=String(role).includes('academy')?'academy':String(role).includes('manager')?'manager':'neutral';
-  return '<tr><td><div class="person-cell">'+avatarHtml(key,name)+'<div class="person-copy"><strong>'+esc(name)+'</strong><span>'+esc(profile?.job_title||person?.job_title||'')+'</span></div></div></td><td>'+esc(companyFor(person,profile))+'</td><td>'+esc(person?.person_type||'Profile')+'</td><td>'+esc(managerFor(person,profile))+'</td><td>'+esc(email)+'</td><td><span class="pill '+cls+'">'+esc(hasPortal?accessLabel(role):'No Portal Access')+'</span></td><td><span class="pill '+(hasPortal?'ok':'no')+'">'+(hasPortal?'Yes':'No')+'</span></td><td><span class="pill neutral">'+esc(status)+'</span></td><td class="actions"><button onclick="openUser(\''+esc(key)+'\')">'+(hasPortal?'Edit Access':'Grant Access')+'</button></td></tr>'
+  return '<tr><td><div class="person-cell">'+avatarHtml(key,name)+'<div class="person-copy"><strong>'+esc(name)+'</strong></div></div></td><td>'+esc(companyFor(person,profile))+'</td><td>'+esc(profile?.job_title||person?.job_title||'—')+'</td><td>'+esc(managerFor(person,profile))+'</td><td>'+esc(email)+'</td><td><span class="pill '+cls+'">'+esc(hasPortal?accessLabel(role):'No Portal Access')+'</span></td><td><span class="pill '+(hasPortal?'ok':'no')+'">'+(hasPortal?'Yes':'No')+'</span></td><td><span class="pill neutral">'+esc(status)+'</span></td><td class="actions"><button onclick="openUser(\''+esc(key)+'\')">'+(hasPortal?'Edit Access':'Grant Access')+'</button></td></tr>'
  }).join(''):'<tr><td colspan="9">No users match the selected filters.</td></tr>';
  count.textContent='Showing '+list.length+' of '+personRows().length+' profiles';
 }
 function openUser(key){
  const row=personRows().find(x=>String(x.key)===String(key));if(!row)return;selected=row;
  const {person,profile}=row,name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—';
- drawerAvatar.innerHTML=avatarHtml(key,name);drawerName.textContent=name;drawerMeta.textContent=(companyFor(person,profile))+' · '+(person?.person_type||'Profile');drawerEmail.textContent=email;
+ drawerAvatar.innerHTML=avatarHtml(key,name);drawerName.textContent=name;drawerMeta.textContent=(companyFor(person,profile))+' · '+(profile?.job_title||person?.job_title||'No job title');drawerEmail.textContent=email;
  const hasPortal=!!profile;profileAccessFields.style.display=hasPortal?'block':'none';grantAccessFields.classList.toggle('open',!hasPortal);saveAccess.style.display=hasPortal?'inline-flex':'none';
  if(hasPortal){const pa=portalFor(profile.id)||{};roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true;resetPasswordInput.value=''}
  else{grantRole.value='operative';tempPassword.value=''}
