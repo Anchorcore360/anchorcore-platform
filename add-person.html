@@ -16,7 +16,7 @@ async function init(){
  if(!canPeople){location.href='portal.html';return}
  const[m,c,j]=await Promise.all([
   db.from('profiles').select('id,full_name,job_title,account_status').eq('account_status','active').order('full_name'),
-  db.from('external_customers').select('id,company_name,active').eq('active',true).order('company_name'),
+  db.from('external_customers').select('id,company_name,active,is_rrt_subcontractor').eq('active',true).order('company_name'),
   db.from('job_roles').select('id,name,division,active').eq('active',true).order('division').order('name')
  ]);
  if(m.error)throw m.error;if(c.error)throw c.error;if(j.error)throw j.error;
@@ -30,11 +30,18 @@ async function saveComplianceRoles(personId){
  const rows=ids.map((x,i)=>({person_id:personId,job_role_id:Number(x),is_primary:i===0}));
  const r=await db.from('person_job_roles').insert(rows);if(r.error)throw r.error;
 }
+function relationshipTypeForCompany(companyId){
+ const co=companies.find(x=>String(x.id)===String(companyId));
+ const name=String(co?.company_name||'').trim().toLowerCase();
+ if(name==='rapid response telecoms ltd'||name==='rapid response telecoms')return 'rrt_direct_staff';
+ if(co?.is_rrt_subcontractor===true)return 'rrt_subcontractor';
+ return 'rrta_external_delegate';
+}
 async function saveManagerRelationship(personId,companyId){
  const managerId=val('manager');if(!managerId)return;
  const r=await db.from('person_relationships').insert({
   person_id:personId,manager_profile_id:managerId,company_id:companyId||null,
-  relationship_type:'manager',active:true,started_at:new Date().toISOString().slice(0,10),updated_at:new Date().toISOString()
+  relationship_type:relationshipTypeForCompany(companyId),active:true,started_at:new Date().toISOString().slice(0,10),updated_at:new Date().toISOString()
  });if(r.error)throw r.error;
 }
 form.onsubmit=async e=>{
