@@ -80,13 +80,15 @@ document.getElementById('trafficLogo').src=assets.traffic||'';
 document.getElementById('academyLogo').src=assets.academy||'';
 const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
 const loginZone=document.getElementById('loginZone'),workspaceZone=document.getElementById('workspaceZone'),sessionBox=document.getElementById('sessionBox'),loginError=document.getElementById('loginError'),academyCard=document.getElementById('academyCard'),learnerCard=document.getElementById('learnerCard'),sessionName=document.getElementById('sessionName'),sessionRole=document.getElementById('sessionRole'),platformLoginForm=document.getElementById('platformLoginForm'),platformEmail=document.getElementById('platformEmail'),platformPassword=document.getElementById('platformPassword'),platformLoginButton=document.getElementById('platformLoginButton'),signOutBtn=document.getElementById('signOutBtn');
+if(new URLSearchParams(location.search).get('passwordChanged')==='1'){loginError.textContent='Password updated successfully. Sign in with your new password.';loginError.classList.remove('hidden');}
 async function loadAccess(user){
   const results=await Promise.all([
-    db.from('profiles').select('id,full_name,email,role,permission_level,job_title,organisational_access_role,portal_access_role,account_status').eq('id',user.id).single(),
+    db.from('profiles').select('id,full_name,email,role,permission_level,job_title,organisational_access_role,portal_access_role,account_status,must_change_password').eq('id',user.id).single(),
     db.from('portal_access').select('*').eq('user_id',user.id).maybeSingle()
   ]);
   const p=results[0].data,pe=results[0].error,a=results[1].data;
   if(pe||!p) throw new Error('Your profile could not be loaded.');
+  if(p.must_change_password===true){location.replace('change-password.html');return}
   const systemRole=String(p.organisational_access_role||p.portal_access_role||'').toLowerCase();
   const noAccess=systemRole==='external'||p.account_status==='archived';
   const academy=a?.academy_admin===true||p.permission_level==='super_user'||['academy_staff','academy','health_safety','operations_manager','administrator'].includes(systemRole);
