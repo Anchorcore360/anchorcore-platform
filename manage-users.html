@@ -20,7 +20,7 @@ input,select{height:40px;border:1px solid #d3d9df;border-radius:7px;background:#
 table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{background:var(--soft);font-size:10px;text-align:left;color:#475467;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:11px 12px;border-bottom:1px solid #e3e7ec;font-size:11px;vertical-align:middle;background:#fff}tbody tr:nth-child(odd) td{background:#f7f8f9}tbody tr:hover td{background:var(--soft2)}
 .person-cell{display:flex;align-items:center;gap:10px}.avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;display:grid;place-items:center;flex:0 0 38px;background:#e8ebef;border:1px solid #d7dde4;color:#475467;font-weight:850}.person-copy strong{display:block;font-size:12px}.person-copy span{display:block;color:var(--muted);font-size:9px;margin-top:2px}.pill{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:9px;font-weight:850;white-space:nowrap}.ok{background:#e7f6ec;color:#176b37}.no{background:#fdebec;color:#a11b2b}.neutral{background:#edf1f5;color:#344054}.academy{background:#fbe9ec;color:#9d0b1a}.manager{background:#e8f1ff;color:#2457a6}
 .actions button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 9px;font-size:9px;font-weight:850;cursor:pointer}.actions button:hover{border-color:var(--red);color:#9d0b1a}
-.footer{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:11px 14px;background:var(--soft);color:var(--muted);font-size:10px}
+.footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:11px 14px;background:var(--soft);color:var(--muted);font-size:10px}.page-size{display:flex;align-items:center;gap:7px;white-space:nowrap}.page-size select{height:30px;min-width:66px;padding:0 7px;font-size:10px}.page-info{text-align:center}.pager{display:flex;align-items:center;gap:7px;white-space:nowrap}.pager button{height:30px;border:1px solid var(--line);background:#fff;border-radius:7px;padding:0 10px;font-size:10px;font-weight:800;cursor:pointer}.pager button:disabled{opacity:.45;cursor:not-allowed}
 .drawer-backdrop{position:fixed;inset:0;background:rgba(15,20,28,.36);z-index:40;display:none}.drawer-backdrop.open{display:block}.drawer{position:absolute;right:0;top:0;height:100%;width:min(470px,94vw);background:#fff;box-shadow:-18px 0 55px rgba(0,0,0,.18);display:flex;flex-direction:column}.drawer-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.drawer-head h2{margin:0;font-size:19px}.close{border:0;background:transparent;font-size:24px;cursor:pointer}.drawer-body{padding:18px 20px;overflow:auto}.user-card{display:flex;gap:12px;align-items:center;padding-bottom:15px;border-bottom:1px solid var(--line);margin-bottom:16px}.user-card .avatar{width:48px;height:48px;flex-basis:48px}.user-card strong{display:block;font-size:14px}.section-title{font-size:11px;font-weight:900;margin:18px 0 8px}.form-row{margin-bottom:12px}.form-row label{display:block;font-size:10px;font-weight:850;margin-bottom:5px}.form-row select,.form-row input{width:100%}.toggle-row{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #edf0f3}.toggle-copy strong{display:block;font-size:11px}.toggle-copy span{display:block;color:var(--muted);font-size:9px;margin-top:3px}.switch{position:relative;width:38px;height:22px;flex:0 0 38px}.switch input{display:none}.slider{position:absolute;inset:0;background:#cfd5dc;border-radius:999px;cursor:pointer}.slider:after{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.16s}.switch input:checked+.slider{background:#2f7de1}.switch input:checked+.slider:after{transform:translateX(16px)}
 .drawer-actions{margin-top:auto;padding:14px 20px 62px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;background:#fff}.notice{background:#f7f8fa;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:10px;color:#475467}.grant-box{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.grant-box.open{display:block}
 @media(max-width:1000px){.shell{grid-template-columns:1fr}.side{position:relative;height:auto}.filters{grid-template-columns:1fr 1fr}.content{padding:20px 14px}}@media(max-width:650px){.filters{grid-template-columns:1fr}.head{display:block}.head-actions{margin-top:12px}}
@@ -34,7 +34,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 <section class="panel">
 <div class="filters"><input id="searchBox" placeholder="Search name, email, company, manager or role"><select id="companyFilter"><option value="all">All Companies</option></select><select id="accessFilter"><option value="all">All Access Levels</option></select><select id="portalFilter"><option value="all">All Portal States</option><option value="yes">Portal Access</option><option value="no">No Portal Access</option></select></div>
 <div class="table-wrap"><table><thead><tr><th>Name</th><th>Company</th><th>Job Title</th><th>Manager</th><th>Email</th><th>System Access</th><th>Portal Access</th><th>Status</th><th>Actions</th></tr></thead><tbody id="rows"><tr><td colspan="9">Loading users…</td></tr></tbody></table></div>
-<div class="footer"><span id="count">—</span><span>Access changes can only be made from this screen.</span></div>
+<div class="footer"><div class="page-size"><span>Show</span><select id="pageSize"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select><span>per page</span></div><div class="page-info"><span id="count">—</span><span style="margin-left:10px">Access changes can only be made from this screen.</span></div><div class="pager"><button id="prevPage" type="button">Previous</button><span id="pageLabel">Page 1 of 1</span><button id="nextPage" type="button">Next</button></div></div>
 </section>
 </div></main></div>
 
@@ -79,7 +79,7 @@ const roleOptions=[
  ['academy_staff','Academy Staff'],['external','External — No Access']
 ];
 const accessLabel=v=>Object.fromEntries(roleOptions)[String(v||'').toLowerCase()]||'No Portal Access';
-let people=[],profiles=[],companies=[],rels=[],portalRows=[],photoUrls={},selected=null;
+let people=[],profiles=[],companies=[],rels=[],portalRows=[],photoUrls={},selected=null,currentPage=1,pageSizeValue=10;
 const byId=(arr,id)=>arr.find(x=>String(x.id)===String(id));
 function companyFor(person,profile){const id=person?.default_company_id||profile?.company_id;return byId(companies,id)?.company_name||profile?.organisation||'—'}
 function managerFor(person,profile){const rel=rels.find(r=>String(r.person_id)===String(person?.id)&&r.active!==false&&r.manager_profile_id);const id=rel?.manager_profile_id||profile?.manager_1_id;return byId(profiles,id)?.full_name||'—'}
@@ -126,12 +126,17 @@ function render(){
   const companyId=person?.default_company_id||profile?.company_id||'';
   return(!q||text.includes(q))&&(cf==='all'||String(companyId)===cf)&&(af==='all'||role===af)&&(pf==='all'||(pf==='yes'?hasPortal:!hasPortal));
  });
- rows.innerHTML=list.length?list.map(({person,profile,key})=>{
+ const total=list.length,totalPages=Math.max(1,Math.ceil(total/pageSizeValue));
+ if(currentPage>totalPages)currentPage=totalPages;
+ const start=(currentPage-1)*pageSizeValue,end=Math.min(start+pageSizeValue,total),paged=list.slice(start,end);
+ rows.innerHTML=paged.length?paged.map(({person,profile,key})=>{
   const name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—',role=profile?.organisational_access_role||profile?.portal_access_role||'external',hasPortal=!!profile,status=profile?.account_status||person?.status||'active';
   const cls=String(role).includes('academy')?'academy':String(role).includes('manager')?'manager':'neutral';
   return '<tr><td><div class="person-cell">'+avatarHtml(key,name)+'<div class="person-copy"><strong>'+esc(name)+'</strong></div></div></td><td>'+esc(companyFor(person,profile))+'</td><td>'+esc(profile?.job_title||person?.job_title||'—')+'</td><td>'+esc(managerFor(person,profile))+'</td><td>'+esc(email)+'</td><td><span class="pill '+cls+'">'+esc(hasPortal?accessLabel(role):'No Portal Access')+'</span></td><td><span class="pill '+(hasPortal?'ok':'no')+'">'+(hasPortal?'Yes':'No')+'</span></td><td><span class="pill neutral">'+esc(status)+'</span></td><td class="actions"><button onclick="openUser(\''+esc(key)+'\')">'+(hasPortal?'Edit Access':'Grant Access')+'</button></td></tr>'
  }).join(''):'<tr><td colspan="9">No users match the selected filters.</td></tr>';
- count.textContent='Showing '+list.length+' of '+personRows().length+' profiles';
+ count.textContent=total?'Showing '+(start+1)+'–'+end+' of '+total+' profiles':'Showing 0 profiles';
+ pageLabel.textContent='Page '+currentPage+' of '+totalPages;
+ prevPage.disabled=currentPage<=1;nextPage.disabled=currentPage>=totalPages;
 }
 function openUser(key){
  const row=personRows().find(x=>String(x.key)===String(key));if(!row)return;selected=row;
@@ -181,7 +186,10 @@ async function reloadData(){
  const [pe,pr,re,pa]=await Promise.all([db.from('people').select('*').order('full_name'),db.from('profiles').select('id,full_name,email,forename,surname,photo_path,organisation,company_id,manager_1_id,job_title,account_status,portal_access_role,organisational_access_role,permission_level').order('full_name'),db.from('person_relationships').select('person_id,manager_profile_id,company_id,active'),db.from('portal_access').select('*')]);
  people=pe.data||people;profiles=pr.data||profiles;rels=re.data||rels;portalRows=pa.data||portalRows;render();
 }
-[searchBox,companyFilter,accessFilter,portalFilter].forEach(x=>x.addEventListener('input',render));
+[searchBox,companyFilter,accessFilter,portalFilter].forEach(x=>x.addEventListener('input',()=>{currentPage=1;render()}));
+pageSize.addEventListener('change',()=>{pageSizeValue=Number(pageSize.value)||10;currentPage=1;render()});
+prevPage.onclick=()=>{if(currentPage>1){currentPage--;render()}};
+nextPage.onclick=()=>{currentPage++;render()};
 closeDrawer.onclick=closeUser;cancelEdit.onclick=closeUser;drawerBackdrop.addEventListener('click',e=>{if(e.target===drawerBackdrop)closeUser()});saveAccess.onclick=saveUser;grantAccessBtn.onclick=grantAccess;roleSelect.addEventListener('change',syncNoAccess);resetPasswordBtn.onclick=resetPassword;
 load().catch(e=>{rows.innerHTML='<tr><td colspan="9">Unable to load users: '+esc(e.message)+'</td></tr>'});
 </script>
