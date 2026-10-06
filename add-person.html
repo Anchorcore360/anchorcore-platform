@@ -28,7 +28,7 @@ async function saveComplianceRoles(personId){
  const ids=[...new Set([val('compliancePrimary'),val('complianceSecondary')].filter(Boolean))];
  if(!ids.length)return;
  const rows=ids.map((x,i)=>({person_id:personId,job_role_id:Number(x),is_primary:i===0}));
- const r=await db.from('person_job_roles').insert(rows);if(r.error)throw r.error;
+ const r=await db.from('person_job_roles').upsert(rows,{onConflict:'person_id,job_role_id'});if(r.error)throw r.error;
 }
 function relationshipTypeForCompany(companyId){
  const co=companies.find(x=>String(x.id)===String(companyId));
@@ -39,29 +39,38 @@ function relationshipTypeForCompany(companyId){
 }
 async function saveManagerRelationship(personId,companyId){
  const managerId=val('manager');if(!managerId)return;
- const r=await db.from('person_relationships').insert({
+ const r=await db.from('person_relationships').upsert({
   person_id:personId,manager_profile_id:managerId,company_id:companyId||null,
   relationship_type:relationshipTypeForCompany(companyId),active:true,started_at:new Date().toISOString().slice(0,10),updated_at:new Date().toISOString()
- });if(r.error)throw r.error;
+ },{onConflict:'person_id,relationship_type,company_id'});if(r.error)throw r.error;
 }
 form.onsubmit=async e=>{
  e.preventDefault();save.disabled=true;save.textContent='Adding…';message.textContent='';
  try{
   const fn=val('forename'),sn=val('surname'),emailValue=val('email').toLowerCase(),companyId=val('company')||null;
   if(!fn||!sn||!emailValue)throw new Error('Please complete forename, surname and email.');
-  const duplicate=await db.from('people').select('id,full_name,email').ilike('email',emailValue).maybeSingle();
-  if(duplicate.error)throw duplicate.error;if(duplicate.data)throw new Error('A person with this email already exists. Open their existing profile instead of creating another.');
+  const duplicate=await db.from('people').select('id,full_name,email,profile_id').ilike('email',emailValue).maybeSingle();
+  if(duplicate.error)throw duplicate.error;
   const full=`${fn} ${sn}`.trim();
-  const pr=await db.from('people').insert({
+  const personPayload={
     full_name:full,forename:fn,surname:sn,email:emailValue,phone:val('phone')||null,date_of_birth:val('dob')||null,
     default_company_id:companyId,status:'active',person_type:'workforce',employee_number:val('employee')||null,
     job_title:val('job')||null,department:val('department')||null,work_location:val('location')||null,
-    start_date:val('startDate')||null,
-    notes:val('notes')||null,updated_at:new Date().toISOString()
-  }).select('id').single();
-  if(pr.error)throw pr.error;
-  await saveComplianceRoles(pr.data.id);
-  await saveManagerRelationship(pr.data.id,companyId);
+    start_date:val('startDate')||null,notes:val('notes')||null,updated_at:new Date().toISOString()
+  };
+  let personId;
+  if(duplicate.data){
+    const existingRel=await db.from('person_relationships').select('id').eq('person_id',duplicate.data.id).limit(1);
+    if(existingRel.error)throw existingRel.error;
+    if(duplicate.data.profile_id||existingRel.data?.length)throw new Error('A person with this email already exists. Open their existing profile instead of creating another.');
+    const resumed=await db.from('people').update(personPayload).eq('id',duplicate.data.id).select('id').single();
+    if(resumed.error)throw resumed.error;personId=resumed.data.id;
+  }else{
+    const pr=await db.from('people').insert(personPayload).select('id').single();
+    if(pr.error)throw pr.error;personId=pr.data.id;
+  }
+  await saveComplianceRoles(personId);
+  await saveManagerRelationship(personId,companyId);
   message.textContent='Person added. Portal access can now be granted from Setup → Manage Users.';
   message.className='message wide ok';
   setTimeout(()=>location.href=returnTo,650);
