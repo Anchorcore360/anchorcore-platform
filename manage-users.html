@@ -186,9 +186,9 @@ async function grantAccess(){
  try{
   const r=await db.functions.invoke('enable-portal-access',{body:{person_id:selected.person.id,password:pwd,system_role:grantRole.value}});
   if(r.error)throw r.error;if(r.data?.error)throw new Error(r.data.error);
-  const {error}=await db.rpc('manage_user_access',{target_user_id:r.data.profile_id,new_access_role:grantRole.value,new_academy_admin:false,new_workforce_manager:false,new_learner_portal:true,new_manage_users:false});if(error)throw error;
-  await reloadData();closeUser();
- }catch(e){alert(e.message||'Unable to grant portal access.')}finally{grantAccessBtn.disabled=false;grantAccessBtn.textContent='Grant Access'}
+  const {error}=await db.rpc('manage_user_access',{target_user_id:r.data.profile_id,new_access_role:grantRole.value,new_academy_admin:false,new_workforce_manager:false,new_learner_portal:true,new_manage_users:false,new_login_enabled:true});if(error)throw error;
+  await reloadData();closeUser();showAccessMessage('Portal account created successfully.');
+ }catch(e){showAccessMessage(e.message||'Unable to grant portal access.',true)}finally{grantAccessBtn.disabled=false;grantAccessBtn.textContent='Grant Access'}
 }
 function yesNo(v){return v===true?'Yes':'No'}
 function exportUsersToExcel(){
