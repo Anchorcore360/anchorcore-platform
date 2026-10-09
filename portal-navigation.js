@@ -3,6 +3,32 @@
   if (window.__rrtaPortalNavigationLoaded) return;
   window.__rrtaPortalNavigationLoaded = true;
   const currentPage=(location.pathname.split('/').pop()||'').toLowerCase();
+  // Honour disabled login status even when an existing browser session navigates directly to a portal page.
+  let loginGuardBusy=false;
+  async function verifyPlatformLoginEnabled(){
+    if(loginGuardBusy||currentPage==='portal.html'||currentPage==='change-password.html')return;
+    if(!window.supabase?.createClient)return;
+    loginGuardBusy=true;
+    try{
+      const client=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
+      const auth=await client.auth.getUser();
+      if(!auth.data?.user)return;
+      const check=await client.from('profiles').select('login_enabled').eq('id',auth.data.user.id).maybeSingle();
+      if(!check.error&&check.data?.login_enabled===false){
+        await client.auth.signOut();
+        location.replace('portal.html');
+      }
+    }catch(e){console.warn('Login status check could not complete',e)}
+    finally{loginGuardBusy=false}
+  }
+  function scheduleLoginGuard(){
+    let attempts=0;
+    const tick=()=>{if(window.supabase?.createClient){verifyPlatformLoginEnabled()}else if(++attempts<40)setTimeout(tick,150)};
+    tick();
+    window.addEventListener('focus',verifyPlatformLoginEnabled);
+  }
+  if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',scheduleLoginGuard,{once:true});
+  else scheduleLoginGuard();
   const addScript=(src,key)=>{if(document.querySelector(`script[data-${key}]`))return null;const s=document.createElement('script');s.src=src;s.setAttribute('data-'+key,'1');document.body.appendChild(s);return s};
   const loadArchivedGuard=()=>addScript('archived-selector-guard.js?v=20260917-1','rrta-archive-guard');
   const loadPersonLinks=()=>addScript('person-profile-links.js?v=20260917-2','rrta-person-links');
