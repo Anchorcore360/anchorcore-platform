@@ -54,7 +54,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 <div class="toggle-row"><div class="toggle-copy"><strong>Manage Users</strong><span>High-trust permission. Allows this user to open Setup → Manage Users and grant or change user access.</span></div><label class="switch"><input type="checkbox" id="manageUsersToggle"><span class="slider"></span></label></div>
 <div class="section-title">Password Reset</div>
 <div class="notice">Issue a temporary password if the user cannot sign in. On their next login they will be required to replace it with a private password of their own.</div>
-<div class="form-row"><label>Temporary Password</label><input id="resetPasswordInput" type="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters"></div>
+<div class="form-row"><label for="resetPasswordInput">Temporary Password</label><div style="display:flex;gap:8px;align-items:center"><input id="resetPasswordInput" type="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters" style="min-width:0;flex:1"><button class="btn light" type="button" id="toggleResetPassword" aria-label="Show temporary password" aria-pressed="false" style="white-space:nowrap">View Password</button></div></div>
 <button class="btn light" type="button" id="resetPasswordBtn">Issue Temporary Password</button>
 </div>
 <div id="grantAccessFields" class="grant-box">
@@ -151,7 +151,7 @@ function openUser(key){
  const {person,profile}=row,name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—';
  drawerAvatar.innerHTML=avatarHtml(key,name);drawerName.textContent=name;drawerMeta.textContent=(companyFor(person,profile))+' · '+(profile?.job_title||person?.job_title||'No job title');drawerEmail.textContent=email;
  const hasPortal=!!profile;profileAccessFields.style.display=hasPortal?'block':'none';grantAccessFields.classList.toggle('open',!hasPortal);saveAccess.style.display=hasPortal?'inline-flex':'none';
- if(hasPortal){const pa=portalFor(profile.id)||{};loginToggle.checked=isLoginEnabled(profile);roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true;resetPasswordInput.value=''}
+ if(hasPortal){const pa=portalFor(profile.id)||{};loginToggle.checked=isLoginEnabled(profile);roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true;resetPasswordInput.value='';resetPasswordInput.type='password';toggleResetPassword.textContent='View Password';toggleResetPassword.setAttribute('aria-pressed','false')}
  else{grantRole.value='operative';tempPassword.value=''}
  syncLoginAccess();drawerBackdrop.classList.add('open');
 }
@@ -230,7 +230,7 @@ pageSize.addEventListener('change',()=>{pageSizeValue=Number(pageSize.value)||10
 exportUsersBtn.onclick=exportUsersToExcel;
 prevPage.onclick=()=>{if(currentPage>1){currentPage--;render()}};
 nextPage.onclick=()=>{currentPage++;render()};
-closeDrawer.onclick=closeUser;cancelEdit.onclick=closeUser;drawerBackdrop.addEventListener('click',e=>{if(e.target===drawerBackdrop)closeUser()});saveAccess.onclick=saveUser;grantAccessBtn.onclick=grantAccess;loginToggle.addEventListener('change',syncLoginAccess);resetPasswordBtn.onclick=resetPassword;
+closeDrawer.onclick=closeUser;cancelEdit.onclick=closeUser;drawerBackdrop.addEventListener('click',e=>{if(e.target===drawerBackdrop)closeUser()});saveAccess.onclick=saveUser;grantAccessBtn.onclick=grantAccess;loginToggle.addEventListener('change',syncLoginAccess);resetPasswordBtn.onclick=resetPassword;toggleResetPassword.onclick=()=>{const visible=resetPasswordInput.type==='text';resetPasswordInput.type=visible?'password':'text';toggleResetPassword.textContent=visible?'View Password':'Hide Password';toggleResetPassword.setAttribute('aria-label',visible?'Show temporary password':'Hide temporary password');toggleResetPassword.setAttribute('aria-pressed',String(!visible))};
 load().catch(e=>{rows.innerHTML='<tr><td colspan="9">Unable to load users: '+esc(e.message)+'</td></tr>'});
 </script>
 </body></html>
