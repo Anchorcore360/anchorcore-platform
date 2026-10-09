@@ -32,8 +32,8 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 <div class="content">
 <div class="head"><div><div class="eyebrow">Setup</div><h1>Manage Users</h1><p class="muted">Every person in one place. View profile access, grant portal access and control user permissions.</p></div><div class="head-actions"><button class="btn light" type="button" id="exportUsersBtn" title="Export current user audit to Excel" aria-label="Export users to Excel"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M8 13l4 5"></path><path d="M12 13l-4 5"></path></svg> Export Excel</button><a class="btn dark" href="add-person.html?return=manage-users.html">＋ Add Person</a></div></div>
 <section class="panel">
-<div class="filters"><input id="searchBox" placeholder="Search name, email, company, manager or role"><select id="companyFilter"><option value="all">All Companies</option></select><select id="accessFilter"><option value="all">All Access Levels</option></select><select id="portalFilter"><option value="all">All Portal States</option><option value="yes">Portal Access</option><option value="no">No Portal Access</option></select></div>
-<div class="table-wrap"><table><thead><tr><th>Name</th><th>Company</th><th>Job Title</th><th>Manager</th><th>Email</th><th>System Access</th><th>Portal Access</th><th>Status</th><th>Actions</th></tr></thead><tbody id="rows"><tr><td colspan="9">Loading users…</td></tr></tbody></table></div>
+<div class="filters"><input id="searchBox" placeholder="Search name, email, company, manager or role"><select id="companyFilter"><option value="all">All Companies</option></select><select id="accessFilter"><option value="all">All Access Levels</option></select><select id="portalFilter"><option value="all">All Portal States</option><option value="yes">Enabled</option><option value="no">Disabled / No Login</option></select></div>
+<div class="table-wrap"><table><thead><tr><th>Name</th><th>Company</th><th>Job Title</th><th>Manager</th><th>Email</th><th>System Access</th><th>Login Status</th><th>Status</th><th>Actions</th></tr></thead><tbody id="rows"><tr><td colspan="9">Loading users…</td></tr></tbody></table></div>
 <div class="footer"><div class="page-size"><span>Show</span><select id="pageSize"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select><span>per page</span></div><div class="page-info"><span id="count">—</span><span style="margin-left:10px">Access changes can only be made from this screen.</span></div><div class="pager"><button id="prevPage" type="button">Previous</button><span id="pageLabel">Page 1 of 1</span><button id="nextPage" type="button">Next</button></div></div>
 </section>
 </div></main></div>
@@ -45,6 +45,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 <div id="profileAccessFields">
 <div class="section-title">Access & Permissions</div>
 <div class="form-row"><label>System Access Level</label><select id="roleSelect"></select></div>
+<div class="toggle-row"><div class="toggle-copy"><strong>Login Enabled</strong><span>Turn off to disable platform access without deleting training records.</span></div><label class="switch"><input type="checkbox" id="loginToggle"><span class="slider"></span></label></div>
 <div class="notice">Team visibility is still controlled by the manager relationships in Manage People. Changing access here does not change who reports to whom.</div>
 <div class="section-title">Portal Areas</div>
 <div class="toggle-row"><div class="toggle-copy"><strong>Learner Portal</strong><span>Own profile, learning, accreditations and bookings.</span></div><label class="switch"><input type="checkbox" id="learnerToggle"><span class="slider"></span></label></div>
@@ -77,7 +78,7 @@ const roleOptions=[
  ['operator','Operator'],['operative','Operative'],['supervisor','Supervisor'],['manager','Manager'],
  ['rrt_subcontractor_operator','RRT Subcontractor Operator'],['rrt_subcontractor_manager','RRT Subcontractor Manager'],
  ['health_safety','Health & Safety'],['operations_manager','Operations Manager'],['administrator','Administrator'],
- ['academy_staff','Academy Staff'],['external','External — No Access']
+ ['academy_staff','Academy Staff'],['external','External']
 ];
 const accessLabel=v=>Object.fromEntries(roleOptions)[String(v||'').toLowerCase()]||'No Portal Access';
 let people=[],profiles=[],companies=[],rels=[],portalRows=[],photoUrls={},selected=null,currentPage=1,pageSizeValue=10;
@@ -85,6 +86,9 @@ const byId=(arr,id)=>arr.find(x=>String(x.id)===String(id));
 function companyFor(person,profile){const id=person?.default_company_id||profile?.company_id;return byId(companies,id)?.company_name||profile?.organisation||'—'}
 function managerFor(person,profile){const rel=rels.find(r=>String(r.person_id)===String(person?.id)&&r.active!==false&&r.manager_profile_id);const id=rel?.manager_profile_id||profile?.manager_1_id;return byId(profiles,id)?.full_name||'—'}
 function portalFor(id){return portalRows.find(x=>String(x.user_id)===String(id))||null}
+function isLoginEnabled(profile){return !!profile && profile.login_enabled!==false && profile.account_status==='active'}
+function loginStatus(profile){return !profile?'No Login':isLoginEnabled(profile)?'Enabled':'Disabled'}
+function showAccessMessage(message,isError=false){let n=document.getElementById('accessMessage');if(!n){n=document.createElement('div');n.id='accessMessage';n.setAttribute('role','status');n.style.cssText='position:fixed;top:20px;right:24px;z-index:99999;padding:14px 20px;border-radius:8px;color:white;box-shadow:0 6px 24px #0003;font-size:13px;max-width:370px';document.body.appendChild(n)}n.style.background=isError?'#b42335':'#187c49';n.textContent=message;n.hidden=false;clearTimeout(window.accessMessageTimer);window.accessMessageTimer=setTimeout(()=>{n.hidden=true},4500)}
 function initials(name){return String(name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()}
 function avatarHtml(key,name){const url=photoUrls[key];return url?'<img class="avatar" src="'+esc(url)+'" alt="">':'<div class="avatar">'+esc(initials(name))+'</div>'}
 function personRows(){
@@ -102,7 +106,7 @@ async function load(){
  if(!me||me.account_status!=='active'||!(me.permission_level==='super_user'||myAccess?.manage_users===true)){location.href='portal.html';return}
  const [pe,pr,co,re,pa]=await Promise.all([
   db.from('people').select('*').order('full_name'),
-  db.from('profiles').select('id,full_name,email,forename,surname,photo_path,organisation,company_id,manager_1_id,job_title,account_status,portal_access_role,organisational_access_role,permission_level').order('full_name'),
+  db.from('profiles').select('id,full_name,email,forename,surname,photo_path,organisation,company_id,manager_1_id,job_title,account_status,login_enabled,portal_access_role,organisational_access_role,permission_level').order('full_name'),
   db.from('external_customers').select('id,company_name,active').order('company_name'),
   db.from('person_relationships').select('person_id,manager_profile_id,company_id,active'),
   db.from('portal_access').select('*')
@@ -122,7 +126,7 @@ function filteredUserRows(){
  return personRows().filter(({person,profile})=>{
   const name=profile?.full_name||person?.full_name||'',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'',company=companyFor(person,profile),manager=managerFor(person,profile);
   const role=String(profile?.organisational_access_role||profile?.portal_access_role||'external').toLowerCase();
-  const hasPortal=!!profile;
+  const hasPortal=isLoginEnabled(profile);
   const text=[name,email,company,manager,role,person?.person_type,profile?.job_title].filter(Boolean).join(' ').toLowerCase();
   const companyId=person?.default_company_id||profile?.company_id||'';
   return(!q||text.includes(q))&&(cf==='all'||String(companyId)===cf)&&(af==='all'||role===af)&&(pf==='all'||(pf==='yes'?hasPortal:!hasPortal));
@@ -134,9 +138,9 @@ function render(){
  if(currentPage>totalPages)currentPage=totalPages;
  const start=(currentPage-1)*pageSizeValue,end=Math.min(start+pageSizeValue,total),paged=list.slice(start,end);
  rows.innerHTML=paged.length?paged.map(({person,profile,key})=>{
-  const name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—',role=profile?.organisational_access_role||profile?.portal_access_role||'external',hasPortal=!!profile,status=profile?.account_status||person?.status||'active';
+  const name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—',role=profile?.organisational_access_role||profile?.portal_access_role||'external',hasPortal=isLoginEnabled(profile),status=profile?.account_status||person?.status||'active';
   const cls=String(role).includes('academy')?'academy':String(role).includes('manager')?'manager':'neutral';
-  return '<tr><td><div class="person-cell">'+avatarHtml(key,name)+'<div class="person-copy"><strong>'+esc(name)+'</strong></div></div></td><td>'+esc(companyFor(person,profile))+'</td><td>'+esc(profile?.job_title||person?.job_title||'—')+'</td><td>'+esc(managerFor(person,profile))+'</td><td>'+esc(email)+'</td><td><span class="pill '+cls+'">'+esc(hasPortal?accessLabel(role):'No Portal Access')+'</span></td><td><span class="pill '+(hasPortal?'ok':'no')+'">'+(hasPortal?'Yes':'No')+'</span></td><td><span class="pill neutral">'+esc(status)+'</span></td><td class="actions"><button onclick="openUser(\''+esc(key)+'\')">'+(hasPortal?'Edit Access':'Grant Access')+'</button></td></tr>'
+  return '<tr><td><div class="person-cell">'+avatarHtml(key,name)+'<div class="person-copy"><strong>'+esc(name)+'</strong></div></div></td><td>'+esc(companyFor(person,profile))+'</td><td>'+esc(profile?.job_title||person?.job_title||'—')+'</td><td>'+esc(managerFor(person,profile))+'</td><td>'+esc(email)+'</td><td><span class="pill '+cls+'">'+esc(profile?accessLabel(role):'External')+'</span></td><td><span class="pill '+(hasPortal?'ok':'no')+'">'+esc(loginStatus(profile))+'</span></td><td><span class="pill neutral">'+esc(status)+'</span></td><td class="actions"><button onclick="openUser(\''+esc(key)+'\')">'+(profile?'Edit Access':'Grant Access')+'</button></td></tr>'
  }).join(''):'<tr><td colspan="9">No users match the selected filters.</td></tr>';
  count.textContent=total?'Showing '+(start+1)+'–'+end+' of '+total+' profiles':'Showing 0 profiles';
  pageLabel.textContent='Page '+currentPage+' of '+totalPages;
@@ -147,23 +151,23 @@ function openUser(key){
  const {person,profile}=row,name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—';
  drawerAvatar.innerHTML=avatarHtml(key,name);drawerName.textContent=name;drawerMeta.textContent=(companyFor(person,profile))+' · '+(profile?.job_title||person?.job_title||'No job title');drawerEmail.textContent=email;
  const hasPortal=!!profile;profileAccessFields.style.display=hasPortal?'block':'none';grantAccessFields.classList.toggle('open',!hasPortal);saveAccess.style.display=hasPortal?'inline-flex':'none';
- if(hasPortal){const pa=portalFor(profile.id)||{};roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true;resetPasswordInput.value=''}
+ if(hasPortal){const pa=portalFor(profile.id)||{};loginToggle.checked=isLoginEnabled(profile);roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true;resetPasswordInput.value=''}
  else{grantRole.value='operative';tempPassword.value=''}
- syncNoAccess();drawerBackdrop.classList.add('open');
+ syncLoginAccess();drawerBackdrop.classList.add('open');
 }
 function closeUser(){drawerBackdrop.classList.remove('open');selected=null}
 async function saveUser(){
  if(!selected?.profile)return;
  saveAccess.disabled=true;saveAccess.textContent='Saving…';
  try{
-  const noAccess=roleSelect.value==='external';
-  const {error}=await db.rpc('manage_user_access',{target_user_id:selected.profile.id,new_access_role:roleSelect.value,new_academy_admin:noAccess?false:academyToggle.checked,new_workforce_manager:noAccess?false:workforceToggle.checked,new_learner_portal:noAccess?false:learnerToggle.checked,new_manage_users:noAccess?false:manageUsersToggle.checked});
-  if(error)throw error;await reloadData();closeUser();
- }catch(e){alert(e.message||'Unable to update access.')}finally{saveAccess.disabled=false;saveAccess.textContent='Save Changes'}
+  const enabled=loginToggle.checked;
+  const {error}=await db.rpc('manage_user_access',{target_user_id:selected.profile.id,new_access_role:roleSelect.value,new_academy_admin:enabled&&academyToggle.checked,new_workforce_manager:enabled&&workforceToggle.checked,new_learner_portal:enabled&&learnerToggle.checked,new_manage_users:enabled&&manageUsersToggle.checked,new_login_enabled:enabled});
+  if(error)throw error;await reloadData();closeUser();showAccessMessage('User access updated successfully.');
+ }catch(e){showAccessMessage(e.message||'Unable to update access.',true)}finally{saveAccess.disabled=false;saveAccess.textContent='Save Changes'}
 }
-function syncNoAccess(){
- const off=roleSelect.value==='external';
- [learnerToggle,academyToggle,workforceToggle,manageUsersToggle].forEach(x=>{if(off)x.checked=false;x.disabled=off});
+function syncLoginAccess(){
+ const off=!loginToggle.checked;
+ [learnerToggle,academyToggle,workforceToggle,manageUsersToggle].forEach(x=>{x.disabled=off});
 }
 async function resetPassword(){
  if(!selected?.profile)return;
@@ -201,11 +205,11 @@ function exportUsersToExcel(){
    'Manager':managerFor(person,profile)==='—'?'':managerFor(person,profile),
    'Email':profile?.email||person?.email||person?.work_email||person?.personal_email||'',
    'System Access':profile?accessLabel(role):'No Portal Access',
-   'Portal Access':profile?'Yes':'No',
-   'Learner Portal':profile?yesNo(pa.learner_portal!==false):'No',
-   'Academy Administration':profile?yesNo(pa.academy_admin===true):'No',
-   'Workforce Management':profile?yesNo(pa.workforce_manager===true):'No',
-   'Manage Users':profile?yesNo(pa.manage_users===true):'No',
+   'Login Status':loginStatus(profile),
+   'Learner Portal':profile?yesNo(isLoginEnabled(profile)&&pa.learner_portal!==false):'No',
+   'Academy Administration':profile?yesNo(isLoginEnabled(profile)&&pa.academy_admin===true):'No',
+   'Workforce Management':profile?yesNo(isLoginEnabled(profile)&&pa.workforce_manager===true):'No',
+   'Manage Users':profile?yesNo(isLoginEnabled(profile)&&pa.manage_users===true):'No',
    'Status':profile?.account_status||person?.status||'active'
   };
  });
@@ -218,7 +222,7 @@ function exportUsersToExcel(){
  XLSX.writeFile(wb,'RRTA User Access Audit '+stamp+'.xlsx');
 }
 async function reloadData(){
- const [pe,pr,re,pa]=await Promise.all([db.from('people').select('*').order('full_name'),db.from('profiles').select('id,full_name,email,forename,surname,photo_path,organisation,company_id,manager_1_id,job_title,account_status,portal_access_role,organisational_access_role,permission_level').order('full_name'),db.from('person_relationships').select('person_id,manager_profile_id,company_id,active'),db.from('portal_access').select('*')]);
+ const [pe,pr,re,pa]=await Promise.all([db.from('people').select('*').order('full_name'),db.from('profiles').select('id,full_name,email,forename,surname,photo_path,organisation,company_id,manager_1_id,job_title,account_status,login_enabled,portal_access_role,organisational_access_role,permission_level').order('full_name'),db.from('person_relationships').select('person_id,manager_profile_id,company_id,active'),db.from('portal_access').select('*')]);
  people=pe.data||people;profiles=pr.data||profiles;rels=re.data||rels;portalRows=pa.data||portalRows;render();
 }
 [searchBox,companyFilter,accessFilter,portalFilter].forEach(x=>x.addEventListener('input',()=>{currentPage=1;render()}));
@@ -226,7 +230,7 @@ pageSize.addEventListener('change',()=>{pageSizeValue=Number(pageSize.value)||10
 exportUsersBtn.onclick=exportUsersToExcel;
 prevPage.onclick=()=>{if(currentPage>1){currentPage--;render()}};
 nextPage.onclick=()=>{currentPage++;render()};
-closeDrawer.onclick=closeUser;cancelEdit.onclick=closeUser;drawerBackdrop.addEventListener('click',e=>{if(e.target===drawerBackdrop)closeUser()});saveAccess.onclick=saveUser;grantAccessBtn.onclick=grantAccess;roleSelect.addEventListener('change',syncNoAccess);resetPasswordBtn.onclick=resetPassword;
+closeDrawer.onclick=closeUser;cancelEdit.onclick=closeUser;drawerBackdrop.addEventListener('click',e=>{if(e.target===drawerBackdrop)closeUser()});saveAccess.onclick=saveUser;grantAccessBtn.onclick=grantAccess;loginToggle.addEventListener('change',syncLoginAccess);resetPasswordBtn.onclick=resetPassword;
 load().catch(e=>{rows.innerHTML='<tr><td colspan="9">Unable to load users: '+esc(e.message)+'</td></tr>'});
 </script>
 </body></html>
