@@ -83,14 +83,14 @@ const loginZone=document.getElementById('loginZone'),workspaceZone=document.getE
 if(new URLSearchParams(location.search).get('passwordChanged')==='1'){loginError.textContent='Password updated successfully. Sign in with your new password.';loginError.classList.remove('hidden');}
 async function loadAccess(user){
   const results=await Promise.all([
-    db.from('profiles').select('id,full_name,email,role,permission_level,job_title,organisational_access_role,portal_access_role,account_status,must_change_password').eq('id',user.id).single(),
+    db.from('profiles').select('id,full_name,email,role,permission_level,job_title,organisational_access_role,portal_access_role,account_status,login_enabled,must_change_password').eq('id',user.id).single(),
     db.from('portal_access').select('*').eq('user_id',user.id).maybeSingle()
   ]);
   const p=results[0].data,pe=results[0].error,a=results[1].data;
   if(pe||!p) throw new Error('Your profile could not be loaded.');
   if(p.must_change_password===true){location.replace('change-password.html');return}
   const systemRole=String(p.organisational_access_role||p.portal_access_role||'').toLowerCase();
-  const noAccess=systemRole==='external'||p.account_status==='archived';
+  const noAccess=p.login_enabled===false||p.account_status!=='active';
   const academy=a?.academy_admin===true||p.permission_level==='super_user'||['academy_staff','academy','health_safety','operations_manager','administrator'].includes(systemRole);
   if(noAccess) throw new Error('This account does not currently have platform access.');
   academyCard.classList.toggle('hidden',!academy);
