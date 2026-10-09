@@ -91,10 +91,12 @@ async function loadAccess(user){
   if(p.must_change_password===true){location.replace('change-password.html');return}
   const systemRole=String(p.organisational_access_role||p.portal_access_role||'').toLowerCase();
   const noAccess=p.login_enabled===false||p.account_status!=='active';
-  const academy=a?.academy_admin===true||p.permission_level==='super_user'||['academy_staff','academy','health_safety','operations_manager','administrator'].includes(systemRole);
+  const academy=p.permission_level==='super_user'||(a?a.academy_admin===true:['academy_staff','academy','health_safety','operations_manager','administrator'].includes(systemRole));
+  const learner=p.permission_level==='super_user'||(a?a.learner_portal===true:true);
   if(noAccess) throw new Error('This account does not currently have platform access.');
+  if(!academy&&!learner)throw new Error('No portal areas have been assigned to this account.');
   academyCard.classList.toggle('hidden',!academy);
-  learnerCard.classList.remove('hidden');
+  learnerCard.classList.toggle('hidden',!learner);
   sessionName.textContent=p.full_name||p.email||'Signed In';
   sessionRole.textContent=p.permission_level==='super_user'?'Super User':(p.job_title||p.role||'Platform Access');
   loginZone.classList.add('hidden');workspaceZone.classList.remove('hidden');sessionBox.classList.remove('hidden');
