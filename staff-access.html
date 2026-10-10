@@ -21,14 +21,11 @@ function show(which){if(which==='team'&&!canTeam||which==='company'&&!canCompany
 function fail(e){$('error').textContent=e?.message||'Unable to load this area.';}
 async function required(query){const {data,error}=await query;if(error)throw error;return data||[];}
 async function loadTeam(){
- const links=await required(db.from('person_relationships').select('person_id').eq('manager_profile_id',userId).eq('active',true));
- const ids=[...new Set(links.map(x=>x.person_id).filter(Boolean))];
- if(!ids.length){$('teamMembers').textContent='No direct reports are currently assigned to you.';$('teamBookings').textContent='No bookings for your direct team.';return;}
- const people=await required(db.from('people').select('id,profile_id,full_name,job_title').in('id',ids));
- const pids=people.map(x=>x.profile_id).filter(Boolean);
- if(!pids.length){$('teamMembers').textContent='No linked staff profiles found.';return;}
- const profiles=await required(db.from('profiles').select('id,manager_1_id,full_name,job_title').in('id',pids));
- const direct=people.filter(p=>profiles.some(x=>x.id===p.profile_id&&x.manager_1_id===userId));
+ const profiles=await required(db.from('profiles').select('id,manager_1_id,full_name,job_title').eq('manager_1_id',userId));
+ const pids=profiles.map(p=>p.id);
+ if(!pids.length){$('teamMembers').textContent='No direct reports are currently assigned to you.';$('teamBookings').textContent='No bookings for your direct team.';return;}
+ const people=await required(db.from('people').select('id,profile_id,full_name,job_title').in('profile_id',pids));
+ const direct=people.filter(p=>profiles.some(x=>x.id===p.profile_id));
  const directIds=direct.map(x=>x.profile_id);
  $('teamMembers').innerHTML=direct.length?direct.map(x=>'<div class="person"><strong>'+esc(x.full_name)+'</strong><small>'+esc(x.job_title||'Staff member')+'</small><small>Direct report</small></div>').join(''):'No direct reports currently assigned.';
  if(!directIds.length){$('teamBookings').textContent='No bookings for your direct team.';return;}
