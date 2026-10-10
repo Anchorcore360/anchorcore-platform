@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Staff Access | RRTA</title>
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal-navigation.css"><link rel="stylesheet" href="rrta-uniform-ui.css">
+<style>body{background:#f3f5f7;font-family:Inter,Arial,sans-serif;color:#1c2530;margin:0}.shell{display:grid;grid-template-columns:258px minmax(0,1fr);min-height:100vh}.sidebar{background:#171d25}.main{padding:28px;min-width:0}.wrap{max-width:1240px;margin:auto}.card{background:#fff;border:1px solid #e0e4e8;border-radius:12px;padding:18px;margin:15px 0;box-shadow:0 2px 12px #18202a09}h1{font-size:29px;margin:0 0 9px}h2{font-size:18px;margin:0 0 8px}.muted{color:#677380}.hide{display:none!important}.notice{padding:12px;border-radius:8px;background:#e8eaed}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.person{border:1px solid #e2e5e8;padding:13px;border-radius:9px}.person strong,.person small{display:block}.person small{color:#66717f;margin-top:5px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:11px;border-bottom:1px solid #e5e8eb}th{background:#f5f6f7}.scroll{overflow-x:auto}.pill{display:inline-block;background:#e8e9eb;border-radius:14px;padding:4px 9px;font-size:11px}nav.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}button.tab{border:1px solid #d4d7dc;background:#fff;border-radius:8px;padding:11px 17px;cursor:pointer;font-weight:700}button.tab.active{background:#252c35;color:white}#error{color:#ab2035}</style></head>
+<body data-portal-nav="learner"><div class="shell"><aside class="sidebar portal-side"></aside><main class="main"><div class="wrap">
+<div style="color:#a51326;font-size:11px;font-weight:800">RAPID RESPONSE TELECOMS</div><h1>Staff access</h1><div class="muted">Team visibility and company compliance are separate permissions.</div>
+<div id="loading" class="card">Checking your access…</div><div id="error" role="alert"></div>
+<nav class="tabs hide" id="tabs"><button class="tab" id="teamTab" type="button">Manage My Team</button><button class="tab" id="companyTab" type="button">Company Compliance</button></nav>
+<section id="teamPanel" class="hide"><div class="card"><h2>My direct reports</h2><p class="muted">Only people assigned directly to you as their primary manager appear here. Reassignments are reflected automatically.</p><div id="teamMembers" class="grid"></div></div><div class="card"><h2>Training bookings I created for my team</h2><p class="muted">This does not include other managers' bookings, even when one of your staff is attending.</p><div id="teamBookings" class="scroll"></div></div></section>
+<section id="companyPanel" class="hide"><div class="card"><h2>Rapid Response Telecoms compliance</h2><p class="muted">Internal RRT staff only. External customers and subcontractors at other companies are excluded.</p><div id="companyList" class="scroll"></div></div></section>
+</div></main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="platform-navigation.js"></script><script src="portal-navigation.js"></script>
+<script>
+const db=window.supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hasManagerRole=role=>['supervisor','manager','operations_manager'].includes(String(role||'').toLowerCase());
+let canTeam=false,canCompany=false,loadedTeam=false,loadedCompany=false,userId=null;
+function table(head,rows){return '<table><thead><tr>'+head.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table>';}
+function show(which){if(which==='team'&&!canTeam||which==='company'&&!canCompany)return;$('teamPanel').classList.toggle('hide',which!=='team');$('companyPanel').classList.toggle('hide',which!=='company');$('teamTab').classList.toggle('active',which==='team');$('companyTab').classList.toggle('active',which==='company');if(which==='team'&&!loadedTeam){loadedTeam=true;loadTeam().catch(fail)}if(which==='company'&&!loadedCompany){loadedCompany=true;loadCompany().catch(fail)}}
+function fail(e){$('error').textContent=e?.message||'Unable to load this area.';}
+async function required(query){const {data,error}=await query;if(error)throw error;return data||[];}
+async function loadTeam(){
+ const links=await required(db.from('person_relationships').select('person_id').eq('manager_profile_id',userId).eq('active',true));
+ const ids=[...new Set(links.map(x=>x.person_id).filter(Boolean))];
+ if(!ids.length){$('teamMembers').textContent='No direct reports are currently assigned to you.';$('teamBookings').textContent='No bookings for your direct team.';return;}
+ const people=await required(db.from('people').select('id,profile_id,full_name,job_title').in('id',ids));
+ const pids=people.map(x=>x.profile_id).filter(Boolean);
+ if(!pids.length){$('teamMembers').textContent='No linked staff profiles found.';return;}
+ const profiles=await required(db.from('profiles').select('id,manager_1_id,full_name,job_title').in('id',pids));
+ const direct=people.filter(p=>profiles.some(x=>x.id===p.profile_id&&x.manager_1_id===userId));
+ const directIds=direct.map(x=>x.profile_id);
+ $('teamMembers').innerHTML=direct.length?direct.map(x=>'<div class="person"><strong>'+esc(x.full_name)+'</strong><small>'+esc(x.job_title||'Staff member')+'</small><small>Direct report</small></div>').join(''):'No direct reports currently assigned.';
+ if(!directIds.length){$('teamBookings').textContent='No bookings for your direct team.';return;}
+ const attendee=await required(db.from('booking_attendees').select('booking_id,profile_id').in('profile_id',directIds));
+ const bIds=[...new Set(attendee.map(a=>a.booking_id).filter(Boolean))];
+ if(!bIds.length){$('teamBookings').textContent='You have not booked training for your direct team.';return;}
+ const bookings=await required(db.from('bookings').select('id,course_title,start_date,location,status,created_by').in('id',bIds).eq('created_by',userId).order('start_date',{ascending:false}));
+ const names=Object.fromEntries(direct.map(p=>[p.profile_id,p.full_name]));
+ $('teamBookings').innerHTML=bookings.length?table(['Course','Date','Team attendee(s)','Location','Status'],bookings.map(b=>'<tr><td>'+esc(b.course_title)+'</td><td>'+esc(b.start_date)+'</td><td>'+esc(attendee.filter(a=>a.booking_id===b.id).map(a=>names[a.profile_id]).filter(Boolean).join(', '))+'</td><td>'+esc(b.location)+'</td><td><span class="pill">'+esc(b.status)+'</span></td></tr>')):'No bookings made by you for your direct reports.';
+}
+async function loadCompany(){
+ const {data:id,error}=await db.rpc('rrt_internal_company_id');if(error)throw error;
+ if(!id){$('companyList').textContent='Company compliance access has not been enabled.';return;}
+ const people=await required(db.from('people').select('id,profile_id,full_name,job_title').eq('default_company_id',id).order('full_name'));
+ const pids=people.map(p=>p.profile_id).filter(Boolean);
+ const acc=pids.length?await required(db.from('accreditations').select('learner_id,accreditation_name,expiry_date,status').in('learner_id',pids).neq('status','archived')):[];
+ const today=new Date().toISOString().slice(0,10);
+ const counts={};for(const a of acc){const x=counts[a.learner_id]||(counts[a.learner_id]={valid:0,expired:0});if(a.expiry_date&&a.expiry_date<today)x.expired++;else x.valid++;}
+ $('companyList').innerHTML=people.length?table(['Staff member','Job title','Current accreditations','Expired accreditations'],people.map(p=>{const c=counts[p.profile_id]||{valid:0,expired:0};return '<tr><td>'+esc(p.full_name)+'</td><td>'+esc(p.job_title)+'</td><td>'+c.valid+'</td><td>'+c.expired+'</td></tr>';})):'No internal RRT staff records found.';
+}
+(async()=>{
+ try{
+ const auth=await db.auth.getUser();if(!auth.data?.user)throw Error('Please sign in to the Staff Portal.');
+ userId=auth.data.user.id;
+ const p=await db.from('profiles').select('organisational_access_role,portal_access_role,account_status,login_enabled').eq('id',userId).single();if(p.error)throw p.error;
+ if(p.data.account_status!=='active'||p.data.login_enabled===false)throw Error('Your account is not active.');
+ const a=await db.from('portal_access').select('compliance_all').eq('user_id',userId).maybeSingle();if(a.error)throw a.error;
+ canTeam=hasManagerRole(p.data.organisational_access_role||p.data.portal_access_role);
+ canCompany=a.data?.compliance_all===true;
+ $('loading').classList.add('hide');if(!canTeam&&!canCompany)throw Error('You do not have Manage My Team or Company Compliance access.');
+ $('tabs').classList.remove('hide');$('teamTab').classList.toggle('hide',!canTeam);$('companyTab').classList.toggle('hide',!canCompany);
+ $('teamTab').onclick=()=>show('team');$('companyTab').onclick=()=>show('company');
+ show(location.hash==='#company'&&canCompany?'company':canTeam?'team':'company');
+ }catch(e){$('loading').classList.add('hide');fail(e)}
+})();
+</script></body></html>
