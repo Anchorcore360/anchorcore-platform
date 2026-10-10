@@ -52,6 +52,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 <div class="toggle-row"><div class="toggle-copy"><strong>Academy Administration</strong><span>Access to the Academy administration portal where permitted by role.</span></div><label class="switch"><input type="checkbox" id="academyToggle"><span class="slider"></span></label></div>
 <div class="toggle-row"><div class="toggle-copy"><strong>Workforce Management</strong><span>Access to workforce management functions where permitted.</span></div><label class="switch"><input type="checkbox" id="workforceToggle"><span class="slider"></span></label></div>
 <div class="toggle-row"><div class="toggle-copy"><strong>Manage Users</strong><span>High-trust permission. Allows this user to open Setup → Manage Users and grant or change user access.</span></div><label class="switch"><input type="checkbox" id="manageUsersToggle"><span class="slider"></span></label></div>
+<div class="toggle-row"><div class="toggle-copy"><strong>Company Compliance</strong><span>View compliance of all direct Rapid Response Telecoms staff, excluding external customers. Separate from Manage My Team.</span></div><label class="switch"><input type="checkbox" id="complianceAllToggle"><span class="slider"></span></label></div>
 <div class="section-title">Password Reset</div>
 <div class="notice">Issue a temporary password if the user cannot sign in. On their next login they will be required to replace it with a private password of their own.</div>
 <div class="form-row"><label for="resetPasswordInput">Temporary Password</label><div style="display:flex;gap:8px;align-items:center"><input id="resetPasswordInput" type="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters" style="min-width:0;flex:1"><button class="btn light" type="button" id="toggleResetPassword" aria-label="Show temporary password" aria-pressed="false" style="white-space:nowrap">View Password</button></div></div>
@@ -151,7 +152,7 @@ function openUser(key){
  const {person,profile}=row,name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—';
  drawerAvatar.innerHTML=avatarHtml(key,name);drawerName.textContent=name;drawerMeta.textContent=(companyFor(person,profile))+' · '+(profile?.job_title||person?.job_title||'No job title');drawerEmail.textContent=email;
  const hasPortal=!!profile;profileAccessFields.style.display=hasPortal?'block':'none';grantAccessFields.classList.toggle('open',!hasPortal);saveAccess.style.display=hasPortal?'inline-flex':'none';
- if(hasPortal){const pa=portalFor(profile.id)||{};loginToggle.checked=isLoginEnabled(profile);roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true;resetPasswordInput.value='';resetPasswordInput.type='password';toggleResetPassword.textContent='View Password';toggleResetPassword.setAttribute('aria-pressed','false')}
+ if(hasPortal){const pa=portalFor(profile.id)||{};loginToggle.checked=isLoginEnabled(profile);roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true;complianceAllToggle.checked=pa.compliance_all===true;resetPasswordInput.value='';resetPasswordInput.type='password';toggleResetPassword.textContent='View Password';toggleResetPassword.setAttribute('aria-pressed','false')}
  else{grantRole.value='operative';tempPassword.value=''}
  syncLoginAccess();drawerBackdrop.classList.add('open');
 }
@@ -162,12 +163,12 @@ async function saveUser(){
  try{
   const enabled=loginToggle.checked;
   const {error}=await db.rpc('manage_user_access',{target_user_id:selected.profile.id,new_access_role:roleSelect.value,new_academy_admin:enabled&&academyToggle.checked,new_workforce_manager:enabled&&workforceToggle.checked,new_learner_portal:enabled&&learnerToggle.checked,new_manage_users:enabled&&manageUsersToggle.checked,new_login_enabled:enabled});
-  if(error)throw error;await reloadData();closeUser();showAccessMessage('User access updated successfully.');
+  if(error)throw error;const complianceSave=await db.rpc('set_rrt_compliance_permission',{target_user_id:selected.profile.id,allow_access:enabled&&complianceAllToggle.checked});if(complianceSave.error)throw complianceSave.error;await reloadData();closeUser();showAccessMessage('User access updated successfully.');
  }catch(e){showAccessMessage(e.message||'Unable to update access.',true)}finally{saveAccess.disabled=false;saveAccess.textContent='Save Changes'}
 }
 function syncLoginAccess(){
  const off=!loginToggle.checked;
- [learnerToggle,academyToggle,workforceToggle,manageUsersToggle].forEach(x=>{x.disabled=off});
+ [learnerToggle,academyToggle,workforceToggle,manageUsersToggle,complianceAllToggle].forEach(x=>{x.disabled=off});
 }
 async function resetPassword(){
  if(!selected?.profile)return;
@@ -210,6 +211,7 @@ function exportUsersToExcel(){
    'Academy Administration':profile?yesNo(isLoginEnabled(profile)&&pa.academy_admin===true):'No',
    'Workforce Management':profile?yesNo(isLoginEnabled(profile)&&pa.workforce_manager===true):'No',
    'Manage Users':profile?yesNo(isLoginEnabled(profile)&&pa.manage_users===true):'No',
+   'Company Compliance':profile?yesNo(isLoginEnabled(profile)&&pa.compliance_all===true):'No',
    'Status':profile?.account_status||person?.status||'active'
   };
  });
