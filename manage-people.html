@@ -34,7 +34,9 @@ await Promise.all(withPhotos.map(async x=>{const s=await db.storage.from('learne
 companies.forEach(x=>companyEl.insertAdjacentHTML('beforeend',`<option value="${x.id}">${esc(x.company_name)}</option>`));managers.forEach(x=>managerEl.insertAdjacentHTML('beforeend',`<option value="${x.id}">${esc(x.full_name||'Unnamed')}</option>`));render()}function profileFor(person){return person.profile_id?profiles.find(x=>x.id===person.profile_id):null}function companyName(id){return companies.find(x=>x.id===id)?.company_name||'—'}function primaryCompanyFor(p,pf,pr){
  const relationIds=pr.map(r=>r.company_id).filter(Boolean);
  const ids=[pf?.company_id,p.default_company_id,...relationIds].filter(Boolean);
- const rrt=ids.find(id=>/^rapid response telecoms( ltd)?$/i.test(companyName(id).trim()));
+ const subcontractor=ids.find(id=>companyById(id)?.is_rrt_subcontractor===true);
+ if(personCategory(p)==='subcontractor'&&subcontractor)return companyName(subcontractor);
+ const rrt=ids.find(id=>isRrtCompany(companyById(id)));
  if(rrt&&String(p.person_type||'').toLowerCase()!=='external')return companyName(rrt);
  return ids.length?companyName(ids[0]):(pf?.organisation||'—');
 }
