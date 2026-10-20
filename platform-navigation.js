@@ -3,6 +3,57 @@ const I={dashboard:'<svg viewBox="0 0 24 24"><path d="M3 13h7V3H3zM14 21h7V11h-7
 const icon=n=>`<span class="portal-nav-icon">${I[n]||I.course}</span>`;
 const academy=[{type:'link',label:'Dashboard',icon:'dashboard',href:'academy-admin.html'},{type:'group',label:'Manage',icon:'people',items:[['Manage People','people','manage-people.html'],['Archived People','people','archived-people.html'],['Manage Companies','company','manage-companies.html']]},{type:'group',label:'Compliance',icon:'compliance',items:[['Compliance Overview','compliance','compliance-operatives.html'],['Reviews & Requests','request','requests-review.html'],['Teams & Managers','people','compliance-teams.html'],['Job Roles','matrix','compliance.html'],['Training Matrix','matrix','training-matrix.html'],['Training Needs','report','training-needs.html'],['Cards & QR','qr','employee-card-preview.html']]},{type:'group',label:'Bookings Management',icon:'booking',items:[['Training Requests','request','training-requests.html'],['Induction Management','people','induction-bookings.html'],['Training Schedule','training','training-schedule.html'],['Confirmed Bookings','booking','booked-courses.html'],['Completed Bookings','award','certification-queue.html']]},{type:'link',label:'Library',icon:'course',href:'library.html'},{type:'link',label:'Reports',icon:'report',href:'reports.html'},{type:'section',label:'Academy Finance'},{type:'group',label:'Academy Finance',icon:'finance',items:[['Finance Overview','dashboard','academy-finance.html'],['Build Quote','booking','finance-quotes.html?view=build'],['Existing Quotes','request','academy-finance.html?view=quotes'],['Invoices','booking','academy-finance.html?view=invoices'],['Invoice Tracker','report','academy-finance.html?view=tracker'],['Internal Costs','report','academy-finance.html?view=costs'],['Archive / Incomplete','course','academy-finance.html?view=archive'],['Finance Settings','award','academy-settings.html']]},{type:'section',label:'Academy Management'},{type:'group',label:'Academy Management',icon:'award',items:[['Academy Overview','dashboard','academy-management.html'],['Course Management','course','courses.html'],['Training Team','people','academy-management.html#training-team'],['Assessment & IQA','assess','academy-management.html#iqa'],['IQA & Sampling','assess','academy-management.html#iqa'],['Observations','compliance','academy-management.html#observations'],['Standardisation','people','academy-management.html#standardisation'],['QA Actions','request','academy-management.html#actions'],['Awarding Bodies','award','academy-management.html#awarding-bodies'],['Companies','company','manage-companies.html'],['EQA & Audit','report','academy-management.html#audit']]},{type:'group',label:'Setup',icon:'user',items:[['Manage Users','user','manage-users.html']]},{type:'group',label:'Tools & Uploads',icon:'upload',items:[['Accreditation Bulk Upload','award','bulk-accreditation-upload.html'],['Operator Bulk Upload','upload','bulk-people-upload.html']]}];
 const learner=[{type:'link',label:'My Overview',icon:'dashboard',href:'learner-portal.html'},{type:'link',label:'My Profile',icon:'user',href:'learner-portal.html#profile'},{type:'link',label:'My Compliance',icon:'compliance',href:'learner-portal.html#compliance'},{type:'link',label:'Upcoming Training',icon:'training',href:'learner-portal.html#training'},{type:'link',label:'Accreditations & Certificates',icon:'award',href:'learner-portal.html#accreditations'},{type:'link',label:'Online Learning',icon:'course',href:'learner-online-learning.html'},{type:'link',label:'Library',icon:'course',href:'learner-library.html'},{type:'link',label:'Evidence Requests',icon:'request',href:'learner-portal.html#requests'},{type:'link',label:'My QR Card',icon:'qr',href:'learner-portal.html#qr'}];
-window.RRTAPlatformNavigation={icons:I,icon,menus:{academy,learner}};
+// The original feature inventory remains intact above. Only the navigation is streamlined.
+// Hidden modules and pages are not deleted; restore by switching academyMenu to academy.
+const academyStreamlined=[
+  {type:'link',label:'Dashboard',icon:'dashboard',href:'academy-admin.html'},
+  {type:'group',label:'Workforce Management',icon:'people',items:[
+    ['RRT Direct Staff','people','manage-people.html?view=rrt'],
+    ['Subcontractors','company','manage-people.html?view=subcontractor'],
+    ['Managers & Contract Teams','people','company-team-links.html'],
+    ['Manage Companies','company','manage-companies.html'],
+    ['Compliance Overview','compliance','compliance-operatives.html'],
+    ['Job Roles','matrix','compliance.html'],
+    ['Training Matrix','matrix','training-matrix.html'],
+    ['Training Needs','report','training-needs.html'],
+    ['Cards & QR','qr','employee-card-preview.html']
+  ]},
+  {type:'group',label:'Training Operations',icon:'training',items:[
+    ['Training Schedule','training','training-schedule.html'],
+    ['Training Requests','request','training-requests.html'],
+    ['Inductions','people','induction-bookings.html'],
+    ['Confirmed Bookings','booking','booked-courses.html'],
+    ['Completed Bookings','award','certification-queue.html'],
+    ['External Customers','company','manage-companies.html'],
+    ['External Delegates','people','manage-people.html?view=external'],
+    ['Accreditations','award','bulk-accreditation-upload.html'],
+    ['Reports','report','reports.html']
+  ]},
+  {type:'link',label:'Library',icon:'course',href:'library.html'},
+  {type:'group',label:'Tools & Uploads',icon:'upload',items:[
+    ['Bulk Staff Upload','upload','bulk-people-upload.html'],
+    ['Bulk Accreditation Upload','award','bulk-accreditation-upload.html']
+  ]},
+  {type:'group',label:'Courses',icon:'course',items:[
+    ['Manage Courses','course','courses.html'],
+    ['Online Courses','course','academy-online-learning.html'],
+    ['Smart Awards / EUSR / ProTrainings','award','courses.html']
+  ]},
+  {type:'section',label:'Academy Management'},
+  {type:'group',label:'Academy Management',icon:'award',items:[
+    ['Academy Overview','dashboard','academy-management.html'],
+    ['Training Team','people','academy-management.html#training-team'],
+    ['Assessment & IQA','assess','academy-management.html#iqa'],
+    ['Observations','assess','academy-management.html#observations'],
+    ['Standardisation','people','academy-management.html#standardisation'],
+    ['QA Actions','request','academy-management.html#actions'],
+    ['Awarding Bodies','award','academy-management.html#awarding-bodies'],
+    ['EQA & Audit','report','academy-management.html#audit']
+  ]},
+  {type:'group',label:'Setup',icon:'user',items:[['Manage Users','user','manage-users.html']]}
+];
+const academyMenu=academyStreamlined;
+window.RRTAPlatformNavigation={icons:I,icon,menus:{academy:academyMenu,learner},hiddenMenus:{academyLegacy:academy}};
+
 if((location.pathname.split('/').pop()||'').toLowerCase()==='add-person.html'){const s=document.createElement('script');s.src='add-person-duplicate-guard.js';document.head.appendChild(s)}
 })();
