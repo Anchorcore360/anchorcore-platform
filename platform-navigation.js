@@ -52,7 +52,10 @@ const academyStreamlined=[
   ]},
   {type:'group',label:'Setup',icon:'user',items:[['Manage Users','user','manage-users.html']]}
 ];
-const academyMenu=academyStreamlined;
+// Keep legacy and external-delegate functions available in source, but hide their menu entry.
+const academyMenu=academyStreamlined.map(section=>section.type==='group'&&section.label==='Training Operations'
+  ? {...section,items:section.items.filter(item=>item[0]!=='External Delegates')}
+  : section);
 window.RRTAPlatformNavigation={icons:I,icon,menus:{academy:academyMenu,learner},hiddenMenus:{academyLegacy:academy}};
 
 if((location.pathname.split('/').pop()||'').toLowerCase()==='add-person.html'){const s=document.createElement('script');s.src='add-person-duplicate-guard.js';document.head.appendChild(s)}
