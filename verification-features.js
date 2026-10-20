@@ -238,6 +238,6 @@ render=async function(){
   // The core profile must remain visible if QR-generation or other optional enhancements fail.
   await verificationOriginalRender();
   try{ensureVerificationActions()}catch(error){console.warn('Verification actions unavailable',error)}
-  try{await renderVerificationQr()}catch(error){console.warn('Optional QR enhancement unavailable',error)}
+  void renderVerificationQr().catch(error=>console.warn('Optional QR enhancement unavailable',error))
   try{await renderAccreditationRecords()}catch(error){console.warn('Optional accreditation display unavailable',error)}
 };
