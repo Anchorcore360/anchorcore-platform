@@ -62,5 +62,5 @@
     const qr=document.querySelector('.qr-slot');if(qr){const small=qr.querySelector('small');if(small)small.textContent='Person ID / verification'}
   }
 
-  if(typeof render==='function'){const previousRender=render;render=async function(){const result=await previousRender.apply(this,arguments);await enhancePersonProfile();return result};setTimeout(enhancePersonProfile,0);setTimeout(enhancePersonProfile,350)}else{window.addEventListener('load',()=>setTimeout(enhancePersonProfile,250))}
+  if(typeof render==='function'){const previousRender=render;render=async function(){const result=await previousRender.apply(this,arguments);try{await enhancePersonProfile()}catch(error){console.warn('Optional profile enhancements unavailable',error)}return result};setTimeout(enhancePersonProfile,0);setTimeout(enhancePersonProfile,350)}else{window.addEventListener('load',()=>setTimeout(enhancePersonProfile,250))}
 })();
