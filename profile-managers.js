@@ -5,6 +5,8 @@ let companyDirectory=[];
 const originalLoadData=loadData;
 loadData=async function(){
   await originalLoadData();
+  // Manager and job-role panels are an enhancement, not a prerequisite for opening a learner profile.
+  try{
   const sourcePerson=typeof personRecord!=='undefined'&&!!personRecord;
   const [peopleRes,rolesRes,linksRes,companiesRes]=await Promise.all([
     db.from('profiles').select('id,full_name,forename,surname,employee_number,job_title,role,account_status,organisational_access_role,portal_access_role').order('full_name'),
@@ -20,6 +22,7 @@ loadData=async function(){
   jobRoleDirectory=rolesRes.data||[];
   learnerJobRoles=linksRes.data||[];
   companyDirectory=companiesRes.data||[];
+  }catch(error){console.warn('Supplementary profile manager details unavailable',error)}
 };
 const originalRender=render;
 render=async function(){await originalRender();try{renderManagers();renderJobRoles()}catch(err){console.error('Profile enhancement render failed',err)}};
