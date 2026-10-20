@@ -235,8 +235,9 @@ async function downloadAccreditationPdf(){
 
 const verificationOriginalRender=render;
 render=async function(){
+  // The core profile must remain visible if QR-generation or other optional enhancements fail.
   await verificationOriginalRender();
-  ensureVerificationActions();
-  await renderVerificationQr();
-  await renderAccreditationRecords();
+  try{ensureVerificationActions()}catch(error){console.warn('Verification actions unavailable',error)}
+  try{await renderVerificationQr()}catch(error){console.warn('Optional QR enhancement unavailable',error)}
+  try{await renderAccreditationRecords()}catch(error){console.warn('Optional accreditation display unavailable',error)}
 };
