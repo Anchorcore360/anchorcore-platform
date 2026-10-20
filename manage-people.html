@@ -65,7 +65,7 @@ companies.forEach(x=>companyEl.insertAdjacentHTML('beforeend',`<option value="${
  if(rrt&&String(p.person_type||'').toLowerCase()!=='external')return companyName(rrt);
  return ids.length?companyName(ids[0]):(pf?.organisation||'—');
 }
-function profileHrefFor(p){return 'learner-profile.html?person_id='+encodeURIComponent(p.id)}
+function profileHrefFor(p){return p.profile_id?'learner-profile.html?id='+encodeURIComponent(p.profile_id):'learner-profile.html?person_id='+encodeURIComponent(p.id)}
 function primaryManagerIdFor(p,pf,pr,companyIds){
  // The person's primary reporting manager takes precedence over any secondary or contract manager.
  if(pf?.manager_1_id)return pf.manager_1_id;
