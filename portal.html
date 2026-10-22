@@ -52,7 +52,7 @@
         <p class="sub">Use your Rapid Response account to access your permitted portals.</p>
         <form id="platformLoginForm" class="login-form">
           <label>Email address<div class="field email-field"><input id="platformEmail" type="email" autocomplete="username" placeholder="Enter your email address" required></div></label>
-          <label>Password<div class="field password-field"><input id="platformPassword" type="password" autocomplete="current-password" placeholder="Enter your password" required></div></label>
+          <label>Password<div class="field password-field"><input id="platformPassword" type="password" autocomplete="current-password" placeholder="Enter your password" required><button id="togglePlatformPassword" type="button" aria-label="Show password" aria-pressed="false" style="margin-left:8px;padding:9px 12px;border:1px solid #6b7789;background:#25303c;color:#fff;border-radius:7px;cursor:pointer;white-space:nowrap;font-size:12px">Show</button></div></label>
           <button id="platformLoginButton" type="submit">Sign in to platform →</button>
         </form>
         <div id="loginError" class="login-error hidden" role="alert"></div>
@@ -112,6 +112,9 @@ platformLoginForm.addEventListener('submit',async function(e){
     loginError.textContent=/invalid login credentials/i.test(err.message||'')?'Email address or password is incorrect.':(err.message||'Unable to sign in. Please try again.');
     loginError.classList.remove('hidden');
   }finally{platformLoginButton.disabled=false;platformLoginButton.textContent='Sign in to platform →';}
+});
+document.getElementById('togglePlatformPassword').addEventListener('click',function(){
+ const shown=platformPassword.type==='text';platformPassword.type=shown?'password':'text';this.textContent=shown?'Show':'Hide';this.setAttribute('aria-label',shown?'Show password':'Hide password');this.setAttribute('aria-pressed',String(!shown));
 });
 signOutBtn.onclick=async function(){await db.auth.signOut();workspaceZone.classList.add('hidden');sessionBox.classList.add('hidden');loginZone.classList.remove('hidden');platformPassword.value='';};
 (async function(){const result=await db.auth.getUser();if(result.data?.user){try{await loadAccess(result.data.user)}catch(_){await db.auth.signOut();}}})();
