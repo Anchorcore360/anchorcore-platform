@@ -73,7 +73,7 @@ async function load(){
   const count={valid:0,expiring:0,expired:0,missing:0};
   needed.forEach(n=>count[n.status]++);
   const total=needed.length,pct=total?Math.round(100*(count.valid+count.expiring)/total):null;
-  return{person,role:roles.get(linked[0]?.job_role_id)||person.job_title||'Not assigned',held,needed,count,total,pct};
+  return{person,role:roles.get(linked[0]?.job_role_id)||'No mapped job role',held,needed,count,total,pct};
  });
  certs=members.flatMap(m=>m.held.filter(a=>a.expiry_date).map(a=>({person:m.person,name:a.accreditation_name,expiry:a.expiry_date,day:days(a.expiry_date)})));
  const seen=new Set();tasks=[];
