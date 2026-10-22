@@ -178,13 +178,35 @@ function syncLoginAccess(){
 async function resetPassword(){
  if(!selected?.profile)return;
  const pwd=resetPasswordInput.value;
- if(pwd.length<8){alert('Temporary password must be at least 8 characters.');return}
- resetPasswordBtn.disabled=true;resetPasswordBtn.textContent='Updating…';
+ if(pwd.length<8){showAccessMessage('Temporary password must be at least 8 characters.',true);return}
+ const accountId=selected.profile.id;
+ const intendedName=selected.profile.full_name||'this employee';
+ if(!confirm('Issue a new temporary password for '+intendedName+'? This replaces their existing password and they will need to set a private password at next sign-in.'))return;
+ resetPasswordBtn.disabled=true;resetPasswordBtn.textContent='Issuing…';
  try{
-  const r=await db.functions.invoke('manage-user-password',{body:{target_user_id:selected.profile.id,password:pwd}});
-  if(r.error)throw r.error;if(r.data?.error)throw new Error(r.data.error);
-  resetPasswordInput.value='';alert('Temporary password issued. The user must create their own password at next login.');
- }catch(e){alert(e.message||'Unable to update password.')}finally{resetPasswordBtn.disabled=false;resetPasswordBtn.textContent='Issue Temporary Password'}
+  // A user token must be present and current before the backend can carry out a privileged reset.
+  const session=await db.auth.getSession();
+  if(session.error||!session.data.session?.access_token)throw new Error('Your Academy session has expired. Please sign in again.');
+  const r=await db.functions.invoke('manage-user-password',{body:{target_user_id:accountId,password:pwd}});
+  if(r.error){
+   const context=r.error.context;
+   let details='';
+   if(context&&typeof context.json==='function'){try{const x=await context.json();details=x?.error||x?.message||''}catch(_){}}
+   throw new Error(details||r.error.message||'The password reset service rejected this request.');
+  }
+  if(r.data?.success!==true)throw new Error(r.data?.error||'The password reset was not confirmed by the server. No successful reset has been recorded.');
+  const checked=await db.from('profiles').select('must_change_password').eq('id',accountId).maybeSingle();
+  if(checked.error||checked.data?.must_change_password!==true){
+   throw new Error('The password change requirement was not verified. Do not assume this temporary password is active. Please contact the Academy administrator.');
+  }
+  resetPasswordInput.value='';
+  showAccessMessage('Temporary password confirmed. Next login requires a private password change.');
+  alert('Temporary password was successfully set for '+intendedName+'. Sign in with their account email and the exact temporary password you entered. They will be prompted to choose their own password.');
+ }catch(e){
+  console.error('RRTA password reset unsuccessful:',e);
+  showAccessMessage(e.message||'Temporary password reset failed.',true);
+  alert('Password reset not confirmed: '+(e.message||'Unknown error'));
+ }finally{resetPasswordBtn.disabled=false;resetPasswordBtn.textContent='Issue Temporary Password'}
 }
 async function updateLoginEmail(){
  if(!selected?.profile)return;
