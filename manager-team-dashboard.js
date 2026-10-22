@@ -83,7 +83,7 @@ async function load(){
   m.held.filter(a=>a.expiry_date&&days(a.expiry_date)<=90).forEach(a=>add(a.accreditation_name,a.expiry_date,days(a.expiry_date)<0?'expired':'expiring'));
  });
  tasks.sort((a,b)=>((a.status==='expired'?0:a.status==='missing'?1:2)+(a.day==null?0:Math.max(0,a.day)/100))-((b.status==='expired'?0:b.status==='missing'?1:2)+(b.day==null?0:Math.max(0,b.day)/100)));
- render();
+ render();prefillRequest();
 }
 const link=(id,req)=>'manager-team.html?person='+encodeURIComponent(id)+'&requirement='+encodeURIComponent(req)+'#requests';
 const prof=id=>'manager-member.html?id='+encodeURIComponent(id);
@@ -158,6 +158,24 @@ function exportCsv(){
  const csv=lines.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
  const uri=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
  const a=document.createElement('a');a.href=uri;a.download='RRTA-team-competency.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(uri),1000);
+}
+function prefillRequest(){
+ const q=new URLSearchParams(location.search),id=q.get('person'),requirement=q.get('requirement');
+ if(!id&&!requirement)return;
+ setTimeout(()=>{
+  if(typeof setTab==='function')setTab('requests');
+  const form=document.getElementById('requestForm');if(!form)return;
+  if(id&&form.elements.person)form.elements.person.value=id;
+  if(!requirement)return;
+  const option=[...(form.elements.course?.options||[])].find(o=>matches(requirement,o.textContent)||norm(o.textContent).includes(norm(requirement)));
+  if(option){
+   document.querySelector('[data-type="internal"]')?.click();
+   form.elements.course.value=option.value;
+  }else{
+   document.querySelector('[data-type="external"]')?.click();
+   if(form.elements.external_course)form.elements.external_course.value=requirement;
+  }
+ },350);
 }
 function init(n=0){
  const grid=document.getElementById('teamGrid');
