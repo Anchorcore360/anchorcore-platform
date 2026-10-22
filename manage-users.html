@@ -53,6 +53,10 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 <div class="toggle-row"><div class="toggle-copy"><strong>Workforce Management</strong><span>Access to workforce management functions where permitted.</span></div><label class="switch"><input type="checkbox" id="workforceToggle"><span class="slider"></span></label></div>
 <div class="toggle-row"><div class="toggle-copy"><strong>Manage Users</strong><span>High-trust permission. Allows this user to open Setup → Manage Users and grant or change user access.</span></div><label class="switch"><input type="checkbox" id="manageUsersToggle"><span class="slider"></span></label></div>
 <div class="toggle-row"><div class="toggle-copy"><strong>Company Compliance</strong><span>View compliance of all direct Rapid Response Telecoms staff, excluding external customers. Separate from Manage My Team.</span></div><label class="switch"><input type="checkbox" id="complianceAllToggle"><span class="slider"></span></label></div>
+<div class="section-title">Login Email / Username</div>
+<div class="notice">Users sign in with an email address, not their name. Changing this address updates their sign-in details, but does not change their password or reporting relationships.</div>
+<div class="form-row"><label for="loginEmailInput">Login Email</label><input id="loginEmailInput" type="email" autocomplete="off" placeholder="name@example.com" style="width:100%"></div>
+<button class="btn light" type="button" id="updateLoginEmailBtn">Update Login Email</button>
 <div class="section-title">Password Reset</div>
 <div class="notice">Issue a temporary password if the user cannot sign in. On their next login they will be required to replace it with a private password of their own.</div>
 <div class="form-row"><label for="resetPasswordInput">Temporary Password</label><div style="display:flex;gap:8px;align-items:center"><input id="resetPasswordInput" type="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters" style="min-width:0;flex:1"><button class="btn light" type="button" id="toggleResetPassword" aria-label="Show temporary password" aria-pressed="false" style="white-space:nowrap">View Password</button></div></div>
@@ -61,6 +65,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1260px}th{b
 <div id="grantAccessFields" class="grant-box">
 <div class="section-title">Grant Portal Access</div>
 <div class="notice">This person has a profile record but no login. A secure portal account will be created and linked to their existing record.</div>
+<div class="form-row"><label for="grantLoginEmail">Login Email / Username</label><input id="grantLoginEmail" type="email" autocomplete="off" placeholder="name@example.com" required></div>
 <div class="form-row"><label>System Access Level</label><select id="grantRole"></select></div>
 <div class="form-row"><label>Temporary Password</label><input id="tempPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters"></div>
 <button class="btn dark" type="button" id="grantAccessBtn">Grant Access</button>
@@ -152,8 +157,8 @@ function openUser(key){
  const {person,profile}=row,name=profile?.full_name||person?.full_name||'Unnamed',email=profile?.email||person?.email||person?.work_email||person?.personal_email||'—';
  drawerAvatar.innerHTML=avatarHtml(key,name);drawerName.textContent=name;drawerMeta.textContent=(companyFor(person,profile))+' · '+(profile?.job_title||person?.job_title||'No job title');drawerEmail.textContent=email;
  const hasPortal=!!profile;profileAccessFields.style.display=hasPortal?'block':'none';grantAccessFields.classList.toggle('open',!hasPortal);saveAccess.style.display=hasPortal?'inline-flex':'none';
- if(hasPortal){const pa=portalFor(profile.id)||{};loginToggle.checked=isLoginEnabled(profile);roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true;complianceAllToggle.checked=pa.compliance_all===true;resetPasswordInput.value='';resetPasswordInput.type='password';toggleResetPassword.textContent='View Password';toggleResetPassword.setAttribute('aria-pressed','false')}
- else{grantRole.value='operative';tempPassword.value=''}
+ if(hasPortal){const pa=portalFor(profile.id)||{};loginToggle.checked=isLoginEnabled(profile);roleSelect.value=profile.organisational_access_role||profile.portal_access_role||'operative';learnerToggle.checked=pa.learner_portal!==false;academyToggle.checked=pa.academy_admin===true;workforceToggle.checked=pa.workforce_manager===true;manageUsersToggle.checked=pa.manage_users===true;complianceAllToggle.checked=pa.compliance_all===true;loginEmailInput.value=profile.email||'';resetPasswordInput.value='';resetPasswordInput.type='password';toggleResetPassword.textContent='View Password';toggleResetPassword.setAttribute('aria-pressed','false')}
+ else{grantRole.value='operative';grantLoginEmail.value=person?.email||person?.work_email||person?.personal_email||'';tempPassword.value=''}
  syncLoginAccess();drawerBackdrop.classList.add('open');
 }
 function closeUser(){drawerBackdrop.classList.remove('open');selected=null}
@@ -181,10 +186,36 @@ async function resetPassword(){
   resetPasswordInput.value='';alert('Temporary password issued. The user must create their own password at next login.');
  }catch(e){alert(e.message||'Unable to update password.')}finally{resetPasswordBtn.disabled=false;resetPasswordBtn.textContent='Issue Temporary Password'}
 }
+async function updateLoginEmail(){
+ if(!selected?.profile)return;
+ const email=loginEmailInput.value.trim().toLowerCase();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showAccessMessage('Please enter a valid login email address.',true);return}
+ const previous=selected.profile.email||'';
+ if(email===previous.toLowerCase()){showAccessMessage('This is already the assigned login email.');return}
+ const name=selected.profile.full_name||'this user';
+ if(!confirm('Change '+name+'\'s sign-in email from '+(previous||'not set')+' to '+email+'? They will use the new email the next time they sign in.'))return;
+ updateLoginEmailBtn.disabled=true;updateLoginEmailBtn.textContent='Updating…';
+ try{
+  const result=await db.functions.invoke('manage-user-login',{body:{action:'existing_login',target_user_id:selected.profile.id,email}});
+  if(result.error)throw result.error;
+  if(result.data?.error)throw new Error(result.data.error);
+  await reloadData();closeUser();showAccessMessage('Login email updated to '+email+'.');
+ }catch(e){showAccessMessage(e.message||'Unable to update login email.',true)}
+ finally{updateLoginEmailBtn.disabled=false;updateLoginEmailBtn.textContent='Update Login Email'}
+}
 async function grantAccess(){
- if(!selected?.person)return;const pwd=tempPassword.value;if(pwd.length<8){alert('Temporary password must be at least 8 characters.');return}
+ if(!selected?.person)return;
+ const pwd=tempPassword.value,email=grantLoginEmail.value.trim().toLowerCase();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showAccessMessage('Enter a valid login email before granting access.',true);return}
+ if(pwd.length<8){alert('Temporary password must be at least 8 characters.');return}
  grantAccessBtn.disabled=true;grantAccessBtn.textContent='Creating…';
  try{
+  // Save the chosen username on the person record before creating the secure login.
+  if(String(selected.person.email||'').trim().toLowerCase()!==email){
+   const check=await db.functions.invoke('manage-user-login',{body:{action:'person_without_login',person_id:selected.person.id,email}});
+   if(check.error)throw check.error;
+   if(check.data?.error)throw new Error(check.data.error);
+  }
   const r=await db.functions.invoke('enable-portal-access',{body:{person_id:selected.person.id,password:pwd,system_role:grantRole.value}});
   if(r.error)throw r.error;if(r.data?.error)throw new Error(r.data.error);
   const {error}=await db.rpc('manage_user_access',{target_user_id:r.data.profile_id,new_access_role:grantRole.value,new_academy_admin:false,new_workforce_manager:false,new_learner_portal:true,new_manage_users:false,new_login_enabled:true});if(error)throw error;
@@ -232,7 +263,7 @@ pageSize.addEventListener('change',()=>{pageSizeValue=Number(pageSize.value)||10
 exportUsersBtn.onclick=exportUsersToExcel;
 prevPage.onclick=()=>{if(currentPage>1){currentPage--;render()}};
 nextPage.onclick=()=>{currentPage++;render()};
-closeDrawer.onclick=closeUser;cancelEdit.onclick=closeUser;drawerBackdrop.addEventListener('click',e=>{if(e.target===drawerBackdrop)closeUser()});saveAccess.onclick=saveUser;grantAccessBtn.onclick=grantAccess;loginToggle.addEventListener('change',syncLoginAccess);resetPasswordBtn.onclick=resetPassword;toggleResetPassword.onclick=()=>{const visible=resetPasswordInput.type==='text';resetPasswordInput.type=visible?'password':'text';toggleResetPassword.textContent=visible?'View Password':'Hide Password';toggleResetPassword.setAttribute('aria-label',visible?'Show temporary password':'Hide temporary password');toggleResetPassword.setAttribute('aria-pressed',String(!visible))};
+closeDrawer.onclick=closeUser;cancelEdit.onclick=closeUser;drawerBackdrop.addEventListener('click',e=>{if(e.target===drawerBackdrop)closeUser()});saveAccess.onclick=saveUser;grantAccessBtn.onclick=grantAccess;loginToggle.addEventListener('change',syncLoginAccess);resetPasswordBtn.onclick=resetPassword;updateLoginEmailBtn.onclick=updateLoginEmail;toggleResetPassword.onclick=()=>{const visible=resetPasswordInput.type==='text';resetPasswordInput.type=visible?'password':'text';toggleResetPassword.textContent=visible?'View Password':'Hide Password';toggleResetPassword.setAttribute('aria-label',visible?'Show temporary password':'Hide temporary password');toggleResetPassword.setAttribute('aria-pressed',String(!visible))};
 load().catch(e=>{rows.innerHTML='<tr><td colspan="9">Unable to load users: '+esc(e.message)+'</td></tr>'});
 </script>
 </body></html>
