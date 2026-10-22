@@ -11,7 +11,7 @@ const response = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: cors });
 
 const validEmail = (email: string) =>
-  email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  email.length <= 254 && /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i.test(email);
 
 Deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: cors });
@@ -51,13 +51,13 @@ Deno.serve(async (request: Request) => {
     }
 
     // Prevent a login address being reused by another RRTA record.
-    const [{ data: duplicateProfile }, { data: duplicatePeople }] = await Promise.all([
+    const [{ data: duplicateProfile, error: dpError }, { data: peopleEmail, error: deError }, { data: peopleWork, error: dwError }] = await Promise.all([
       admin.from("profiles").select("id").ilike("email", email).limit(10),
-      admin.from("people").select("id,profile_id").or("email.ilike." + email + ",work_email.ilike." + email).limit(10)
+      admin.from("people").select("id,profile_id").ilike("email", email).limit(10),
+      admin.from("people").select("id,profile_id").ilike("work_email", email).limit(10)
     ]);
-    if (!Array.isArray(duplicateProfile) || !Array.isArray(duplicatePeople)) {
-      return response(500, { error: "Unable to check existing login addresses." });
-    }
+    if (dpError || deError || dwError) return response(500, { error: "Unable to check existing login addresses." });
+    const duplicatePeople = [...new Map([...(peopleEmail || []), ...(peopleWork || [])].map(p => [p.id, p])).values()];
 
     if (action === "person_without_login") {
       const personId = String(body.person_id || "");
