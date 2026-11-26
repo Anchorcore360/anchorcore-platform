@@ -287,7 +287,7 @@ body[data-rrta-ui] .empty{padding:16px!important;border:0!important;border-radiu
 body.queue-expanded .side,body.queue-expanded .portal-side,body.queue-expanded .sidebar{display:none!important}
 body.queue-expanded .shell{display:block!important;grid-template-columns:1fr!important}
 body.queue-expanded .main{width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
-</style></head>
+</style><style>body[data-rrta-ui] .evidence-row{grid-template-columns:minmax(160px,1fr) minmax(220px,2fr) 145px!important}body[data-rrta-ui] #evidenceRequests{min-width:520px}body[data-rrta-ui] .certificate-preview{display:block;background:#fff;padding:8px;border:1px solid #cbd3db;margin-bottom:10px} .certificate-preview iframe{width:100%;height:55vh;border:0;display:block;margin-top:8px}.certificate-preview img{display:block;max-width:100%;max-height:65vh;margin:8px auto}.review-grid select{width:100%;margin-top:5px;padding:8px;border:1px solid #cfd5dd;background:#fff}</style></head>
   <body data-portal-nav="academy" data-rrta-ui="standard">
     <div class="shell">
       <aside class="side">
@@ -337,7 +337,7 @@ body.queue-expanded .main{width:100%!important;max-width:none!important;margin:0
         );
       const fmt = (d) => (d ? new Date(d).toLocaleDateString("en-GB") : "—");
       let reviewer = null,
-        evidenceRows = [], profileRows = [];
+        evidenceRows = [], profileRows = [], catalogue = [];
       function msg(t, type = "ok") {
         message.innerHTML = `<div class="message ${type}">${esc(t)}</div>`;
         setTimeout(() => (message.innerHTML = ""), 3500);
@@ -382,7 +382,7 @@ body.queue-expanded .main{width:100%!important;max-width:none!important;margin:0
       }
       async function load() {
         if (!(await auth())) return;
-        const [pr, er] = await Promise.all([
+        const [pr, er, cat] = await Promise.all([
           db
             .from("profile_change_requests")
             .select("*,profiles:learner_id(id,full_name,email,employee_number)")
@@ -393,9 +393,10 @@ body.queue-expanded .main{width:100%!important;max-width:none!important;margin:0
             .select("*,profiles:learner_id(id,full_name,email,employee_number)")
             .eq("status", "pending")
             .order("submitted_at"),
+          db.from("accreditation_catalog").select("id,module_code,description").eq("active",true).order("module_code"),
         ]);
         if(pr.error||er.error){msg((pr.error||er.error).message,"err");return;}
-        evidenceRows = er.data || []; profileRows=pr.data||[];
+        evidenceRows = er.data || []; profileRows=pr.data||[]; catalogue=cat.data||[]; if(cat.error)msg("Qualification catalogue unavailable: "+cat.error.message,"err");
         render(profileRows, evidenceRows);
       }
       function render(p, e) {
@@ -414,10 +415,10 @@ body.queue-expanded .main{width:100%!important;max-width:none!important;margin:0
               .join("")
           : '<div class="empty">No pending profile change requests.</div>';
         evidenceRequests.innerHTML = e.length
-          ? '<div class="queue-header evidence-row"><span>Employee</span><span>Qualification</span><span>Awarding body</span><span>Certificate no.</span><span>Submitted</span><span>Actions</span></div>'+e
+          ? '<div class="queue-header evidence-row"><span>Employee</span><span>Course / qualification</span><span>Actions</span></div>'+e
               .map(
                 (r) =>
-                  `<article class="request evidence-row" data-evidence-card="${r.id}"><div><strong>${esc(r.profiles?.full_name || "Learner")}</strong><p>${esc(r.profiles?.employee_number||"")}</p></div><div>${esc(r.qualification_name || "Qualification")}</div><div>${esc(r.awarding_body || "—")}</div><div>${esc(r.certificate_number||"—")}</div><div>${fmt(r.submitted_at)}</div><div class="actions"><button class="btn dark toggle-review" data-open-evidence="${r.id}">Review Evidence</button><a class="btn light" href="learner-profile.html?id=${encodeURIComponent(r.learner_id)}">View Profile</a></div><div class="review-box"><div class="review-grid"><label class="wide">Accreditation / Qualification<input data-field="qualification_name" value="${esc(r.qualification_name || "")}"></label><label>Awarding Body<input data-field="awarding_body" value="${esc(r.awarding_body || "")}"></label><label>Certificate Number<input data-field="certificate_number" value="${esc(r.certificate_number || "")}"></label><label>Issue Date<input data-field="issue_date" type="date" value="${r.issue_date || ""}"></label><label>Expiry Date<input data-field="expiry_date" type="date" value="${r.expiry_date || ""}"></label><label class="wide">Reviewer Notes<textarea data-field="reviewer_note" placeholder="Required when returning evidence to the learner">${esc(r.reviewer_note || "")}</textarea></label></div><div class="actions" style="margin-top:12px"><button class="btn light" data-view-file="${r.id}">Open Uploaded Evidence</button><button class="btn light" data-reject-evidence="${r.id}">Return To Learner</button><button class="btn dark" data-approve-evidence="${r.id}">Approve & Add To Profile</button></div></div></article>`,
+                  `<article class="request evidence-row" data-evidence-card="${r.id}"><div><strong>${esc(r.profiles?.full_name || "Learner")}</strong><p>${esc(r.profiles?.employee_number||"")}</p></div><div>${esc(r.qualification_name || "Qualification")}</div><div class="actions"><button class="btn dark toggle-review" data-open-evidence="${r.id}">Review Evidence</button></div><div class="review-box"><div class="certificate-preview"></div><div class="review-grid"><label class="wide">Assign to qualification<select data-field="catalogue_id"><option value="">Select qualification from catalogue</option>${catalogue.map(c=>`<option value="${esc(c.id)}" ${String(r.accreditation_catalog_id||"")===String(c.id)?"selected":""}>${esc([c.module_code,c.description].filter(Boolean).join(" — "))}</option>`).join("")}</select></label><label>Awarding Body<input data-field="awarding_body" value="${esc(r.awarding_body || "")}"></label><label>Certificate Number<input data-field="certificate_number" value="${esc(r.certificate_number || "")}"></label><label>Issue Date<input data-field="issue_date" type="date" value="${r.issue_date || ""}"></label><label>Expiry Date<input data-field="expiry_date" type="date" value="${r.expiry_date || ""}"></label><label class="wide">Reviewer Notes<textarea data-field="reviewer_note" placeholder="Required when returning evidence to the learner">${esc(r.reviewer_note || "")}</textarea></label></div><div class="actions" style="margin-top:12px"><button class="btn light" data-view-file="${r.id}">Open Uploaded Evidence</button><button class="btn light" data-reject-evidence="${r.id}">Reject</button><button class="btn dark" data-approve-evidence="${r.id}">Accept & Add To Profile</button></div></div></article>`,
               )
               .join("")
           : '<div class="empty">No pending evidence reviews.</div>';
@@ -427,17 +428,7 @@ body.queue-expanded .main{width:100%!important;max-width:none!important;margin:0
         document
           .querySelectorAll("[data-reject]")
           .forEach((b) => (b.onclick = () => rejectProfile(b.dataset.reject)));
-        document
-          .querySelectorAll("[data-open-evidence]")
-          .forEach(
-            (b) =>
-              (b.onclick = () =>
-                document
-                  .querySelector(
-                    `[data-evidence-card="${b.dataset.openEvidence}"]`,
-                  )
-                  ?.classList.toggle("open")),
-          );
+        document.querySelectorAll("[data-open-evidence]").forEach(b=>b.onclick=async()=>{const card=document.querySelector('[data-evidence-card="'+b.dataset.openEvidence+'"]');if(!card)return;const on=card.classList.toggle("open");if(!on)return;const r=evidenceRows.find(x=>String(x.id)===b.dataset.openEvidence),preview=card.querySelector(".certificate-preview"),select=card.querySelector('[data-field="catalogue_id"]');if(!select.value){const name=String(r.qualification_name||"").trim().toUpperCase();const match=catalogue.filter(c=>String(c.module_code||"").trim().toUpperCase()===name||String(c.description||"").trim().toUpperCase()===name);if(match.length===1)select.value=match[0].id;}preview.textContent="Loading certificate…";if(!r.evidence_path){preview.textContent="No certificate attached.";return;}const {data,error}=await db.storage.from("learner-documents").createSignedUrl(r.evidence_path,300);if(error||!data?.signedUrl){preview.textContent="Unable to load certificate. Use Open Uploaded Evidence to retry.";return;}preview.replaceChildren();const link=document.createElement("a");link.href=data.signedUrl;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Open certificate in new tab";preview.append(link);const ext=r.evidence_path.split(".").pop().toLowerCase();if(["jpg","jpeg","png","webp","gif"].includes(ext)){const img=document.createElement("img");img.src=data.signedUrl;img.alt="Uploaded certificate";preview.append(img);}else if(ext==="pdf"){const frame=document.createElement("iframe");frame.src=data.signedUrl;frame.title="Uploaded PDF certificate";preview.append(frame);}else{preview.append(document.createTextNode(" — use the link to view this file."));}});
         document
           .querySelectorAll("[data-view-file]")
           .forEach((b) => (b.onclick = () => openEvidence(b.dataset.viewFile)));
@@ -515,12 +506,15 @@ body.queue-expanded .main{width:100%!important;max-width:none!important;margin:0
         const val = (f) =>
             card.querySelector(`[data-field="${f}"]`)?.value?.trim() || null,
           awarding = val("awarding_body"),
-          qualification = val("qualification_name"),
+          catalogueId = val("catalogue_id"),
+          selected = catalogue.find(c=>String(c.id)===String(catalogueId)),
+          qualification = selected ? [selected.module_code,selected.description].filter(Boolean).join(" — ") : r.qualification_name,
           cert = val("certificate_number"),
           issue = val("issue_date"),
           expiry = val("expiry_date"),
           note = val("reviewer_note");
-        if (!qualification) return msg("Enter the qualification name.", "err");
+        if(decision==="approved"&&!selected)return msg("Select the relevant qualification from the catalogue.","err");
+        if(decision==="approved"&&!r.evidence_path)return msg("No certificate is attached.","err");
         if (decision === "rejected" && !note)
           return msg(
             "Add a reviewer note explaining what the learner needs to correct.",
@@ -540,20 +534,10 @@ body.queue-expanded .main{width:100%!important;max-width:none!important;margin:0
           return;
         try {
           if (decision === "approved") {
-            const { data: existing } = await db
-              .from("accreditations")
-              .select("id,accreditation_name")
-              .eq("learner_id", r.learner_id);
-            const code = codeOf(qualification),
-              match = (existing || []).find(
-                (a) =>
-                  (code && codeOf(a.accreditation_name) === code) ||
-                  String(a.accreditation_name || "").toLowerCase() ===
-                    String(qualification || "").toLowerCase(),
-              );
             const payload = {
               learner_id: r.learner_id,
               accreditation_name: qualification,
+              accreditation_catalog_id: selected.id,
               awarding_body: awarding,
               certificate_number: cert,
               issue_date: issue,
@@ -561,12 +545,8 @@ body.queue-expanded .main{width:100%!important;max-width:none!important;margin:0
               certificate_url: r.evidence_path,
               status: statusFor(expiry),
             };
-            const q = match
-              ? await db
-                  .from("accreditations")
-                  .update(payload)
-                  .eq("id", match.id)
-              : await db.from("accreditations").insert(payload);
+            const {data:existing,error:lookupError}=await db.from("accreditations").select("id").eq("learner_id",r.learner_id).eq("accreditation_catalog_id",selected.id).eq("certificate_url",r.evidence_path).is("archived_at",null).limit(1);if(lookupError)throw lookupError;
+            const q=existing?.length?{error:null}:await db.from("accreditations").insert(payload);
             if (q.error) throw q.error;
           }
           const q = await db
