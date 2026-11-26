@@ -24,7 +24,50 @@ tr.querySelectorAll('[data-field]').forEach(el=>{el.disabled=el.disabled||state.
 tr.querySelectorAll('[data-action]').forEach(b=>{b.disabled=state.busy||(r.done&&['remove','copy'].includes(b.dataset.action));b.onclick=()=>{const a=b.dataset.action;if(a==='remove'){state.rows=state.rows.filter(x=>x!==r);render()}if(a==='copy'){state.rows.splice(state.rows.indexOf(r)+1,0,{...r,id:++seq,qual:'',confirmed:false,done:false,error:''});render()}if(a==='preview'&&r.file){const u=URL.createObjectURL(r.file);window.open(u,'_blank','noopener');setTimeout(()=>URL.revokeObjectURL(u),120000)}if(a==='text'){E('smartText').textContent=r.text||'No extracted text.';E('smartTextDialog').showModal()}}});box.append(tr)}
 const approved=state.rows.filter(r=>r.confirmed&&valid(r)).length;E('smartCount').textContent=state.rows.length+' rows · '+approved+' approved · '+state.rows.filter(r=>r.done).length+' imported';E('smartImport').disabled=state.busy||!approved;E('smartApprove').disabled=state.busy;E('smartFiles').disabled=state.busy||!state.ready;E('smartSheet').disabled=state.busy||!state.ready;
 }
-async function addFiles(list){if(state.busy||!state.ready)return;state.busy=true;render();try{for(const f of list){if(!/\.(pdf|jpe?g|png|webp)$/i.test(f.name)||f.size>max){E('smartMessage').textContent='Skipped '+f.name+' (unsupported format or over 20 MB)';continue}const r={id:++seq,file:f,text:'',confirmed:false,done:false,error:'',noExpiry:false};state.rows.push(r);E('smartMessage').textContent='Reading '+f.name;try{const result=await read(f);Object.assign(r,extract(result.text),result)}catch(e){Object.assign(r,extract(''),{note:'Reading failed; enter details manually.'})}render()}}finally{if(worker){try{await worker.terminate()}catch{}worker=null}state.busy=false;E('smartMessage').textContent='Reading complete. Check all suggested details before approving.';render()}}
+const zipMax=250*1024*1024,expandedMax=500*1024*1024,entryMax=500;
+const accepted=n=>/\.(pdf|jpe?g|png|webp)$/i.test(n);
+let zipLibrary;
+async function unzip(file,onFile,report){
+ if(file.size>zipMax)throw Error('ZIP exceeds 250 MB; split into smaller archives.');
+ if(!zipLibrary)zipLibrary=import('https://cdn.jsdelivr.net/npm/@zip.js/zip.js@2.7.57/+esm').catch(e=>{zipLibrary=null;throw e});
+ const {ZipReader,BlobReader,BlobWriter}=await zipLibrary;
+ const reader=new ZipReader(new BlobReader(file),{useWebWorkers:false});
+ try{
+ const entries=await reader.getEntries();if(entries.length>5000)throw Error('Archive has too many entries; split it into smaller ZIPs.');
+ const candidates=entries.filter(e=>!e.directory&&!e.filename.split('/').some(p=>p==='__MACOSX'||p.startsWith('.'))&&accepted(e.filename));
+ report.skipped+=entries.filter(e=>!e.directory).length-candidates.length;
+ if(candidates.length>entryMax)throw Error('ZIP contains over 500 certificates; split it into smaller archives.');
+ let total=0;
+ for(const e of candidates){if(!Number.isSafeInteger(e.uncompressedSize)||e.uncompressedSize<0)throw Error('Archive contains invalid file sizes.');if(e.uncompressedSize<=max)total+=e.uncompressedSize;}
+ if(total>expandedMax)throw Error('Extracted certificates exceed 500 MB; split this ZIP.');
+ for(let i=0;i<candidates.length;i++){
+ const e=candidates[i];E('smartMessage').textContent='Extracting '+(i+1)+' / '+candidates.length+' from '+file.name;
+ if(e.encrypted||e.uncompressedSize>max){report.errors.push(e.filename+' — '+(e.encrypted?'password protected':'over 20 MB'));continue}
+ try{
+ const blob=await e.getData(new BlobWriter(),{checkSignature:true,onprogress:loaded=>{if(loaded>max)throw Error('Extracted file exceeds size limit')}});
+ if(blob.size>max)throw Error('Extracted file exceeds 20 MB');
+ const name=e.filename.split(/[\\/]/).pop();if(!name)throw Error('Invalid filename');
+ await onFile(new File([blob],name,{type:/\.pdf$/i.test(name)?'application/pdf':/\.png$/i.test(name)?'image/png':/\.webp$/i.test(name)?'image/webp':'image/jpeg'}),file.name+' / '+e.filename);
+ }catch(err){report.errors.push(e.filename+' — '+(err.message||'Extraction failed'))}
+ }
+ }finally{await reader.close()}
+}
+async function addFiles(list){
+ if(state.busy||!state.ready)return;state.busy=true;render();
+ const report={added:0,skipped:0,errors:[]};
+ async function process(f,source=''){
+ if(!accepted(f.name)||f.size>max){report.errors.push(f.name+' — unsupported format or over 20 MB');return}
+ const r={id:++seq,file:f,text:'',confirmed:false,done:false,error:'',noExpiry:false};state.rows.push(r);report.added++;
+ E('smartMessage').textContent='Reading certificate '+report.added+': '+f.name;
+ try{const result=await read(f);Object.assign(r,extract(result.text),result);r.note=[source,r.note].filter(Boolean).join(' · ')}
+ catch(e){Object.assign(r,extract(''),{note:[source,'Reading failed; enter details manually.'].filter(Boolean).join(' · ')})}
+ render();
+ }
+ try{for(const f of list){try{if(/\.zip$/i.test(f.name))await unzip(f,process,report);else await process(f)}catch(e){report.errors.push(f.name+' — '+(e.message||'Unable to extract ZIP'))}}}
+ finally{if(worker){try{await worker.terminate()}catch{}worker=null}state.busy=false;
+ E('smartMessage').textContent=report.added+' certificates added · '+report.skipped+' unsupported/hidden ZIP entries skipped · '+report.errors.length+' files could not be processed. Check suggested details before approving.';
+ const box=E('smartArchiveErrors');if(box){box.hidden=!report.errors.length;box.textContent=report.errors.join('\n')}render()}
+}
 async function init(){const perm=await db.rpc('is_trainer');if(perm.error||perm.data!==true)throw Error('Academy access required.');const [p,c,a,co]=await Promise.all([db.from('people').select('id,profile_id,full_name,forename,surname,email,employee_number,learner_reference,default_company_id,person_type').eq('status','active').order('full_name'),db.from('accreditation_catalog').select('id,module_code,description').eq('active',true).order('module_code'),db.from('accreditations').select('person_id,learner_id,accreditation_catalog_id,accreditation_name,certificate_number,issue_date,expiry_date').is('archived_at',null).order('id').range(0,999),db.from('external_customers').select('id,company_name,is_internal_rrt,is_rrt_subcontractor')]);for(const x of [p,c,a,co])if(x.error)throw x.error;const companies=new Map(co.data.filter(x=>x.is_internal_rrt||x.is_rrt_subcontractor).map(x=>[x.id,x.company_name]));state.people=p.data.filter(x=>x.person_type!=='external'&&companies.has(x.default_company_id)).map(x=>({...x,company:companies.get(x.default_company_id)}));state.catalog=c.data;state.records=a.data;let offset=a.data.length;while(offset&&offset%1000===0){const r=await db.from('accreditations').select('person_id,learner_id,accreditation_catalog_id,accreditation_name,certificate_number,issue_date,expiry_date').is('archived_at',null).order('id').range(offset,offset+999);if(r.error)throw r.error;state.records.push(...r.data);if(r.data.length<1000)break;offset+=r.data.length}state.ready=true;E('smartMessage').textContent='Ready to select certificates.';render()}
 async function importRows(){if(state.busy)return;const selected=state.rows.filter(r=>r.confirmed&&valid(r));if(!selected.length||!confirm('Import '+selected.length+' approved accreditation records?'))return;state.busy=true;render();const paths=new WeakMap();try{for(const r of selected){if(!valid(r)){r.confirmed=false;continue}const p=state.people.find(x=>x.id===r.person),q=state.catalog.find(x=>String(x.id)===r.qual);let path=null,uploaded=false;try{E('smartMessage').textContent='Importing '+p.full_name+' — '+q.module_code;if(r.file){path=paths.get(r.file)?.get(p.id);if(!path){path=(p.profile_id||p.id)+'/accreditations/'+crypto.randomUUID()+'-'+r.file.name.replace(/[^a-zA-Z0-9._-]/g,'_');const up=await db.storage.from('learner-documents').upload(path,r.file,{upsert:false});if(up.error)throw up.error;uploaded=true}}const today=new Date().toISOString().slice(0,10),days=r.expiry?(Date.parse(r.expiry)-Date.parse(today))/86400000:null;const payload={person_id:p.id,learner_id:p.profile_id||null,accreditation_catalog_id:q.id,accreditation_name:q.module_code||q.description,awarding_body:r.awarding||null,certificate_number:r.number||null,issue_date:r.issue,expiry_date:r.noExpiry?null:r.expiry,certificate_url:path,status:days===null?'current':days<0?'expired':days<=90?'expiring':'current'};const res=await db.from('accreditations').insert(payload).select('id').single();if(res.error)throw res.error;if(path&&r.file){if(!paths.has(r.file))paths.set(r.file,new Map());paths.get(r.file).set(p.id,path)}state.records.push(payload);r.done=true;r.confirmed=false}catch(e){if(uploaded&&path)await db.storage.from('learner-documents').remove([path]);r.error=e.message||'Import failed';r.confirmed=false}render()}}finally{state.busy=false;E('smartMessage').textContent='Import finished. Failed rows remain available for correction.';render()}}
 E('smartFiles').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};E('smartDrop').ondragover=e=>e.preventDefault();E('smartDrop').ondrop=e=>{e.preventDefault();addFiles([...e.dataTransfer.files])};E('smartFilter').onchange=render;E('smartImport').onclick=importRows;E('smartApprove').onclick=()=>{if(!confirm('Approve all complete, non-duplicate rows? Only do this after checking the details against the certificates.'))return;state.rows.forEach(r=>{if(valid(r))r.confirmed=true});render()};E('smartTextClose').onclick=()=>E('smartTextDialog').close();
