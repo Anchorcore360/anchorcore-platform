@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head>
+<head><script src="workforce-compliance.js"></script>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Training Matrix | RRTA</title>
 <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal-navigation.css">
@@ -67,17 +67,11 @@ const code=v=>{const s=norm(v),m=s.match(/\b(SA\d+[A-Z]?|S\d{3}|Q\d{2,3}|K\d{3}|
 const sameAcc=(item,acc)=>{if(item.approvedEntry){if(item.catalogId&&acc.accreditation_catalog_id&&String(item.catalogId)===String(acc.accreditation_catalog_id))return true;return approvedMatch(item.approvedEntry,acc.accreditation_name)}if(item.catalogId&&acc.accreditation_catalog_id)return String(item.catalogId)===String(acc.accreditation_catalog_id);const a=item.moduleCode?norm(item.moduleCode):code(item.name),b=code(acc.accreditation_name);if(item.moduleCode&&(norm(acc.accreditation_name)===norm(item.moduleCode)||norm(acc.accreditation_name)===norm(item.name)))return true;if(a&&b)return a===b;const x=norm(item.name),y=norm(acc.accreditation_name);return Boolean(x&&y&&x===y)};
 const workforceView=new URLSearchParams(location.search).get('view')==='subcontractor'?'subcontractor':'rrt';let managerDirectory=[];
 let profiles=[],roles=[],profileRoles=[],items=[],requirements=[],accreditations=[],visiblePeople=[],visibleItems=[],quickView='all',matrixMode='combined',courseCatalogue=[],accreditationCatalogue=[];
-function accreditationRecords(person,item){return accreditations.filter(x=>(x.learner_id===person.id||(person.person_id&&x.person_id===person.person_id))&&sameAcc(item,x)).sort((a,b)=>String(b.issue_date||'').localeCompare(String(a.issue_date||''))||String(b.created_at||'').localeCompare(String(a.created_at||''))||String(b.id).localeCompare(String(a.id)))}
-function currentAccreditation(person,item){const today=new Date().toISOString().slice(0,10),rows=accreditationRecords(person,item).filter(a=>!a.superseded_by&&(!a.issue_date||a.issue_date<=today));const valid=rows.filter(a=>a.expiry_date&&a.expiry_date>=today);return valid.filter(a=>a.primary_selected_at).sort((a,b)=>String(b.primary_selected_at).localeCompare(String(a.primary_selected_at)))[0]||valid[0]||rows[0]}
-function statusFor(person,item){const roleIds=profileRoles.filter(x=>x.profile_id===person.id).map(x=>x.job_role_id),reqs=requirements.filter(x=>roleIds.includes(x.job_role_id)&&x.compliance_item_id===item.id),required=reqs.some(x=>x.status==='required'),conditional=!required&&reqs.some(x=>x.status==='conditional'),held=currentAccreditation(person,item);if(!held)return required?{key:'missing',label:'',required}:conditional?{key:'conditional',label:'',required:false}:{key:'not-required',label:'',required:false};if(!held.expiry_date)return item.moduleCode==='NOPS'?{key:'not-required',label:'',required,held}:{key:'valid',label:'Valid',required,held};const today=new Date();today.setHours(0,0,0,0);const end=new Date(held.expiry_date+'T00:00:00'),days=Math.ceil((end-today)/86400000);if(days<0)return{key:'expired',label:'Expired',required,held};if(days<=90)return{key:'expiring',label:'Expiring',required,held};return{key:'valid',label:'Valid',required,held}}
-function safetyCode(i){return String(i.moduleCode||i.name||'').trim().toUpperCase().match(/^SA00[26](?![A-Z0-9])/)?.[0]||''}
-function requirementStates(p,roleIds=personRoles(p).map(r=>r.id)){
- const required=items.filter(i=>requirements.some(r=>roleIds.includes(r.job_role_id)&&r.compliance_item_id===i.id&&r.status==='required'));
- const codes=new Set(required.map(safetyCode));const hasCivils=roles.some(r=>roleIds.includes(r.id)&&String(r.division).toLowerCase()==='civils'&&requirements.some(q=>q.job_role_id===r.id&&q.status==='required'&&required.some(i=>i.id===q.compliance_item_id&&['SA002','SA006'].includes(safetyCode(i)))));
- const safety=required.filter(i=>safetyCode(i));const result=required.filter(i=>!safetyCode(i)).map(i=>({...statusFor(p,i),required:true}));
- if(safety.length){const six=codes.has('SA006')||hasCivils;const options=items.filter(i=>safetyCode(i)==='SA006'||(!six&&safetyCode(i)==='SA002')).map(i=>statusFor(p,i));const rank={valid:4,expiring:3,expired:2,missing:1,'not-required':0,conditional:0};options.sort((a,b)=>(rank[b.key]||0)-(rank[a.key]||0));const best=options[0];result.push(best&&best.held?{...best,required:true}:{key:'missing',label:'',required:true})}
- return result;
-}
+function complianceEngine(){return window.RRTACompliance({roles,profileRoles,items,requirements,accreditations})}
+function accreditationRecords(p,i){return complianceEngine().accreditationRecords(p,i)}
+function currentAccreditation(p,i){return complianceEngine().currentAccreditation(p,i)}
+function statusFor(p,i){return complianceEngine().statusFor(p,i)}
+function requirementStates(p,ids){return complianceEngine().requirementStates(p,ids)}
 function fullRequiredStates(p){return requirementStates(p)}
 // Approved Rapid Response catalogue: 87 Keep rows from Rapid_Response_Qualification_Catalogue(1).xlsx.
 // Excluded and review-only entries remain in the source database for evidence and audit.
