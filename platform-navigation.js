@@ -54,14 +54,20 @@ const academyStreamlined=[
 // Keep legacy and external-delegate functions available in source, but hide their menu entry.
 const academyMenu=[
 {type:'link',label:'Dashboard',icon:'dashboard',href:'compliance-operatives.html'},
-{type:'group',label:'Employees',icon:'people',items:[['Employees','people','manage-people.html?view=rrt'],['Teams & Managers','people','compliance-teams.html'],['Archived People','people','archived-people.html']]},
-{type:'link',label:'Training Catalogue',icon:'course',href:'courses.html'},
-{type:'group',label:'Training Matrix',icon:'matrix',items:[['RRT Employee Matrix','matrix','training-matrix.html'],['Subcontractor Matrix','matrix','training-matrix.html?view=subcontractor'],['Job Role / Contract Matrix','matrix','compliance.html'],['Training Needs','report','training-needs.html'],['Reviews & Requests','request','requests-review.html']]},
+{type:'group',label:'People',icon:'people',items:[['Active People','people','manage-people.html'],['Inactive People','people','manage-people.html?status=inactive'],['Archived History','people','archived-people.html'],['Companies','company','manage-companies.html'],['Teams & Managers','people','compliance-teams.html']]},
+{type:'group',label:'Operational Compliance',icon:'matrix',items:[['RRT Employee Matrix','matrix','training-matrix.html'],['Subcontractor Matrix','matrix','training-matrix.html?view=subcontractor'],['Job Role / Contract Matrix','matrix','compliance.html'],['Training Needs','report','training-needs.html'],['Reviews & Requests','request','requests-review.html'],['Cards & QR','qr','employee-card-preview.html']]},
 {type:'group',label:'Learning Management',icon:'course',items:[['Learning Dashboard','dashboard','academy-online-learning.html'],['Learning Matrix','matrix','learning-matrix.html'],['Learning Needs','report','learning-matrix.html?view=needs'],['Learning Groups','people','learning-matrix.html?view=groups'],['Learning Requirements Matrix','matrix','learning-matrix.html?view=requirements'],['Learning Course Settings','course','learning-matrix.html?view=catalogue']]},
 {type:'link',label:'Reports',icon:'report',href:'reports.html'},
-{type:'group',label:'Settings',icon:'user',items:[['Manage Users','user','manage-users.html'],['Companies & Contracts','company','manage-companies.html'],['Managers & Contract Teams','people','company-team-links.html'],['Bulk Staff Upload','upload','bulk-people-upload.html'],['Bulk Accreditation Upload','award','bulk-accreditation-upload.html'],['Cards & QR','qr','employee-card-preview.html'],['Library','course','library.html']]}
+{type:'group',label:'Settings',icon:'user',items:[['Manage Users','user','manage-users.html'],['Managers & Contract Teams','people','company-team-links.html'],['Bulk Staff Upload','upload','bulk-people-upload.html'],['Bulk Accreditation Upload','award','bulk-accreditation-upload.html'],['Library','course','library.html']]}
 ];
-const learnerMenu=learner.filter(item=>!['Upcoming Training','Library','My QR Card'].includes(item.label)).map(item=>({...item,label:({'My Overview':'Home','My Compliance':'My Training Status','Accreditations & Certificates':'My Qualifications & Certificates','Online Learning':'My Online Learning','Evidence Requests':'My Requests'})[item.label]||item.label}));
+const learnerMenu=[
+{type:'link',label:'My Dashboard',icon:'dashboard',href:'learner-portal.html'},
+{type:'link',label:'My Profile',icon:'user',href:'learner-portal.html#profile'},
+{type:'link',label:'My Qualifications & Certificates',icon:'award',href:'learner-portal.html#accreditations'},
+{type:'link',label:'My Learning',icon:'course',href:'learner-online-learning.html'},
+{type:'link',label:'Submit Evidence / Requests',icon:'request',href:'learner-portal.html#requests'},
+{type:'link',label:'My QR Card',icon:'qr',href:'learner-portal.html#qr'}
+];
 window.RRTAPlatformNavigation={icons:I,icon,menus:{academy:academyMenu,learner:learnerMenu},hiddenMenus:{academyLegacy:academy,academyStreamlined,learnerLegacy:learner}};
 
 if((location.pathname.split('/').pop()||'').toLowerCase()==='add-person.html'){const s=document.createElement('script');s.src='add-person-duplicate-guard.js';document.head.appendChild(s)}
