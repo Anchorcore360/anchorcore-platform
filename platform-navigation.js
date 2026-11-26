@@ -24,8 +24,7 @@ const academyStreamlined=[
     ['Inductions','people','induction-bookings.html'],
     ['Confirmed Bookings','booking','booked-courses.html'],
     ['Completed Bookings','award','certification-queue.html'],
-    ['External Customers','company','manage-companies.html'],
-    ['External Delegates','people','manage-people.html?view=external'],
+
     ['Accreditations','award','bulk-accreditation-upload.html'],
     ['Reports','report','reports.html']
   ]},
