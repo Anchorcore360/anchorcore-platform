@@ -260,7 +260,34 @@
         }
       }
     </style>
-  <link rel="stylesheet" href="rrta-uniform-ui.css?v=20260922-5"></head>
+  <link rel="stylesheet" href="rrta-uniform-ui.css?v=20260922-5"><style>
+body[data-rrta-ui] .content{max-width:none!important;padding:12px!important;margin:0!important}
+body[data-rrta-ui] .top{min-height:42px!important;height:auto!important;padding:8px 12px!important;background:#edf0f3!important}
+body[data-rrta-ui] .summary{display:flex!important;gap:8px!important;margin:8px 0!important}
+body[data-rrta-ui] .stat{display:flex!important;gap:10px;align-items:center;padding:6px 10px!important;border-radius:3px!important;box-shadow:none!important;background:#eef1f4!important}
+body[data-rrta-ui] .stat strong{font-size:15px!important;margin:0!important}
+body[data-rrta-ui] .panel{padding:0!important;border-radius:3px!important;box-shadow:none!important;margin:10px 0!important;overflow:auto!important}
+body[data-rrta-ui] .panel[hidden]{display:none!important}
+body[data-rrta-ui] .panel h2{font-size:13px!important;background:#e0e5ea!important;margin:0!important;padding:8px 10px!important;border-bottom:1px solid #cbd3db}
+body[data-rrta-ui] .request-list{display:block!important;margin:0!important;min-width:830px}
+body[data-rrta-ui] .request,body[data-rrta-ui] .queue-header{display:grid!important;gap:0!important;align-items:stretch!important;border:0!important;border-bottom:1px solid #d4dbe1!important;border-radius:0!important;padding:0!important;font-size:12px!important;box-shadow:none!important}
+body[data-rrta-ui] .profile-row{grid-template-columns:1.2fr .9fr 1fr 1fr 95px 230px!important}
+body[data-rrta-ui] .evidence-row{grid-template-columns:1.2fr 1.6fr 1fr .9fr 95px 210px!important}
+body[data-rrta-ui] .request>div,body[data-rrta-ui] .queue-header>span{min-width:0;padding:8px!important;border-right:1px solid #d4dbe1;overflow-wrap:anywhere;align-content:center}
+body[data-rrta-ui] .queue-header{background:#e6ebef!important;font-size:11px!important;font-weight:800!important;position:sticky;top:0;z-index:2}
+body[data-rrta-ui] .request:nth-child(odd){background:#f0f3f5!important}
+body[data-rrta-ui] .request:nth-child(even){background:#fafbfc!important}
+body[data-rrta-ui] .request .actions{align-items:center;justify-content:flex-start;gap:4px}
+body[data-rrta-ui] .btn{font-size:11px!important;padding:6px 8px!important;border-radius:4px!important;min-height:28px!important}
+body[data-rrta-ui] .review-box{grid-column:1/-1!important;background:#eef1f4!important;padding:12px!important}
+body[data-rrta-ui] .empty{padding:16px!important;border:0!important;border-radius:0!important;text-align:left!important}
+.queue-tools{display:flex;gap:12px;flex-wrap:wrap;background:#edf0f3;padding:8px;border:1px solid #d4dbe1}
+.queue-tools label{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700}
+.queue-tools input,.queue-tools select{border:1px solid #c5cdd5;background:white;padding:7px 9px;border-radius:3px;font-size:12px}
+body.queue-expanded .side,body.queue-expanded .portal-side,body.queue-expanded .sidebar{display:none!important}
+body.queue-expanded .shell{display:block!important;grid-template-columns:1fr!important}
+body.queue-expanded .main{width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
+</style></head>
   <body data-portal-nav="academy" data-rrta-ui="standard">
     <div class="shell">
       <aside class="side">
@@ -269,29 +296,18 @@
       </aside>
       <main class="main">
         <header class="top">
-          <strong>RRTA Training Academy Administration</strong
-          ><span class="muted">Reviews & Requests</span>
+          <strong>Reviews &amp; Requests</strong><div class="actions"><a class="btn light" href="compliance-operatives.html">← Back to system</a><button class="btn light" id="refreshQueue" type="button">Refresh</button><button class="btn light" id="fullQueue" type="button">Full page</button></div>
         </header>
         <div class="content">
-          <div class="head">
-            <div class="eyebrow">Academy Action Queue</div>
-            <h1>Reviews & Requests</h1>
-            <p class="muted">
-              Profile changes and learner evidence that need Academy review.
-              Evidence is now reviewed here without dropping into an old screen.
-            </p>
-          </div>
-          <div id="summary" class="summary"></div>
+          <div class="queue-tools"><label>Search requests <input id="queueSearch" type="search" placeholder="Employee, qualification or request"></label><label>Queue <select id="queueType"><option value="all">All pending requests</option><option value="profile">Profile changes</option><option value="evidence">Evidence submissions</option></select></label></div><div id="summary" class="summary"></div>
           <div id="message"></div>
-          <section class="panel">
-            <div class="eyebrow">Profile Changes</div>
+          <section class="panel" id="profilePanel">
             <h2>Profile Change Requests</h2>
             <div id="profileRequests" class="request-list">
               <div class="empty">Loading requests…</div>
             </div>
           </section>
-          <section class="panel">
-            <div class="eyebrow">Compliance Evidence</div>
+          <section class="panel" id="evidencePanel">
             <h2>Evidence Submissions</h2>
             <div id="evidenceRequests" class="request-list">
               <div class="empty">Loading evidence…</div>
@@ -321,7 +337,7 @@
         );
       const fmt = (d) => (d ? new Date(d).toLocaleDateString("en-GB") : "—");
       let reviewer = null,
-        evidenceRows = [];
+        evidenceRows = [], profileRows = [];
       function msg(t, type = "ok") {
         message.innerHTML = `<div class="message ${type}">${esc(t)}</div>`;
         setTimeout(() => (message.innerHTML = ""), 3500);
@@ -378,24 +394,30 @@
             .eq("status", "pending")
             .order("submitted_at"),
         ]);
-        evidenceRows = er.data || [];
-        render(pr.data || [], evidenceRows);
+        if(pr.error||er.error){msg((pr.error||er.error).message,"err");return;}
+        evidenceRows = er.data || []; profileRows=pr.data||[];
+        render(profileRows, evidenceRows);
       }
       function render(p, e) {
-        summary.innerHTML = `<div class="stat"><span>Total Pending</span><strong>${p.length + e.length}</strong></div><div class="stat"><span>Profile Changes</span><strong>${p.length}</strong></div><div class="stat"><span>Accreditation / Evidence Reviews</span><strong>${e.length}</strong></div>`;
+        const totalP=p.length,totalE=e.length;
+        const q=document.getElementById("queueSearch").value.trim().toLowerCase(),type=document.getElementById("queueType").value;
+        const matches=r=>[r.profiles?.full_name,r.profiles?.employee_number,r.qualification_name,r.field_name,r.awarding_body,r.certificate_number].some(v=>String(v||"").toLowerCase().includes(q));
+        p=p.filter(matches); e=e.filter(matches);
+        document.getElementById("profilePanel").hidden=type==="evidence";document.getElementById("evidencePanel").hidden=type==="profile";
+        summary.innerHTML = `<div class="stat"><span>Total Pending</span><strong>${totalP + totalE}</strong></div><div class="stat"><span>Profile Changes</span><strong>${totalP}</strong></div><div class="stat"><span>Accreditation / Evidence Reviews</span><strong>${totalE}</strong></div>`;
         profileRequests.innerHTML = p.length
-          ? p
+          ? '<div class="queue-header profile-row"><span>Employee</span><span>Field</span><span>Current value</span><span>Requested value</span><span>Requested</span><span>Actions</span></div>'+p
               .map(
                 (r) =>
-                  `<article class="request"><div><span class="pill phone">Profile Change</span><h3>${esc(r.profiles?.full_name || "Learner")}</h3><p><strong>${esc(String(r.field_name || "Field").replace(/_/g, " "))}:</strong> ${esc(r.current_value || "—")} → <strong>${esc(r.requested_value)}</strong></p><p>Requested ${fmt(r.requested_at)}</p></div><div class="actions"><a class="btn light" href="learner-profile.html?id=${encodeURIComponent(r.learner_id)}">View Profile</a><button class="btn dark" data-approve="${r.id}" data-field="${esc(r.field_name)}" data-value="${esc(r.requested_value)}" data-learner="${r.learner_id}">Approve</button><button class="btn light" data-reject="${r.id}">Decline</button></div></article>`,
+                  `<article class="request profile-row"><div><strong>${esc(r.profiles?.full_name || "Learner")}</strong><p>${esc(r.profiles?.employee_number||"")}</p></div><div>${esc(String(r.field_name || "Field").replace(/_/g, " "))}</div><div>${esc(r.current_value || "—")}</div><div>${esc(r.requested_value)}</div><div>${fmt(r.requested_at)}</div><div class="actions"><a class="btn light" href="learner-profile.html?id=${encodeURIComponent(r.learner_id)}">View Profile</a><button class="btn dark" data-approve="${r.id}" data-field="${esc(r.field_name)}" data-value="${esc(r.requested_value)}" data-learner="${r.learner_id}">Approve</button><button class="btn light" data-reject="${r.id}">Decline</button></div></article>`,
               )
               .join("")
           : '<div class="empty">No pending profile change requests.</div>';
         evidenceRequests.innerHTML = e.length
-          ? e
+          ? '<div class="queue-header evidence-row"><span>Employee</span><span>Qualification</span><span>Awarding body</span><span>Certificate no.</span><span>Submitted</span><span>Actions</span></div>'+e
               .map(
                 (r) =>
-                  `<article class="request" data-evidence-card="${r.id}"><div><span class="pill evidence">${r.submission_type==="accreditation_upload"?"Accreditation Upload":"Evidence Review"}</span><h3>${esc(r.profiles?.full_name || "Learner")} · ${esc(r.qualification_name || "Qualification")}</h3><p>${esc(r.awarding_body || "")} ${r.certificate_number ? "· " + esc(r.certificate_number) : ""}</p><p>Submitted ${fmt(r.submitted_at)}</p></div><div class="actions"><button class="btn dark toggle-review" data-open-evidence="${r.id}">Review Evidence</button><a class="btn light" href="learner-profile.html?id=${encodeURIComponent(r.learner_id)}">View Profile</a></div><div class="review-box"><div class="review-grid"><label class="wide">Accreditation / Qualification<input data-field="qualification_name" value="${esc(r.qualification_name || "")}"></label><label>Awarding Body<input data-field="awarding_body" value="${esc(r.awarding_body || "")}"></label><label>Certificate Number<input data-field="certificate_number" value="${esc(r.certificate_number || "")}"></label><label>Issue Date<input data-field="issue_date" type="date" value="${r.issue_date || ""}"></label><label>Expiry Date<input data-field="expiry_date" type="date" value="${r.expiry_date || ""}"></label><label class="wide">Reviewer Notes<textarea data-field="reviewer_note" placeholder="Required when returning evidence to the learner">${esc(r.reviewer_note || "")}</textarea></label></div><div class="actions" style="margin-top:12px"><button class="btn light" data-view-file="${r.id}">Open Uploaded Evidence</button><button class="btn light" data-reject-evidence="${r.id}">Return To Learner</button><button class="btn dark" data-approve-evidence="${r.id}">Approve & Add To Profile</button></div></div></article>`,
+                  `<article class="request evidence-row" data-evidence-card="${r.id}"><div><strong>${esc(r.profiles?.full_name || "Learner")}</strong><p>${esc(r.profiles?.employee_number||"")}</p></div><div>${esc(r.qualification_name || "Qualification")}</div><div>${esc(r.awarding_body || "—")}</div><div>${esc(r.certificate_number||"—")}</div><div>${fmt(r.submitted_at)}</div><div class="actions"><button class="btn dark toggle-review" data-open-evidence="${r.id}">Review Evidence</button><a class="btn light" href="learner-profile.html?id=${encodeURIComponent(r.learner_id)}">View Profile</a></div><div class="review-box"><div class="review-grid"><label class="wide">Accreditation / Qualification<input data-field="qualification_name" value="${esc(r.qualification_name || "")}"></label><label>Awarding Body<input data-field="awarding_body" value="${esc(r.awarding_body || "")}"></label><label>Certificate Number<input data-field="certificate_number" value="${esc(r.certificate_number || "")}"></label><label>Issue Date<input data-field="issue_date" type="date" value="${r.issue_date || ""}"></label><label>Expiry Date<input data-field="expiry_date" type="date" value="${r.expiry_date || ""}"></label><label class="wide">Reviewer Notes<textarea data-field="reviewer_note" placeholder="Required when returning evidence to the learner">${esc(r.reviewer_note || "")}</textarea></label></div><div class="actions" style="margin-top:12px"><button class="btn light" data-view-file="${r.id}">Open Uploaded Evidence</button><button class="btn light" data-reject-evidence="${r.id}">Return To Learner</button><button class="btn dark" data-approve-evidence="${r.id}">Approve & Add To Profile</button></div></div></article>`,
               )
               .join("")
           : '<div class="empty">No pending evidence reviews.</div>';
@@ -572,7 +594,8 @@
           msg(e.message || "Unable to review evidence.", "err");
         }
       }
-      load();
+      document.getElementById("queueSearch").oninput=()=>render(profileRows,evidenceRows);document.getElementById("queueType").onchange=()=>render(profileRows,evidenceRows);document.getElementById("refreshQueue").onclick=()=>load();document.getElementById("fullQueue").onclick=()=>{const on=document.body.classList.toggle("queue-expanded");document.getElementById("fullQueue").textContent=on?"Exit full page":"Full page";};
+load();
     </script>
   </body>
 </html>
