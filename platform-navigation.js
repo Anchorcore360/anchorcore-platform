@@ -57,7 +57,7 @@ const academyMenu=[
 {type:'link',label:'Dashboard',icon:'dashboard',href:'compliance-operatives.html'},
 {type:'group',label:'Employees',icon:'people',items:[['Employees','people','manage-people.html?view=rrt'],['Teams & Managers','people','compliance-teams.html'],['Archived People','people','archived-people.html']]},
 {type:'link',label:'Training Catalogue',icon:'course',href:'courses.html'},
-{type:'group',label:'Training Matrix',icon:'matrix',items:[['Employee Matrix','matrix','training-matrix.html'],['Job Roles','matrix','compliance.html'],['Training Needs','report','training-needs.html'],['Reviews & Requests','request','requests-review.html']]},
+{type:'group',label:'Training Matrix',icon:'matrix',items:[['RRT Employee Matrix','matrix','training-matrix.html'],['Subcontractor Matrix','matrix','training-matrix.html?view=subcontractor'],['Job Role / Contract Matrix','matrix','compliance.html'],['Training Needs','report','training-needs.html'],['Reviews & Requests','request','requests-review.html']]},
 {type:'link',label:'Learning Management',icon:'course',href:'academy-online-learning.html'},
 {type:'link',label:'Reports',icon:'report',href:'reports.html'},
 {type:'group',label:'Settings',icon:'user',items:[['Manage Users','user','manage-users.html'],['Companies & Contracts','company','manage-companies.html'],['Managers & Contract Teams','people','company-team-links.html'],['Bulk Staff Upload','upload','bulk-people-upload.html'],['Bulk Accreditation Upload','award','bulk-accreditation-upload.html'],['Cards & QR','qr','employee-card-preview.html'],['Library','course','library.html']]}
