@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { complianceFor } from './contract-compliance.mjs';
+const base={employeeId:'joe',roleIds:['fibre','overhead'],contractIds:['its','quickline'],roleRequirements:[{job_role_id:'fibre',compliance_item_id:'a',status:'required'},{job_role_id:'overhead',compliance_item_id:'b',status:'required'}],contractRequirements:[{contract_id:'its',compliance_item_id:'a',status:'required'},{contract_id:'its',compliance_item_id:'c',status:'required'},{contract_id:'quickline',compliance_item_id:'d',status:'required'}],qualifications:[{employee_id:'joe',compliance_item_id:'a',verified:true,expiry_date:'2027-01-01'},{employee_id:'joe',compliance_item_id:'b',verified:true,no_expiry:true},{employee_id:'joe',compliance_item_id:'c',verified:true,expiry_date:'2026-11-01'},{employee_id:'someone-else',compliance_item_id:'d',verified:true,no_expiry:true}],today:'2026-11-26'};
+const combined=complianceFor(base);
+assert.equal(combined.required,4);assert.equal(combined.covered,2);assert.equal(combined.score,50);
+assert.equal(combined.items.find(x=>x.itemId==='a').sources.length,2);
+assert.equal(combined.items.find(x=>x.itemId==='c').status,'expired');
+assert.equal(combined.items.find(x=>x.itemId==='d').status,'missing');
+assert.equal(complianceFor({...base,scope:'role'}).score,100);
+assert.equal(complianceFor({...base,scope:'contract',selectedContractId:'its'}).score,50);
+assert.equal(complianceFor({...base,scope:'contract',selectedContractId:'quickline'}).score,0);
+assert.equal(complianceFor({...base,scope:'combined',selectedContractId:'its',selectedRoleId:'fibre'}).required,2);
+assert.equal(complianceFor({...base,roleIds:[],contractIds:[]}).score,null);
+assert.throws(()=>complianceFor({...base,selectedContractId:'unassigned'}),/not assigned/);
+assert.equal(complianceFor({...base,qualifications:[{employee_id:'joe',compliance_item_id:'a',verified:true,expiry_date:'2026-12-01'}]}).items.find(x=>x.itemId==='a').status,'expiring');
+console.log('Contract compliance assertions passed');
