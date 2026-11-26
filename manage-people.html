@@ -101,4 +101,4 @@ document.getElementById('rows').addEventListener('click',event=>{
  }
  window.location.assign(row.dataset.personProfile);
 });
-setPeopleView(['rrt','subcontractor'].includes(new URLSearchParams(location.search).get('view'))?new URLSearchParams(location.search).get('view'):'all');load().catch(e=>rows.innerHTML=`<tr><td colspan="4"><div class="empty">${esc(e.message)}</div></td></tr>`);</script></body></html>
+setPeopleView(['rrt','subcontractor'].includes(new URLSearchParams(location.search).get('view'))?new URLSearchParams(location.search).get('view'):'all');if(new URLSearchParams(location.search).get('status')==='inactive'){statusEl.value='inactive';document.querySelector('h1').textContent='Inactive People'}load().catch(e=>rows.innerHTML=`<tr><td colspan="4"><div class="empty">${esc(e.message)}</div></td></tr>`);</script></body></html>
