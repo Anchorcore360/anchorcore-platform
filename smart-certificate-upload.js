@@ -97,17 +97,39 @@ async function addQualification(r){
 function isCardRecord(a){return String(a.awarding_body||'').trim().toUpperCase()==='SWQR'||/\/SWQR-\d+-card\.pdf$/i.test(a.certificate_url||'')}
 function shouldPromoteCard(r,a){return !!(r.swqrUnit&&!r.streetworksCertificate&&r.awarding==='SWQR'&&!isCardRecord(a))}
 function duplicate(r){if(r.nops||r.qual===nopsOption.id)return false;if(r.personal||r.qual===licenceOption.id)return false;if(evidenceMatch(r)&&r.file)return false;const p=state.people.find(x=>x.id===r.person),q=state.catalog.find(x=>String(x.id)===r.qual);if(!p||!q)return false;return state.records.some(a=>(a.person_id===p.id||(p.profile_id&&a.learner_id===p.profile_id))&&(q.catalogId!=null&&String(a.accreditation_catalog_id)===String(q.catalogId)||q.entry&&window.RRTAQualificationMaster.matches(q.entry,a.accreditation_name)||!q.entry&&norm(a.accreditation_name)===norm(q.module_code))&&((r.number&&norm(a.certificate_number)===norm(r.number)&&(!r.swqrUnit||(a.expiry_date||'')===(r.expiry||'')))||(r.issue&&a.issue_date===r.issue&&(a.expiry_date||'')===(r.expiry||''))))}
-function valid(r){if(r.nops||r.qual===nopsOption.id)return !!(r.qual===nopsOption.id&&r.person&&r.file&&/^\d{1,20}$/.test(r.number||'')&&(!r.nopsCard||/^\d{1,20}$/.test(r.nopsCard))&&!r.done&&!r.error);if(r.personal||r.qual===licenceOption.id)return !!(state.privateAccess&&r.qual===licenceOption.id&&r.person&&r.file&&r.expiry&&parseDate(r.expiry)===r.expiry&&(!r.issue||parseDate(r.issue)===r.issue&&r.issue<=r.expiry)&&!r.done&&!r.error);return !!(r.person&&state.catalog.some(q=>String(q.id)===r.qual)&&parseDate(r.issue)===r.issue&&r.issue&&r.issue<=new Date().toISOString().slice(0,10)&&(r.noExpiry&&!r.expiry||r.expiry&&parseDate(r.expiry)===r.expiry&&r.expiry>=r.issue)&&!duplicate(r)&&!ambiguousEvidence(r)&&!r.error&&!r.done)}
+function valid(r){if(r.codeConflict)return false;if(r.nops||r.qual===nopsOption.id)return !!(r.qual===nopsOption.id&&r.person&&r.file&&/^\d{1,20}$/.test(r.number||'')&&(!r.nopsCard||/^\d{1,20}$/.test(r.nopsCard))&&!r.done&&!r.error);if(r.personal||r.qual===licenceOption.id)return !!(state.privateAccess&&r.qual===licenceOption.id&&r.person&&r.file&&r.expiry&&parseDate(r.expiry)===r.expiry&&(!r.issue||parseDate(r.issue)===r.issue&&r.issue<=r.expiry)&&!r.done&&!r.error);return !!(r.person&&state.catalog.some(q=>String(q.id)===r.qual)&&parseDate(r.issue)===r.issue&&r.issue&&r.issue<=new Date().toISOString().slice(0,10)&&(r.noExpiry&&!r.expiry||r.expiry&&parseDate(r.expiry)===r.expiry&&r.expiry>=r.issue)&&!duplicate(r)&&!ambiguousEvidence(r)&&!r.error&&!r.done)}
 
 function openreachFields(t){
- const source=String(t||'');const template=/date of accreditation/i.test(source)&&/accreditation expiry date/i.test(source)&&/certification\s*id/i.test(source);
- if(!template&&!contains(source,'Openreach'))return null;
+ const source=String(t||'');
+ if(isSwqr(source)||isStreetworksCertificate(source)||/\bNRSWA\b|\bstreet\s*works\b/i.test(source))return null;
+ const template=/date of accreditation/i.test(source)&&/accreditation expiry date/i.test(source)&&/certification\s*id/i.test(source);
+ const explicit=contains(source,'Openreach')||/\bPIA\b/i.test(source);
+ if(!template&&!explicit)return null;
  const nums=[...new Set([...source.matchAll(/certification\s*id\s*[:\-]?\s*([A-Z]{2,12}\s*\d{2,12}|[A-Z0-9][A-Z0-9\/-]{2,35})/gi)].map(m=>m[1].replace(/\s/g,'')))];
- const conflict=/\bS\s*0{0,2}8\s+PIA\s+Sub[\s-]*duct\s+and\s+cable\s+installation\b/i.test(source);
- return {awarding:'Openreach',number:nums.length===1?nums[0]:'',conflict};
+ const catalog=state.catalog.filter(q=>q.entry&&['03 PIA','05 Openreach'].includes(q.entry.category));
+ const section=source.split(/date of accreditation|accreditation expiry date|certification\s*id/i)[0];
+ const normalized=norm(section);
+ const codeCandidates=catalog.filter(q=>{const c=q.entry.code;const m=c.match(/^([A-Z])0*(\d+)$/);return contains(normalized,c)||(m&&contains(normalized,m[1]+Number(m[2])))});
+ const piaDescriptions=[
+ ['S007',/\bsub[\s-]*duct\s+(?:and|&)\s+cable\s+installation\b/i],
+ ['S008',/\boverhead\s+cable\s+installation\b/i]
+ ];
+ const described=piaDescriptions.filter(([,re])=>re.test(section)).map(([c])=>catalog.find(q=>q.entry.code===c)).filter(Boolean);
+ const conflict=codeCandidates.length===1&&described.length===1&&codeCandidates[0].entry.code!==described[0].entry.code;
+ return {awarding:'Openreach',number:nums.length===1?nums[0]:'',conflict,codeCandidates,described};
 }
-function applyOpenreachFields(r){const x=openreachFields(r.text);if(!x)return r;r.awarding=x.awarding;if(x.number)r.number=x.number;if(x.conflict){const q=state.catalog.find(q=>q.entry?.code==='S007');r.qual='';r.suggestions=q?[String(q.id)]:[];r.note=[r.note,'Printed S8 — PIA Sub-duct and Cable Installation conflicts with S008 (Overhead Cable Installation). S007 is the description match; confirm equivalence or add original qualification.'].filter(Boolean).join(' · ')}return r}
-
+function applyOpenreachFields(r){
+ const x=openreachFields(r.text);if(!x)return r;
+ r.awarding=x.awarding;if(x.number)r.number=x.number;
+ if(x.conflict){
+  r.qual='';r.suggestions=x.described.map(q=>String(q.id));r.note=[r.note,'CODE / DESCRIPTION CONFLICT: '+x.codeCandidates[0].entry.code+' vs '+x.described[0].label+'. Obtain corrected evidence before approval.'].filter(Boolean).join(' · ');r.codeConflict=true;
+ }else if(x.codeCandidates.length===1){
+  r.qual=String(x.codeCandidates[0].id);r.suggestions=[r.qual];
+ }else if(x.codeCandidates.length>1){
+  r.qual='';r.suggestions=x.codeCandidates.map(q=>String(q.id));r.note=[r.note,'Multiple Openreach codes; review qualification'].filter(Boolean).join(' · ');
+ }else if(x.described.length===1){r.qual=String(x.described[0].id);r.suggestions=[r.qual]}
+ return r
+}
 function applySmartAwardExpiry(r){if(r.expiry||!r.issue||r.noExpiry||r.personal||r.nops||r.swqrUnit)return r;const q=state.catalog.find(x=>String(x.id)===String(r.qual));const codes=[q?.entry?.code,...(q?.entry?.aliases||[])].filter(x=>/^SA\d{3}[A-Z]?$/i.test(x||''));const text=String(r.text||'');const detected=codes.some(c=>contains(text,c))||(/^SA\d{3}[A-Z]?$/i.test(q?.entry?.code||'')&&norm(r.awarding)==='smart awards');if(detected&&parseDate(r.issue)===r.issue){r.expiry=addYears(r.issue,3);r.expiryDerived=3;r.note=[r.note,'SA expiry calculated: issue + 3 years; verify before approval'].filter(Boolean).join(' · ')}return r}
 function addYears(date,years){const [y,m,d]=date.split('-').map(Number);const last=new Date(Date.UTC(y+years,m,0)).getUTCDate();return new Date(Date.UTC(y+years,m-1,Math.min(d,last))).toISOString().slice(0,10)}
 function render(){const filter=E('smartFilter').value,box=E('smartRows');box.innerHTML='';for(const r of state.rows){if(filter==='imported'?!r.done:r.done)continue;if(filter==='review'&&valid(r)&&r.confirmed)continue;if(filter==='duplicates'&&!duplicate(r))continue;const tr=document.createElement('tr');const input=(k,type='text')=>'<input aria-label="'+k+'" data-field="'+k+'" type="'+type+'" value="'+esc(r[k]||'')+'">';
