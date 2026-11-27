@@ -74,6 +74,7 @@ openAccModal=async function(existing=null){
     <label style="grid-column:1/-1">Accreditation / course
       <select id="catalogSelect" name="catalog_id" required>${catalogOptions(current?.id||null)}</select>
     </label>
+    ${existing?'':`<div id="nrswaBatch" style="grid-column:1/-1;order:-1"><details><summary style="cursor:pointer;font-weight:700">Add multiple NRSWA units (same dates)</summary><div id="nrswaChoices" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(85px,1fr));gap:6px;margin:10px 0">${accreditationCatalog.filter(q=>q.entry?.category==='02 NRSWA').map(q=>'<label style="display:flex;align-items:center;gap:5px" title="'+esc(q.description)+'"><input type="checkbox" name="nrswa_units" value="'+esc(q.id)+'" style="width:16px;height:16px;margin:0">'+esc(q.module_code)+'</label>').join('')}</div><small>Selected units share the card number, dates and evidence. Select only units printed on the card.</small></details></div>`}
     <label style="grid-column:1/-1">Description
       <textarea id="catalogDescription" rows="1" readonly placeholder="Select an accreditation above to see the full description.">${esc(current?.description||'')}</textarea>
     </label>
@@ -84,8 +85,11 @@ openAccModal=async function(existing=null){
     ${existing?'<div id="profileAccEvidence" style="grid-column:1/-1"></div>':'<label style="grid-column:1/-1">Evidence / certificate file<input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.webp"></label>'}
   </div>`,async f=>{
     const catalogId=String(f.get('catalog_id')||'');
-    const selected=accreditationCatalog.find(x=>String(x.id)===catalogId);
-    if(!selected)throw new Error('Please select an accreditation or course from the catalogue.');
+    const batch=existing?[]:[...new Set(f.getAll('nrswa_units').map(String))];
+    const selections=batch.length?batch.map(id=>accreditationCatalog.find(x=>String(x.id)===id&&x.entry?.category==='02 NRSWA')):[accreditationCatalog.find(x=>String(x.id)===catalogId)];
+    const selected=selections[0];
+    if(selections.some(x=>!x)||!selected)throw new Error('Please select an accreditation or course from the catalogue.');
+    if(batch.length){const issue=String(f.get('issue')||''),expiry=String(f.get('expiry')||'');if(!issue||!expiry||issue>expiry||issue>new Date().toISOString().slice(0,10))throw Error('Enter valid shared issue and expiry dates.');if(!String(f.get('number')||'').trim()||!f.get('file')?.size)throw Error('Enter the SWQR card number and attach card evidence.');const duplicates=selections.filter(q=>accreditations.some(a=>!a.superseded_by&&(window.RRTAQualificationMaster.matches(q.entry,a.accreditation_name))&&a.issue_date===issue&&a.expiry_date===expiry));if(duplicates.length)throw Error('Already recorded: '+duplicates.map(q=>q.module_code).join(', ')+'. Deselect these units before saving.');}
     let path=existing?.certificate_url||null;
     let uploadedNewFile=false;
     const file=f.get('file');
@@ -106,7 +110,8 @@ openAccModal=async function(existing=null){
       expiry_date:f.get('expiry')||null,
       certificate_url:path
     };
-    const q=existing?db.from('accreditations').update(payload).eq('id',existing.id):db.from('accreditations').insert(payload);
+    const rows=selections.map(q=>({...payload,accreditation_catalog_id:q.catalogId??null,accreditation_name:q.module_code,...(batch.length?{awarding_body:f.get('awarding').trim()||'SWQR'}:{})}));
+    const q=existing?db.from('accreditations').update(payload).eq('id',existing.id):db.from('accreditations').insert(rows);
     const {error}=await q;
     if(error){
       if(uploadedNewFile&&path)await db.storage.from('learner-documents').remove([path]);
@@ -129,6 +134,7 @@ openAccModal=async function(existing=null){
     updateDescription();
   });
   const selectLabel=select.closest('label'),searchLabel=search.closest('label');if(selectLabel&&searchLabel){searchLabel.after(selectLabel);selectLabel.style.order='-1';searchLabel.style.order='-2'}
+  const batchHost=document.getElementById('nrswaBatch');if(batchHost){const checks=[...batchHost.querySelectorAll('input[type=checkbox]')],sync=()=>{const active=checks.filter(c=>c.checked);select.required=!active.length;select.disabled=!!active.length;search.disabled=!!active.length;if(active.length){description.value=active.map(c=>accreditationCatalog.find(q=>String(q.id)===c.value)?.module_code).join(', ');const awarding=select.closest('form')?.elements.awarding;if(awarding&&!awarding.value)awarding.value='SWQR'}else updateDescription()};checks.forEach(c=>c.addEventListener('change',sync));sync()}
   updateDescription();
   if(existing)mountProfileEvidence(existing,current);
 };
