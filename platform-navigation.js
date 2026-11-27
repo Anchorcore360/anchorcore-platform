@@ -58,13 +58,13 @@ const academyMenu=[
 {type:'group',label:'Operational Compliance',icon:'matrix',items:[['RRT Employee Matrix','matrix','training-matrix.html'],['Subcontractor Matrix','matrix','training-matrix.html?view=subcontractor'],['Job Role / Contract Matrix','matrix','compliance.html'],['Training Needs','report','training-needs.html'],['Reviews & Requests','request','requests-review.html'],['Bulk Certificate Upload','upload','bulk-accreditation-upload.html'],['Cards & QR','qr','employee-card-preview.html']]},
 {type:'group',label:'Learning Management',icon:'course',items:[['Learning Dashboard','dashboard','academy-online-learning.html'],['Learning Matrix','matrix','learning-matrix.html'],['Learning Needs','report','learning-matrix.html?view=needs'],['Learning Groups','people','learning-matrix.html?view=groups'],['Learning Requirements Matrix','matrix','learning-matrix.html?view=requirements'],['Learning Course Settings','course','learning-matrix.html?view=catalogue']]},
 {type:'link',label:'Reports',icon:'report',href:'reports.html'},
-{type:'group',label:'Settings',icon:'user',items:[['Manage Users','user','manage-users.html'],['Integrations','course','integrations.html'],['Managers & Contract Teams','people','company-team-links.html'],['Bulk Staff Upload','upload','bulk-people-upload.html'],['Library','course','library.html']]}
+{type:'group',label:'Settings',icon:'user',items:[['Manage Users','user','manage-users.html'],['Integrations','course','integrations.html'],['Bulk Staff Upload','upload','bulk-people-upload.html'],['Library','course','library.html']]}
 ];
 const learnerMenu=[
 {type:'link',label:'My Dashboard',icon:'dashboard',href:'learner-portal.html'},
 {type:'link',label:'My Profile',icon:'user',href:'learner-portal.html#profile'},
 {type:'link',label:'My Qualifications & Certificates',icon:'award',href:'learner-portal.html#accreditations'},
-{type:'link',label:'My Learning',icon:'course',href:'learner-online-learning.html'},
+{type:'link',label:'My Learning',icon:'course',href:'online-learning.html'},
 {type:'link',label:'Submit Evidence / Requests',icon:'request',href:'learner-portal.html#requests'},
 {type:'link',label:'My QR Card',icon:'qr',href:'learner-portal.html#qr'}
 ];
