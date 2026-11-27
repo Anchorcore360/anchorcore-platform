@@ -45,7 +45,7 @@ async function required(query){const {data,error}=await query;if(error)throw err
 let teamRows=[],teamLearning=null,teamView='team',exportRows=[],cellEvidence=[];
 function coverage(states){const n=states.length,c=states.filter(x=>['valid','expiring'].includes(x.key)).length;return n?Math.round(c*100/n):null}
 async function pagedTeam(make){let all=[];for(let offset=0;;offset+=500){const rows=await required(make().range(offset,offset+499));all.push(...rows);if(rows.length<500)return all}}
-async function getAssigned(){const [rel,pf,links]=await Promise.all([pagedTeam(()=>db.from('person_relationships').select('person_id,company_id,relationship_type,manager_profile_id,active').eq('manager_profile_id',userId).eq('active',true).order('person_id')),pagedTeam(()=>db.from('profiles').select('id,full_name,job_title,organisation,account_status,manager_1_id,company_id').eq('manager_1_id',userId).eq('account_status','active').order('id')),pagedTeam(()=>db.from('company_manager_links').select('company_id').eq('manager_profile_id',userId).eq('active',true).order('company_id'))]);return {rel,pf,links}}
+async function getAssigned(){const [rel,pf,links]=await Promise.all([pagedTeam(()=>db.from('person_relationships').select('person_id,company_id,relationship_type,manager_profile_id,active').eq('manager_profile_id',userId).eq('active',true).order('person_id')),pagedTeam(()=>db.from('profiles').select('id,full_name,job_title,organisation,account_status,manager_1_id,manager_2_id,manager_3_id,company_id').or('manager_1_id.eq.'+userId+',manager_2_id.eq.'+userId+',manager_3_id.eq.'+userId).eq('account_status','active').order('id')),pagedTeam(()=>db.from('company_manager_links').select('company_id').eq('manager_profile_id',userId).eq('active',true).order('company_id'))]);return {rel,pf,links}}
 let teamRoleCatalogue=null;
 async function loadTeam(){
  const {rel,pf,links}=await getAssigned(),companyIds=links.map(x=>x.company_id),peopleMap=new Map(),add=rows=>rows.forEach(p=>peopleMap.set(p.id,p));
@@ -65,7 +65,7 @@ async function loadTeam(){
  scopedCompanies.length?pagedTeam(()=>db.from('external_customers').select('id,company_name,is_rrt_subcontractor,is_internal_rrt').in('id',scopedCompanies).order('id')):[],
  personIds.length?pagedTeam(()=>db.from('person_relationships').select('person_id,company_id,relationship_type,manager_profile_id,active').in('person_id',personIds).eq('active',true).order('person_id')):[]
  ]);
- const activePeople=people.filter(p=>{const assigned=companyRels.filter(r=>r.person_id===p.id&&r.manager_profile_id);return rel.some(r=>r.person_id===p.id)||companyIds.includes(p.default_company_id)||(!assigned.length&&pf.some(x=>x.id===p.profile_id))});
+ const activePeople=people.filter(p=>{const assigned=companyRels.filter(r=>r.person_id===p.id&&r.manager_profile_id);return rel.some(r=>r.person_id===p.id)||companyIds.includes(p.default_company_id)||pf.some(x=>x.id===p.profile_id&&(x.manager_2_id===userId||x.manager_3_id===userId||(!assigned.length&&x.manager_1_id===userId)))});
  const mergedRoles=[...profileRoles];for(const r of personRoles){const p=activePeople.find(x=>x.id===r.person_id);if(p&&!mergedRoles.some(x=>x.profile_id===(p.profile_id||p.id)&&x.job_role_id===r.job_role_id))mergedRoles.push({...r,profile_id:p.profile_id||p.id})}
  teamRoleCatalogue={roles,items,requirements};populateRoleReference();
  const engine=window.RRTACompliance({roles,profileRoles:mergedRoles,items,requirements,accreditations:[...new Map([...accP,...accL].filter(a=>!a.superseded_by).map(a=>[a.id,a])).values()]});
@@ -197,7 +197,7 @@ async function loadCompany(){
  const p=await db.from('profiles').select('organisational_access_role,portal_access_role,account_status,login_enabled').eq('id',userId).single();if(p.error)throw p.error;
  if(p.data.account_status!=='active'||p.data.login_enabled===false)throw Error('Your account is not active.');
  const a=await db.from('portal_access').select('compliance_all').eq('user_id',userId).maybeSingle();if(a.error)throw a.error;
- const scope=await getAssigned();canTeam=hasManagerRole(p.data.organisational_access_role||p.data.portal_access_role)||scope.rel.length>0||scope.pf.length>0||scope.links.length>0;
+ const scope=await getAssigned();const role=String(p.data.organisational_access_role||p.data.portal_access_role||'').toLowerCase();canTeam=hasManagerRole(role)||(['academy','academy_staff'].includes(role)&&(scope.rel.length>0||scope.pf.length>0||scope.links.length>0));
  canCompany=a.data?.compliance_all===true;
  $('loading').classList.add('hide');if(!canTeam&&!canCompany)throw Error('You do not have Manage My Team or Company Compliance access.');
  $('tabs').classList.toggle('hide',!(canTeam&&canCompany));$('teamTab').classList.toggle('hide',!canTeam);$('companyTab').classList.toggle('hide',!canCompany);
