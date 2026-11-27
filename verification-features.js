@@ -57,23 +57,17 @@ function ensureVerificationActions(){
 }
 
 async function renderAccreditationRecords(){
-  const list=document.getElementById('accreditationList');
-  if(!list)return;
-  const expiredCount=accreditations.filter(a=>accreditationStatus(a.expiry_date).cls==='expired').length;
-  const visible=accreditations.filter(a=>showExpiredAccreditations||accreditationStatus(a.expiry_date).cls!=='expired');
-  const rows=await Promise.all(visible.map(async a=>{
-    const status=accreditationStatus(a.expiry_date);
-    let view='';
-    if(a.certificate_url){
-      const url=await signed('learner-documents',a.certificate_url);
-      if(url)view=`<a class="mini-btn" style="text-decoration:none" href="${url}" target="_blank" rel="noopener">View certificate</a>`;
-    }
-    return `<div class="record"><div><strong>${esc(a.accreditation_name||'Accreditation')}</strong><small>${esc(a.awarding_body||'Awarding body not recorded')} · Issued ${fmt(a.issue_date)} · Expires ${fmt(a.expiry_date)}</small></div><div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">${accreditationBadge(a.expiry_date)}${view}${actions('accreditation',a.id)}</div></div>`;
+  const list=document.getElementById('accreditationList');if(!list)return;
+  const rows=[...accreditations].sort((a,b)=>String(a.accreditation_name||'').localeCompare(String(b.accreditation_name||''))||String(b.issue_date||'').localeCompare(String(a.issue_date||'')));
+  list.classList.remove('accreditation-grid');list.style.display='block';
+  const cells=await Promise.all(rows.map(async a=>{
+    let view='—';if(a.certificate_url){try{const url=await signed('learner-documents',a.certificate_url);if(url)view='<a class="mini-btn" href="'+esc(url)+'" target="_blank" rel="noopener">View</a>';else view='Unavailable'}catch(e){view='Unavailable'}}
+    const title=typeof accreditationTitle==='function'?accreditationTitle(a):a.accreditation_name||'Accreditation';
+    return '<tr><td><strong>'+esc(title)+'</strong></td><td>'+esc(a.awarding_body||'—')+'</td><td>'+esc(fmt(a.issue_date))+'</td><td>'+esc(a.expiry_date?fmt(a.expiry_date):'No expiry')+'</td><td>'+accreditationBadge(a.expiry_date)+'</td><td>'+view+'</td><td>'+actions('accreditation',a.id)+' <button type="button" class="mini-btn" data-action="renew" data-type="accreditation" data-id="'+esc(a.id)+'">Renew</button></td></tr>';
   }));
-  list.innerHTML=`${expiredCount?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><label style="display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700"><input type="checkbox" id="showExpiredAccs" ${showExpiredAccreditations?'checked':''}> Show expired (${expiredCount})</label></div>`:''}${rows.length?rows.join(''):empty(showExpiredAccreditations?'No accreditations recorded yet.':'No current accreditations. '+(expiredCount?'Use Show expired to view historic records.':''))}`;
-  const toggle=document.getElementById('showExpiredAccs');if(toggle)toggle.onchange=()=>{showExpiredAccreditations=toggle.checked;renderAccreditationRecords();};
-  const downloadAll=document.getElementById('downloadAllAccreditationsBtn');if(downloadAll)downloadAll.onclick=downloadAllAccreditationsZip;
-  bindActions();
+  list.innerHTML='<div style="font-size:12px;color:#667085;margin-bottom:8px">'+rows.length+' recorded accreditations · includes expired records</div>'+(rows.length?'<div style="overflow-x:auto;min-height:110px"><table class="rrta-uniform-table" style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#e6e9ec">'+['Qualification','Awarding body','Issued','Expiry','Status','Evidence','Actions'].map(t=>'<th style="text-align:left;padding:9px 8px;white-space:nowrap">'+t+'</th>').join('')+'</tr></thead><tbody>'+cells.join('')+'</tbody></table></div>':empty('No accreditations recorded yet.'));
+  list.querySelectorAll('td').forEach(td=>{td.style.padding='7px 8px';td.style.borderBottom='1px solid #dfe3e7';td.style.verticalAlign='middle'});
+  const downloadAll=document.getElementById('downloadAllAccreditationsBtn');if(downloadAll)downloadAll.onclick=downloadAllAccreditationsZip;bindActions();
 }
 
 function safeZipName(value,fallback='accreditation'){
