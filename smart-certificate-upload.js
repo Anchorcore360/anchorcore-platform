@@ -20,6 +20,24 @@ function stackedOpenreachDates(t){
 }
 function extract(t){const stacked=stackedOpenreachDates(t),person=matchPerson(t),qs=matchQual(t),num=t.match(/(?:certificate|certification|accreditation|registration|card)\s*(?:number|no\.?|id|#)\s*[:\-]?\s*([A-Z0-9][A-Z0-9\/-]{2,35})/i);const awarding=['Smart Awards','EUSR','CITB','NRSWA','SWQR','Openreach','IPAF','NPORS','PASMA','ProTrainings','City & Guilds'].filter(x=>contains(t,x));return {person:person?.id||'',qual:qs.length===1?String(qs[0].id):'',suggestions:qs.map(q=>String(q.id)),issue:stacked?.issue||labelledDate(t,'awarded date|date awarded|presented on|date of accreditation|accreditation date|accreditation start date|date accredited|issue date|date of issue|issued on|date issued|achievement date|valid from|validity start date|certification date|date of certification|course completed on|course completion date|date assessed'),expiry:stacked?.expiry||labelledDate(t,'accreditation expiry date|expire date|expiry date|expiration date|valid until|expires on|expires|date of expiry|valid to|validity end date|expiry|expiration|retake this course before|retake course before'),number:num?.[1]||'',awarding:awarding.length===1?awarding[0]:(awarding.includes('Openreach')&&awarding.every(x=>['Openreach','Smart Awards'].includes(x))&&/\bS00[5-9]\b/i.test(t)?'Openreach':'')}}
 
+function nporsRegister(t){
+ const source=String(t||'');if(!/\bNPORS\s+Operator\s+Categories\b/i.test(source)||!/\bNPORS\s+Registration\s+Number\b/i.test(source))return null;
+ const number=source.match(/\bNPORS\s+Registration\s+Number\s*[:#-]?\s*(\d{4,12})\b/i)?.[1]||'';
+ const lines=source.split(/\r?\n/),rows=[];
+ for(const line of lines){if(!/excavator\s*360/i.test(line)||!/above\s+and\s+below\s+10\s+tonnes/i.test(line))continue;
+ const dates=[...line.matchAll(/\b\d{1,2}\s*\/\s*\d{1,2}\s*\/\s*\d{4}\b/g)].map(m=>parseDate(m[0].replace(/\s/g,''))).filter(Boolean);
+ let expiry=dates.length===1?dates[0]:'';
+ if(!expiry&&lines.filter(l=>/excavator\s*360/i.test(l)).length===1){const categorySection=source.split(/NPORS\s+Operator\s+Categories/i)[1].split(/\b(?:Card Name|Email|Date of Birth)\b/i)[0];const found=[...new Set([...categorySection.matchAll(/\b\d{1,2}\s*\/\s*\d{1,2}\s*\/\s*\d{4}\b/g)].map(m=>parseDate(m[0].replace(/\s/g,''))).filter(Boolean))];if(found.length===1)expiry=found[0]}
+ const quick=/fully[ -]automatic\s+quick\s+hitch/i.test(source);
+ for(const title of ['NPORS 360 excavator – over 10 tonnes','NPORS 360 excavator – up to 10 tonnes'])rows.push({title,expiry,quick});
+ }
+ return {number,rows};
+}
+function nporsRegisterRows(t){
+ const parsed=nporsRegister(t);if(!parsed)return null;
+ const person=matchPerson(t);
+ return parsed.rows.map(u=>{const q=state.catalog.find(q=>norm(q.entry?.title||q.description)===norm(u.title));return {person:person?.id||'',qual:q?String(q.id):'',suggestions:q?[String(q.id)]:[],number:parsed.number,awarding:'NPORS',expiry:u.expiry,issue:u.expiry?addYears(u.expiry,-5):'',issueDerived:u.expiry?-5:null,note:'NPORS operator register · '+(u.expiry?'Issue calculated: expiry minus 5 years':'Verify expiry')+(u.quick?' · Fully-automatic quick hitch recorded on evidence':'')+' · excludes Micro 360; review scope before approval'}});
+}
 function swqrNumber(t){const m=String(t||'').match(/\bSWQR\s*(?:No\.?|Number|#)\s*[:\-]?\s*(\d{6,10})\b/i);return m?.[1]||''}
 function swqrRows(t){
  const lines=String(t||'').split(/\r?\n/), units=new Map(), conflicts=new Set();
@@ -230,7 +248,7 @@ async function addFiles(list){
  if(!accepted(f.name)||f.size>max){report.errors.push(f.name+' — unsupported format or over 20 MB');return}
  const r={id:++seq,file:f,text:'',confirmed:false,done:false,error:'',noExpiry:false};state.rows.push(r);report.added++;
  E('smartMessage').textContent='Reading certificate '+report.added+': '+f.name;
- try{const result=await read(f);if(isNops(result.text,f.name)){Object.assign(r,result,nopsFields(result.text));r.nops=true;render();return}if(isDrivingLicence(result.text,f.name)){Object.assign(r,result,licenceFields(result.text));r.personal=true;render();return}if(isStreetworksCertificate(result.text)){const units=streetworksCertificateRows(result.text);if(units.length){state.rows=state.rows.filter(x=>x!==r);report.added--;for(const unit of units){state.rows.push({...r,...result,...unit,id:++seq});report.added++}render();return}}if(isSwqr(result.text)){state.rows=state.rows.filter(x=>x!==r);report.added--;swqrCards.push({...r,...result});return}Object.assign(r,extract(result.text),result);r.note=[source,r.note].filter(Boolean).join(' · ');applyOpenreachFields(r);applySmartAwardExpiry(r)}
+ try{const result=await read(f);const npors=nporsRegisterRows(result.text);if(npors){if(npors.length){state.rows=state.rows.filter(x=>x!==r);report.added--;for(const unit of npors){state.rows.push({...r,...result,...unit,id:++seq});report.added++}}else{Object.assign(r,result,{qual:'',suggestions:[],awarding:'NPORS',note:'NPORS register detected; category could not be matched. Review manually.'})}render();return}if(isNops(result.text,f.name)){Object.assign(r,result,nopsFields(result.text));r.nops=true;render();return}if(isDrivingLicence(result.text,f.name)){Object.assign(r,result,licenceFields(result.text));r.personal=true;render();return}if(isStreetworksCertificate(result.text)){const units=streetworksCertificateRows(result.text);if(units.length){state.rows=state.rows.filter(x=>x!==r);report.added--;for(const unit of units){state.rows.push({...r,...result,...unit,id:++seq});report.added++}render();return}}if(isSwqr(result.text)){state.rows=state.rows.filter(x=>x!==r);report.added--;swqrCards.push({...r,...result});return}Object.assign(r,extract(result.text),result);r.note=[source,r.note].filter(Boolean).join(' · ');applyOpenreachFields(r);applySmartAwardExpiry(r)}
  catch(e){Object.assign(r,extract(''),{note:[source,'Reading failed; enter details manually.'].filter(Boolean).join(' · ')});if(isNops('',f.name)){Object.assign(r,nopsFields(''));r.nops=true}else if(isDrivingLicence('',f.name)){Object.assign(r,licenceFields(''));r.personal=true}}
  render();
  }
