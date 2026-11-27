@@ -64,7 +64,7 @@
   <section id="workspaceZone" class="workspace hidden">
     <div class="workspace-head"><div class="eyebrow">Your Access</div><h1>Choose your portal</h1><p>Access Training &amp; Compliance or your individual learner record.</p></div>
     <div class="grid">
-      <a id="academyCard" class="portal" href="compliance-operatives.html"><div class="tag">Administration</div><h2>Training &amp; Compliance</h2><p>Manage workforce training, qualifications and online learning.</p><ul><li>Employee and subcontractor records</li><li>Training and learning matrices</li><li>Certificates and compliance reporting</li></ul><span class="go">Open Training &amp; Compliance →</span></a>
+      <a id="academyCard" class="portal" href="compliance-dashboard.html"><div class="tag">Administration</div><h2>Training &amp; Compliance</h2><p>Manage workforce training, qualifications and online learning.</p><ul><li>Employee and subcontractor records</li><li>Training and learning matrices</li><li>Certificates and compliance reporting</li></ul><span class="go">Open Training &amp; Compliance →</span></a>
       <a id="learnerCard" class="portal" href="learner-portal.html"><div class="tag">Individual</div><h2>Individual Learner Portal</h2><p>Your personal learning, compliance, evidence and training record.</p><ul><li>Profile and compliance</li><li>Training needs</li><li>Accreditations and evidence</li><li>Upcoming training and certificates</li></ul><span class="go">Open My Learning →</span></a>
     </div>
     <div class="workspace-foot">Your account permissions control whether you can access Training &amp; Compliance, your individual learner portal, or both.</div>
@@ -98,6 +98,7 @@ async function loadAccess(user){
   if(p.must_change_password===true){location.replace('change-password.html');return}
   if(!academy&&!learner)throw new Error('No portal areas have been assigned to this account.');
   if(learner&&!academy){location.replace('learner-portal.html');return}
+  if(academy&&new URLSearchParams(location.search).get('choose')!=='1'){location.replace('compliance-dashboard.html');return}
   academyCard.classList.toggle('hidden',!academy);
   learnerCard.classList.toggle('hidden',!learner);
   sessionName.textContent=p.full_name||p.email||'Signed In';
