@@ -5,7 +5,7 @@ const equal=(a,b)=>!!norm(a)&&norm(a)===norm(b);
 const has=(t,x)=>!!norm(x)&&(' '+norm(t)+' ').includes(' '+norm(x)+' ');
 const nrswa=e=>e.category==='02 NRSWA';
 const display=e=>e.code==='NOPS'?'NOPS card':e.category==='03 PIA'?'PIA '+Number(e.code.slice(1))+' — '+e.title:e.code?e.code+' — '+e.title:e.title;
-function entries(raw=[]){return [...base,...raw.filter(x=>x.source==='RRTA master qualification'&&x.active!==false&&!base.some(e=>matches(e,x.description,x.module_code))).map(x=>({category:'09 Approved additions',code:equal(x.module_code,x.description)?'':x.module_code,title:x.description,stableIndex:'db-'+x.id,dbId:x.id}))]}
+function entries(raw=[]){return [...base.filter(e=>e.code!=='DL'),...raw.filter(x=>x.source==='RRTA master qualification'&&x.active!==false&&!/^(?:driving licen[cs]e|driver'?s licen[cs]e|DL)$/i.test(x.description)&&!base.some(e=>matches(e,x.description,x.module_code))).map(x=>({category:'09 Approved additions',code:equal(x.module_code,x.description)?'':x.module_code,title:x.description,stableIndex:'db-'+x.id,dbId:x.id}))]}
 function matches(e,name,code=''){
  const n=norm(name),c=norm(code),k=norm(e.code),title=norm(e.title);
  if(!n&&!c)return false;
