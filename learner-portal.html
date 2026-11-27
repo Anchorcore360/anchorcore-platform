@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <head><script src="compliance-equivalence.js"></script><script src="workforce-compliance.js?v=20261127-faw"></script><script src="qualification-master.js?v=20261127-private"></script>
+  <head><script src="qualification-master.js?v=20261127-private"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>My RRT</title>
@@ -576,7 +576,7 @@
 #view-overview .myrrt-metric-label{grid-column:2;grid-row:2;align-self:start;font-size:11px;line-height:1.3}
 #view-overview .myrrt-arrow{grid-column:3;grid-row:1/3;align-self:center;justify-self:end;font-size:15px!important;line-height:1}
 @media(max-width:700px){#view-overview .myrrt-action-grid>*{grid-template-columns:34px minmax(0,1fr);column-gap:8px;padding:10px!important;min-height:78px}#view-overview .myrrt-action-grid>*:after{display:none}#view-overview .myrrt-action-grid .portal-nav-icon{width:34px!important;height:34px!important}#view-overview .myrrt-action-grid strong{font-size:12px}#view-overview .myrrt-action-grid small{font-size:10px}#view-overview .myrrt-tile{grid-template-columns:34px minmax(0,1fr);column-gap:8px;min-height:86px;padding:10px!important}#view-overview .myrrt-metric-icon{width:34px!important;height:34px!important}#view-overview .myrrt-arrow{display:none!important}#view-overview .myrrt-metric-label{font-size:10px}}
-</style></head>
+</style><style>.myrrt-home-card{display:flex;align-items:center;gap:12px;max-width:280px;min-width:210px;text-align:left;background:#fff;color:#263441;border:1px solid #ffffff70;padding:14px;border-radius:12px;cursor:pointer;box-shadow:0 4px 12px #0001}.myrrt-home-card svg{width:29px;height:29px;fill:none;stroke:#a31326;stroke-width:1.6;flex:0 0 29px}.myrrt-home-card strong,.myrrt-home-card small{display:block}.myrrt-home-card strong{font-size:13px}.myrrt-home-card small{font-size:10px;color:#657284;margin-top:5px}.myrrt-home-card b{margin-left:auto;color:#8190a1;font-size:19px}.myrrt-manager-note{font-size:11px;color:#657284;line-height:1.55;background:#f5f7fa;border-radius:7px;padding:10px;margin:10px 0}@media(max-width:700px){.myrrt-home-card{max-width:none;width:100%;min-width:0}}</style></head>
   <body data-portal-nav="learner">
     <div class="shell">
       <aside class="sidebar">
@@ -594,17 +594,17 @@
         </header>
         <div class="content">
           <section id="view-overview" class="view active">
-            <div class="myrrt-welcome"><svg class="myrrt-network" viewBox="0 0 640 200" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.3"><path d="M0 160 120 85 220 145 330 30 470 100 640 20M120 85 330 30M220 145 470 100M330 30 640 155M470 100 640 155"/><circle cx="120" cy="85" r="6"/><circle cx="220" cy="145" r="6"/><circle cx="330" cy="30" r="6"/><circle cx="470" cy="100" r="6"/></g></svg><div class="myrrt-person"><div class="myrrt-avatar" id="homeAvatar">--</div><div><div class="eyebrow">MY RRT · YOUR WORKSPACE</div><h1 id="welcomeName">Welcome</h1><p id="homeRole" class="muted">Your training and qualifications</p><div class="myrrt-trust" aria-label="Integrity Breeds Trust"><span>Integrity</span> <em>Breeds Trust.</em></div></div></div><button class="myrrt-score" type="button" onclick="show('compliance')"><div class="review-ring" id="complianceRing"><div class="review-ring-inner"><div><strong id="complianceScore">—</strong><small>Coverage</small></div></div></div><div class="review-copy"><strong id="complianceMessage">Checking your record…</strong><span>View my compliance →</span></div></button></div>
+            <div class="myrrt-welcome"><svg class="myrrt-network" viewBox="0 0 640 200" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.3"><path d="M0 160 120 85 220 145 330 30 470 100 640 20M120 85 330 30M220 145 470 100M330 30 640 155M470 100 640 155"/><circle cx="120" cy="85" r="6"/><circle cx="220" cy="145" r="6"/><circle cx="330" cy="30" r="6"/><circle cx="470" cy="100" r="6"/></g></svg><div class="myrrt-person"><div class="myrrt-avatar" id="homeAvatar">--</div><div><div class="eyebrow">MY RRT · YOUR WORKSPACE</div><h1 id="welcomeName">Welcome</h1><p id="homeRole" class="muted">Your training and qualifications</p><div class="myrrt-trust" aria-label="Integrity Breeds Trust"><span>Integrity</span> <em>Breeds Trust.</em></div></div></div><button class="myrrt-home-card" type="button" onclick="show('qr')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h4v4h-7z"/></svg><span><strong>My digital card</strong><small>Access your QR verification</small></span><b>›</b></button></div>
 <div class="stats myrrt-stats" id="overviewStats"></div>
 <div class="myrrt-home-grid"><section class="panel myrrt-actions"><div class="myrrt-section-heading"><div><span class="eyebrow">YOUR TOOLS</span><h2>Quick actions</h2></div><span class="myrrt-section-note">Everything in one place</span></div><div class="myrrt-action-grid">
 <button type="button" onclick="show('requests')" data-icon="upload"><strong>Upload certificate</strong><small>Submit evidence for review</small></button>
 <a href="online-learning.html" data-icon="course"><strong>My learning</strong><small>Continue your courses</small></a>
 <button type="button" onclick="show('qr')" data-icon="qr"><strong>My digital card</strong><small>Live QR verification</small></button>
 <button type="button" onclick="show('accreditations')" data-icon="award"><strong>My qualifications</strong><small>View and download certificates</small></button>
-<button type="button" onclick="show('compliance')" data-icon="compliance"><strong>My compliance</strong><small>Check role requirements</small></button>
+<button type="button" onclick="show('training')" data-icon="course"><strong>My training history</strong><small>View recorded training</small></button>
 <button type="button" onclick="show('profile')" data-icon="user"><strong>My profile</strong><small>Personal details</small></button>
 </div><a id="homeTeamLink" class="myrrt-team-link" href="staff-access.html#team" hidden>My Team <span>Manage your direct reports →</span></a></section>
-<section class="panel myrrt-attention"><div class="myrrt-section-heading"><div><span class="eyebrow">STAY UP TO DATE</span><h2>Your action list</h2></div><span id="myrrtActionCount" class="myrrt-action-count">—</span></div><div id="attentionList" class="status-list"></div><div id="homeRequiredList"></div></section></div>
+<section class="panel myrrt-attention"><div class="myrrt-section-heading"><div><span class="eyebrow">YOUR RECORD</span><h2>Qualification updates</h2></div><span class="myrrt-action-count">For information</span></div><div id="attentionList" class="status-list"></div><div id="homeRequiredList"></div></section></div>
 </section>
           <section id="view-profile" class="view">
 <div class="head"><div class="eyebrow">MY RRT · ACCOUNT</div><h1>My Profile</h1><p class="muted">Your personal details and digital identity.</p></div>
@@ -618,20 +618,7 @@
 <div><span class="profile-field-icon" data-picon="pin"></span><span><small>Work location</small><strong id="location">—</strong></span></div>
 </div><div class="profile-info-list" id="profileDetails"></div><p class="profile-help">Need to update these details? Contact your manager or the Academy.</p></section>
 <section class="panel my-profile-shortcuts"><h2>Your workspace</h2><p class="muted">Everything you need, in one place.</p><button type="button" onclick="show('accreditations')"><span class="profile-field-icon" data-picon="award"></span><span><strong>Qualifications & certificates</strong><small>View your evidence and expiry dates</small></span><b>›</b></button><button type="button" onclick="show('qr')"><span class="profile-field-icon" data-picon="qr"></span><span><strong>Digital competency card</strong><small>Show your live QR verification</small></span><b>›</b></button><a href="online-learning.html"><span class="profile-field-icon" data-picon="course"></span><span><strong>My learning</strong><small>Access your assigned courses</small></span><b>›</b></a><button type="button" onclick="show('requests')"><span class="profile-field-icon" data-picon="upload"></span><span><strong>Submit evidence</strong><small>Upload a qualification for review</small></span><b>›</b></button></section></div></section>
-<section id="view-compliance" class="view">
-            <div class="head">
-              <div class="eyebrow">Compliance</div>
-              <h1>My Compliance</h1>
-              <p class="muted">
-                Requirements compared with your current accreditations.
-              </p>
-            </div>
-            <div class="stats" id="complianceStats"></div>
-            <section class="panel" id="complianceBody">
-              <div class="empty">Loading compliance…</div>
-            </section>
-          </section>
-          <section id="view-training" class="view">
+<section id="view-training" class="view">
             <div class="head">
               <div class="eyebrow">Training</div>
               <h1>My Training</h1>
@@ -764,7 +751,7 @@
         );
       const fmt = (d) =>
         d ? new Date(d + "T00:00:00").toLocaleDateString("en-GB") : "—";
-      let sharedStates = null, learningRows = null;
+      let learningRows = null;
       let profile = null,
         accs = [],
         records = [],
@@ -814,6 +801,7 @@
         return ["Valid", "good"];
       }
       function show(v) {
+        if(v==="compliance"||v==="training-needs")v="accreditations";
         document
           .querySelectorAll(".view")
           .forEach((x) => x.classList.toggle("active", x.id === "view-" + v));
@@ -828,7 +816,7 @@
       function applyHash() {
         const h = location.hash.replace("#", "");
         const map = {
-          "training-needs": "compliance",
+          "training-needs": "accreditations",
           upcoming: "training",
           accreditations: "accreditations",
           certificates: "certificates",
@@ -836,7 +824,7 @@
           evidence: "requests",
           requests: "requests",
           qr: "qr",
-          compliance: "compliance",
+          compliance: "accreditations",
           training: "training",
           profile: "profile",
           overview: "overview",
@@ -920,32 +908,15 @@
         const roleRows = roles.data || [];
         profileRoleRows = roleRows;
         const roleIds = roleRows.map((x) => x.job_role_id);
-        if (roleIds.length) {
-          const rq = await db
-            .from("job_role_requirements")
-            .select("job_role_id,status,compliance_items(name,category)")
-            .in("job_role_id", roleIds);
-          requirements = rq.data || [];
-        }
-        // Read the same operational rule inputs as the Academy workspace. Never substitute a guessed score on failure.
         try{
-          const personResult=await db.from("people").select("id,profile_id,operational_matrix_enabled").eq("profile_id",p.id).maybeSingle();
+          const personResult=await db.from("people").select("id").eq("profile_id",p.id).maybeSingle();
           if(personResult.error)throw personResult.error;
-          const person=personResult.data;
-          const extra=person?await db.from("accreditations").select("*").eq("person_id",person.id).is("archived_at",null):{data:[]};
-          if(extra.error)throw extra.error;
-          accs=[...new Map([...accs,...(extra.data||[])].filter(a=>!a.superseded_by).map(a=>[a.id,a])).values()];
-          const personRoles=person?await db.from("person_job_roles").select("job_role_id").eq("person_id",person.id):{data:[]};
-          if(personRoles.error)throw personRoles.error;
-          const ids=[...new Set([...roleIds,...(personRoles.data||[]).map(x=>x.job_role_id)])];
-          if(person?.operational_matrix_enabled===false||!ids.length){sharedStates=[]}else{
-            const [items,roles,req]=await Promise.all([db.from("compliance_items").select("*").eq("active",true),db.from("job_roles").select("*").in("id",ids),db.from("job_role_requirements").select("*").in("job_role_id",ids)]);
-            if(items.error||roles.error||req.error)throw items.error||roles.error||req.error;
-            if(!items.data?.length||roles.data?.length!==ids.length)throw Error("Compliance rules unavailable");
-            const engine=window.RRTACompliance({roles:roles.data,profileRoles:ids.map(id=>({profile_id:p.id,job_role_id:id})),items:items.data,requirements:req.data||[],accreditations:accs});
-            sharedStates=engine.requirementStates({id:p.id,person_id:person?.id});
+          if(personResult.data?.id){
+            const extra=await db.from("accreditations").select("*").eq("person_id",personResult.data.id).is("archived_at",null);
+            if(extra.error)throw extra.error;
+            accs=[...new Map([...accs,...(extra.data||[])].filter(a=>!a.superseded_by).map(a=>[a.id,a])).values()];
           }
-        }catch(err){console.warn("Shared compliance unavailable",err);sharedStates=null}
+        }catch(err){console.warn("Additional accreditation records unavailable",err)}
         try{const lr=await db.from("online_course_assignments").select("status,completed_at").eq("learner_id",p.id);if(!lr.error)learningRows=lr.data||[]}catch(err){console.warn("Learning counts unavailable",err)}
         await render(roleRows, evidenceRows);
         applyHash();
@@ -963,13 +934,7 @@
         document.getElementById('myProfileCompany').textContent=profile.organisation||'';
         profileStats.innerHTML=[['award','Qualifications',accs.length,'accreditations'],['check','Valid',valid,'accreditations'],['calendar','Expiring soon',expiring,'accreditations'],['course','Completed training',records.filter(r=>String(r.completion_status).toLowerCase()==='achieved').length,'training']].map(([k,l,v,t])=>'<button type="button" class="stat my-profile-stat" data-profile-target="'+t+'"><span class="profile-field-icon">'+profileIcon(k)+'</span><span><small>'+esc(l)+'</small><strong>'+v+'</strong></span></button>').join('');
         profileStats.querySelectorAll('[data-profile-target]').forEach(b=>b.onclick=()=>show(b.dataset.profileTarget));
-        const states=sharedStates||[];
-        const covered=states.filter(x=>['valid','expiring'].includes(x.key)).length,missing=states.filter(x=>!['valid','expiring'].includes(x.key)).length;
-        const labels={valid:'Valid',expiring:'Expiring',expired:'Expired',missing:'Required'};
-        const reqRows=states.map(x=>'<tr><td>'+esc(x.item?.name||'Requirement')+(x.coveredBy?' <small>Covered by '+esc(x.coveredBy)+'</small>':'')+'</td><td>'+fmt(x.held?.expiry_date)+'</td><td><span class="pill '+(x.key==='valid'?'good':x.key==='expiring'?'warn':'bad')+'">'+esc(labels[x.key]||x.key)+'</span></td></tr>').join('');
-        renderOverview(valid, expiring, expired, covered, missing);
-        complianceStats.innerHTML = `<div class="stat"><span>Requirements</span><strong>${sharedStates===null?'—':states.length}</strong></div><div class="stat"><span>Covered</span><strong>${sharedStates===null?'—':covered}</strong></div><div class="stat"><span>Missing / Expired</span><strong>${sharedStates===null?'—':missing}</strong></div><div class="stat"><span>Compliance Score</span><strong>${states.length?Math.round(covered/states.length*100)+'%':'—'}</strong></div>`;
-        complianceBody.innerHTML=sharedStates===null?'<div class="empty">Compliance rules could not be loaded. Contact the Academy if this persists.</div>':reqRows?'<table class="table"><thead><tr><th>Requirement</th><th>Expiry</th><th>Status</th></tr></thead><tbody>'+reqRows+'</tbody></table>':'<div class="empty">No operational requirements assigned.</div>';
+        renderOverview(valid, expiring, expired);
         trainingBody.innerHTML = records.length
           ? `<table class="table"><thead><tr><th>Course</th><th>Date</th><th>Location</th><th>Status</th></tr></thead><tbody>${records.map((r) => `<tr><td>${esc(r.course_title || "Training")}</td><td>${fmt(r.training_date)}</td><td>${esc(r.location || "—")}</td><td>${esc(r.completion_status || "—")}</td></tr>`).join("")}</tbody></table>`
           : '<div class="empty">No training records yet.</div>';
@@ -1037,24 +1002,20 @@
         link.href = "#qr";
         renderQrInto("profileQr");
       }
-      function renderOverview(valid, expiring, expired, covered, missing) {
-        const states=sharedStates||[],known=sharedStates!==null,score=states.length?Math.round(covered/states.length*100):0,renewals=states.filter(x=>x.key==='expiring').length;
+      function renderOverview(valid, expiring, expired) {
         welcomeName.textContent='Welcome, '+(profile.forename||profile.full_name||'').split(' ')[0];
         document.getElementById('homeAvatar').innerHTML=document.getElementById('initials').innerHTML;
         document.getElementById('homeRole').textContent=[profileRoleRows.find(x=>x.is_primary)?.job_roles?.name||profile.job_title,profile.organisation].filter(Boolean).join(' · ')||'Your personal workspace';
-        complianceRing.style.setProperty('--score',score);complianceScore.textContent=states.length?score+'%':'—';
-        complianceMessage.textContent=!known?'Compliance unavailable':!states.length?'No role requirements assigned':missing?missing+' requirements need attention':'Your role requirements are covered';
         const outstanding=learningRows===null?'—':learningRows.filter(a=>!['completed','passed'].includes(String(a.status||'').toLowerCase())).length;
-        const tiles=[['Valid qualifications',valid,'good','accreditations'],['Required renewals · 90 days',known?renewals:'—','warn','compliance'],['Requirements needing action',known?missing:'—','bad','compliance'],['Learning outstanding',outstanding,'blue','learning']];
+        const tiles=[['Valid qualifications',valid,'good','accreditations'],['Expiring within 30 days',expiring,'warn','accreditations'],['Expired qualifications',expired,'bad','accreditations'],['Assigned learning outstanding',outstanding,'blue','learning']];
         const tileIcons={good:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',warn:'<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4m8-4v4M4 10h16M12 13v3m0 2h.01"/>',bad:'<path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v5m0 3h.01"/>',blue:'<path d="M3 5c4-1 7 0 9 2 2-2 5-3 9-2v14c-4-1-7 0-9 2-2-2-5-3-9-2zM12 7v14"/>'};
         overviewStats.innerHTML=tiles.map(([label,value,css,target])=>'<button type="button" class="stat myrrt-tile '+css+'" data-target="'+target+'"><div class="myrrt-tile-top"><span class="myrrt-metric-icon"><svg viewBox="0 0 24 24" aria-hidden="true">'+tileIcons[css]+'</svg></span><span class="myrrt-arrow" aria-hidden="true">↗</span></div><strong>'+esc(value)+'</strong><span class="myrrt-metric-label">'+esc(label)+'</span></button>').join('');
         overviewStats.querySelectorAll('[data-target]').forEach(b=>b.onclick=()=>b.dataset.target==='learning'?location.assign('online-learning.html'):show(b.dataset.target));
         const pending=evidenceRows.filter(x=>x.status==='pending').length;
         attentionList.innerHTML='<button type="button" class="myrrt-pending" onclick="show(\'requests\')"><span>Evidence awaiting review</span><span class="pill '+(pending?'warn':'good')+'">'+pending+'</span><span aria-hidden="true">›</span></button>';
-        const priority={expired:0,missing:1,expiring:2};
-        const need=states.filter(x=>x.key in priority).sort((a,b)=>priority[a.key]-priority[b.key]||String(a.held?.expiry_date||'').localeCompare(String(b.held?.expiry_date||'')));
-        document.getElementById('myrrtActionCount').textContent=known?need.length+' training actions':'Not available';
-        document.getElementById('homeRequiredList').innerHTML=!known?'<p class="muted">Compliance information is temporarily unavailable.</p>':!states.length?'<p class="muted">No assigned operational requirements.</p>':!need.length?'<p class="myrrt-clear">✓ No operational training actions due.</p>':need.slice(0,5).map(x=>'<button type="button" class="myrrt-task" onclick="show(\'compliance\')"><span><strong>'+esc(x.item?.name||'Qualification')+'</strong><small>'+esc(x.key==='missing'?'Training or evidence required':(x.key==='expired'?'Expired ':'Renew by ')+fmt(x.held?.expiry_date))+'</small></span><span class="pill '+(x.key==='expiring'?'warn':'bad')+'">'+(x.key==='expiring'?'Renew':x.key==='expired'?'Expired':'Required')+'</span></button>').join('')+(need.length>5?'<button class="btn" type="button" onclick="show(\'compliance\')">View all '+need.length+' actions</button>':'');
+        const updates=accs.filter(a=>['Expired','Expiring'].includes(statusAcc(a)[0])).sort((a,b)=>String(a.expiry_date||'').localeCompare(String(b.expiry_date||'')));
+        const note='<p class="myrrt-manager-note">Qualification renewals and training bookings are coordinated by your manager and the Academy. These dates are for your information.</p>';
+        document.getElementById('homeRequiredList').innerHTML=note+(updates.length?updates.slice(0,5).map(a=>{const st=statusAcc(a);return '<button type="button" class="myrrt-task" onclick="show(\'accreditations\')"><span><strong>'+esc(a.accreditation_name||'Qualification')+'</strong><small>'+esc((st[0]==='Expired'?'Expired on ':'Expires on ')+fmt(a.expiry_date))+'</small></span><span class="pill '+st[1]+'">'+st[0]+'</span></button>'}).join('')+'<button class="btn" type="button" onclick="show(\'accreditations\')">View qualification record</button>':'<p class="myrrt-clear">No recorded qualifications expiring within 30 days or expired.</p>');
         document.querySelectorAll('.myrrt-action-grid [data-icon]').forEach(el=>{if(!el.querySelector('.portal-nav-icon')&&window.RRTAPlatformNavigation)el.insertAdjacentHTML('afterbegin',window.RRTAPlatformNavigation.icon(el.dataset.icon))});
       }
       async function downloadAccreditationSummary() {
