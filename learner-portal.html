@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <head><script src="qualification-master.js?v=20261127-private"></script>
+  <head><script src="assets/portal-logo-telecoms.js"></script><script src="qualification-master.js?v=20261127-private"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>My RRT</title>
@@ -592,7 +592,7 @@
 #view-profile .my-profile-identity{align-items:center}
 #view-profile .my-profile-identity .avatar{margin:0!important;align-self:center;flex-shrink:0}
 #view-profile .my-profile-identity .avatar img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
-</style><style>.personal-contact{margin-top:12px;padding:10px;border:1px solid #dce3eb;border-radius:8px;background:#f7f9fb}.contact-title{display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:8px}.contact-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.contact-fields label{display:grid;gap:4px;font-size:11px;color:#536475}.contact-fields input{min-width:0;width:100%;box-sizing:border-box;padding:8px;border:1px solid #ccd5df;border-radius:6px;font-size:12px;background:white;color:#263441}.contact-fields input:disabled{background:transparent;border-color:transparent;padding-left:0;font-weight:650}.personal-contact button{border:1px solid #d3dce5;border-radius:6px;background:white;padding:6px 10px;color:#263441;font-size:11px;font-weight:700;cursor:pointer}.personal-contact button[type=submit]{background:#a31326;color:white}.personal-contact small,#contactMessage{font-size:10px;color:#536475}#contactActions{margin-top:8px}#contactActions[hidden]{display:none}@media(max-width:700px){.contact-fields{grid-template-columns:1fr}}</style></head>
+</style><style>.personal-contact{margin-top:12px;padding:10px;border:1px solid #dce3eb;border-radius:8px;background:#f7f9fb}.contact-title{display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:8px}.contact-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.contact-fields label{display:grid;gap:4px;font-size:11px;color:#536475}.contact-fields input{min-width:0;width:100%;box-sizing:border-box;padding:8px;border:1px solid #ccd5df;border-radius:6px;font-size:12px;background:white;color:#263441}.contact-fields input:disabled{background:transparent;border-color:transparent;padding-left:0;font-weight:650}.personal-contact button{border:1px solid #d3dce5;border-radius:6px;background:white;padding:6px 10px;color:#263441;font-size:11px;font-weight:700;cursor:pointer}.personal-contact button[type=submit]{background:#a31326;color:white}.personal-contact small,#contactMessage{font-size:10px;color:#536475}#contactActions{margin-top:8px}#contactActions[hidden]{display:none}@media(max-width:700px){.contact-fields{grid-template-columns:1fr}}</style><style>.digital-card-layout{display:grid;grid-template-columns:minmax(0,640px) minmax(200px,1fr);gap:24px;align-items:start}.digital-employee-card{aspect-ratio:86/54;background:#171e28 url('assets/employee-card-background.svg') center/cover;color:white;border-radius:16px;box-shadow:0 10px 24px #121a2726;padding:5%;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}.digital-card-top{display:grid;grid-template-columns:24% minmax(0,1fr) 24%;gap:5%;align-items:center}.digital-card-photo{aspect-ratio:166/222;overflow:hidden;border:1px solid #ffffff77;border-radius:4px;display:grid;place-items:center;font-weight:800;background:#ffffff12}.digital-card-photo img{width:100%;height:100%;object-fit:cover}.digital-card-logo{width:100%;max-height:130px;object-fit:contain}.digital-card-qr{background:white;border-radius:3px;padding:7%;aspect-ratio:1;color:#29323c;display:grid;place-items:center;font-size:10px}.digital-card-qr #qrPageCode{width:100%}.digital-card-qr img,.digital-card-qr canvas{width:100%!important;height:auto!important}.digital-card-info h2{color:white;margin:6px 0;font-size:clamp(16px,2vw,28px);line-height:1.1}.digital-card-info p{color:white;margin:4px 0;font-size:clamp(11px,1.3vw,17px)}.digital-card-info small{color:#ffc6cd;font-weight:800;font-size:clamp(8px,1vw,11px);letter-spacing:.08em}.digital-card-footer{margin-top:9px;border-top:1px solid #ffffff55;padding-top:7px;font-size:clamp(8px,1vw,12px)}.digital-card-help h2{font-size:18px;margin-top:4px}.digital-card-help p{font-size:13px;line-height:1.5}@media(max-width:900px){.digital-card-layout{grid-template-columns:minmax(0,1fr)}.digital-employee-card{max-width:640px}}@media(max-width:450px){.digital-employee-card{aspect-ratio:auto;min-height:205px}.digital-card-info{margin-top:12px}}</style></head>
   <body data-portal-nav="learner">
     <div class="shell">
       <aside class="sidebar">
@@ -738,7 +738,7 @@
           <section id="view-qr" class="view">
             <div class="head">
               <div class="eyebrow">Competency Card</div>
-              <h1>My QR Card</h1>
+              <h1>My Digital Card</h1>
             </div>
             <section class="panel" id="qrBody"></section>
           </section>
@@ -998,12 +998,18 @@
           ? `<table class="table"><thead><tr><th>Qualification</th><th>Submitted</th><th>Status</th><th>Reviewer Note</th></tr></thead><tbody>${evidence.map((x) => `<tr><td>${esc(x.qualification_name || "Evidence")}</td><td>${new Date(x.submitted_at).toLocaleDateString("en-GB")}</td><td><span class="pill ${x.status === "approved" ? "good" : x.status === "rejected" ? "bad" : "warn"}">${x.status === "rejected" ? "Returned" : esc((x.status || "Pending").replace(/^./, (c) => c.toUpperCase()))}</span></td><td>${esc(x.reviewer_note || "—")}</td></tr>`).join("")}</tbody></table>`
           : '<div class="empty">No evidence requests submitted yet.</div>';
         renderProfileQr();
-        qrBody.innerHTML = profile.verification_token
-          ? `<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap"><div class="profile-qr"><span id="qrPageCode"></span></div><div><h2>Your Live Verification Record</h2><p>Your QR code opens your current competency record. It updates when RRTA updates your approved accreditations.</p><a class="btn" href="verify.html?t=${encodeURIComponent(profile.verification_token)}">Open My Verification Record</a></div></div>`
-          : '<p class="muted">A verification token has not yet been issued for this profile.</p>';
-        if (profile.verification_token) renderQrInto("qrPageCode");
+        renderDigitalEmployeeCard();
         document.getElementById("downloadSummary").onclick =
           downloadAccreditationSummary;
+      }
+      function renderDigitalEmployeeCard(){
+        const host=document.getElementById('qrBody'),token=profile.verification_token;
+        const direct=['direct_staff','rrt'].includes(String(profile.worker_type||'').toLowerCase())&&/^(rrt|rapid response telecoms(?: ltd| limited)?)$/i.test(String(profile.organisation||'').trim());
+        if(!direct){host.innerHTML=token?'<h2>My competency card</h2><p class="muted">Scan to view your live competency record.</p><div class="profile-qr"><span id="qrPageCode"></span></div><a class="btn" href="'+esc(verificationUrl())+'">Open verification record</a>':'<p class="muted">A verification token has not yet been issued.</p>';if(token)renderQrInto('qrPageCode');return}
+        host.innerHTML='<div class="digital-card-layout"><article class="digital-employee-card" aria-label="Digital employee profile card"><div class="digital-card-top"><div class="digital-card-photo" id="digitalCardPhoto"></div><img class="digital-card-logo" id="digitalCardLogo" alt="Rapid Response Telecoms"><div class="digital-card-qr">'+(token?'<div id="qrPageCode"></div>':'<span>QR not issued</span>')+'</div></div><div class="digital-card-info"><small>RRT EMPLOYEE · DIGITAL PROFILE</small><h2>'+esc(profile.full_name||'Employee')+'</h2><p>'+esc(profile.job_title||'Employee')+'</p><p>Card ID: '+esc(profile.employee_number?'RRT ID '+profile.employee_number:'Not recorded')+'</p><div class="digital-card-footer">Rapid Response Telecoms · Integrity Breeds Trust</div></div></article><aside class="digital-card-help"><h2>Your digital employee card</h2><p>Show your card on your phone when identification is requested. Scan the QR code to open your current approved competency record.</p>'+(token?'<a class="btn" href="'+esc(verificationUrl())+'" target="_blank" rel="noopener">Open live verification record ↗</a>':'<p class="muted">Contact the Academy to activate your verification QR.</p>')+'<p class="muted">Digital profile reference only; not a separately issued physical ID or proof of authorisation to work.</p></aside></div>';
+        document.getElementById('digitalCardPhoto').innerHTML=document.getElementById('initials').innerHTML;
+        const logo=document.getElementById('digitalCardLogo');logo.src=window.RRPortalAssets?.telecoms||document.querySelector('.sidebar .brand img, .sidebar img')?.src||'';
+        if(token)renderQrInto('qrPageCode');
       }
       function verificationUrl() {
         return new URL(
