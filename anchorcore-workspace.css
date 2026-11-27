@@ -1,0 +1,16 @@
+/* Anchorcore enterprise workspace: visual only, no data or status changes. */
+:root{--ac-ink:#263341;--ac-muted:#64748b;--ac-line:#dce3e9;--ac-bg:#f4f6f8;--ac-accent:#a30d1b}
+body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body h1{letter-spacing:-.025em;line-height:1.2}body h2{letter-spacing:-.015em}
+.portal-side .portal-nav-link,.portal-side .portal-nav-parent{font-size:13px!important;min-height:40px}
+.portal-side .portal-nav-label{font-size:10px!important;letter-spacing:.1em}
+.portal-nav-global-flyout .portal-nav-link{font-size:12px!important;min-height:36px}
+.portal-side .portal-nav-link.active{background:#a30d1b!important}
+.rrta-uniform-table tbody tr:nth-child(odd),table.rrta-uniform-table tbody tr:nth-child(odd){background:#fff!important}
+.rrta-uniform-table tbody tr:nth-child(even),table.rrta-uniform-table tbody tr:nth-child(even){background:#f6f8fa!important}
+.rrta-uniform-table tbody tr:hover,table.rrta-uniform-table tbody tr:hover{background:#edf2f7!important}
+:where(button,a,input,select,textarea):focus-visible{outline:3px solid #547fa8;outline-offset:2px}
+:where(.toolbar,.actions,.profile-topbar){flex-wrap:wrap}
+:where(.table-wrap,.preview){overscroll-behavior:contain;scrollbar-width:thin}
+:where(.panel,.profile-hero,.stat){box-shadow:0 1px 3px #162a4010}
+@media(max-width:700px){.profile-shell{padding:14px!important}.profile-hero{grid-template-columns:minmax(0,1fr)!important;gap:12px!important}.profile-meta{font-size:13px}.manager-strip{grid-template-columns:1fr!important}.profile-topbar{align-items:flex-start!important}.portal-nav-link,.portal-nav-parent{min-height:44px}.portal-side{max-height:none!important}.content input:not([type=checkbox]):not([type=radio]),.content select{font-size:16px}}
