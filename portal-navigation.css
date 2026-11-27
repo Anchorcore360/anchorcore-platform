@@ -12,3 +12,16 @@ html.rrta-nav-ready body[data-portal-nav="academy"]{visibility:visible!important
 
 /* Keep the full Academy sidebar usable on shorter laptop screens */
 .portal-side{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent!important}.portal-side .brand{position:relative;z-index:1}.portal-side .portal-nav{flex:0 0 auto!important}.portal-side .rrta-account-panel{position:relative!important;margin-top:14px!important;padding-bottom:12px!important;flex:0 0 auto!important}.portal-side>.spacer{display:block!important;flex:1 0 12px!important;min-height:12px!important}@media(max-height:850px) and (min-width:1001px){.portal-side{padding-top:10px!important;padding-bottom:8px!important}.portal-side .rrta-brand-image-link.academy{min-height:92px!important;background-size:contain!important}.portal-side .rrta-brand-image-link.academy .rrta-3d-logo{height:92px!important;max-height:92px!important}.portal-nav-label{padding-top:8px!important;padding-bottom:4px!important}.portal-nav-link,.portal-nav-parent{padding-top:8px!important;padding-bottom:8px!important}.portal-side .rrta-account-panel{margin-top:8px!important}.rrta-account-user{padding-top:5px!important;padding-bottom:5px!important}.rrta-account-actions a,.rrta-account-actions button{padding-top:7px!important;padding-bottom:7px!important}}
+
+/* My RRT: short content-only transitions. Navigation remains stationary. */
+@keyframes myRrtEnter{from{opacity:.35;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:no-preference){
+body[data-portal-nav="learner"] .main>.content{animation:myRrtEnter 180ms ease-out both}
+body[data-portal-nav="learner"] .view.active{animation:myRrtEnter 180ms ease-out both}
+body[data-portal-nav="learner"] .main>.wrap{animation:myRrtEnter 180ms ease-out both}
+body[data-portal-nav="learner"] .portal-nav-link,body[data-portal-nav="learner"] .portal-nav-parent{transition:background-color 140ms ease,color 140ms ease!important}
+body[data-portal-nav="learner"] .portal-nav-link:hover,body[data-portal-nav="learner"] .portal-nav-parent:hover{transform:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+body[data-portal-nav="learner"] .main>.content,body[data-portal-nav="learner"] .view.active,body[data-portal-nav="learner"] .main>.wrap{animation:none!important}
+}
