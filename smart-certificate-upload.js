@@ -10,8 +10,13 @@ function parseDate(s){const m=String(s||'').trim().match(/^(\d{4})-(\d{1,2})-(\d
 function labelledDate(t,label){const re=new RegExp('(?:'+label+')\\s*[:\\-]?\\s*(\\d{4}-\\d{1,2}-\\d{1,2}|\\d{1,2}[\\/.-]\\d{1,2}[\\/.-]\\d{4}|\\d{1,2}[\\s-]+[A-Za-z]{3,9}[\\s,-]+\\d{4})','gi');const matches=[...new Set([...t.matchAll(re)].map(m=>parseDate(m[1])).filter(Boolean))];return matches.length===1?matches[0]:''}
 function stackedOpenreachDates(t){
  if(!/\bOpenreach\b/i.test(t)||!/\bCertificate\s+of\s+Accreditation\b/i.test(t))return null;
- const m=String(t).match(/Expiry\s*:\s*Date of issue\s*:\s*Learner ID\s*:\s*Assessor Name\s*:\s*(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{4})\s+(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{4})/i);
- if(!m)return null;const issue=parseDate(m[1]),expiry=parseDate(m[2]);return issue&&expiry&&issue<expiry?{issue,expiry}:null
+ const source=String(t).replace(/(\d)\s*([\/.-])\s*(?=\d)/g,'$1$2');
+ const issue=labelledDate(source,'date\\s+of\\s+issue|issue\\s+date'),expiry=labelledDate(source,'expiry(?:\\s+date)?|date\\s+of\\s+expiry');
+ if(issue&&expiry)return issue<expiry?{issue,expiry}:null;
+ // PDF text layers may group labels ahead of their values. Accept only the known template
+ // with exactly two dates in ascending order; otherwise leave the record for review.
+ const m=source.match(/(?:Expiry\s*:\s*Date\s+of\s+issue|Date\s+of\s+issue\s*:\s*Expiry)\s*:\s*Learner\s+ID\s*:\s*Assessor\s+Name\s*:\s*(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{4})\s+(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{4})/i);
+ if(!m)return null;const a=parseDate(m[1]),b=parseDate(m[2]);return a&&b&&a<b&&(!issue||issue===a)&&(!expiry||expiry===b)?{issue:a,expiry:b}:null
 }
 function extract(t){const stacked=stackedOpenreachDates(t),person=matchPerson(t),qs=matchQual(t),num=t.match(/(?:certificate|certification|accreditation|registration|card)\s*(?:number|no\.?|id|#)\s*[:\-]?\s*([A-Z0-9][A-Z0-9\/-]{2,35})/i);const awarding=['Smart Awards','EUSR','CITB','NRSWA','SWQR','Openreach','IPAF','NPORS','PASMA','ProTrainings','City & Guilds'].filter(x=>contains(t,x));return {person:person?.id||'',qual:qs.length===1?String(qs[0].id):'',suggestions:qs.map(q=>String(q.id)),issue:stacked?.issue||labelledDate(t,'presented on|date of accreditation|accreditation date|accreditation start date|date accredited|issue date|date of issue|issued on|date issued|achievement date|valid from|validity start date|certification date|date of certification|course completed on|course completion date|date assessed'),expiry:stacked?.expiry||labelledDate(t,'accreditation expiry date|expiry date|expiration date|valid until|expires on|expires|date of expiry|valid to|validity end date|expiry|expiration|retake this course before|retake course before'),number:num?.[1]||'',awarding:awarding.length===1?awarding[0]:(awarding.includes('Openreach')&&awarding.every(x=>['Openreach','Smart Awards'].includes(x))&&/\bS00[5-9]\b/i.test(t)?'Openreach':'')}}
 
