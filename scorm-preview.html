@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RRTA | Private course preview</title><style>body{margin:0;font:14px Arial,sans-serif;background:#eef0f2;color:#18202a}header{display:flex;justify-content:space-between;align-items:center;gap:16px;background:#18202a;color:white;padding:12px 24px}header a{color:white}#status{padding:12px 24px;white-space:pre-wrap}iframe{display:block;width:100%;height:calc(100dvh - 55px);border:0} [hidden]{display:none!important}</style></head><body><header><a href="scorm-review.html">← Staged courses</a><strong>Private preview · No learning records saved</strong></header><div id="status" role="status">Checking Academy access…</div><iframe id="player" title="RAPID course preview" sandbox="allow-scripts allow-modals" referrerpolicy="no-referrer" hidden></iframe><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script>
+const db=supabase.createClient('https://qgbpotjqggeodxqcwkgj.supabase.co','sb_publishable_J1yPM1Hi7INCX2m7rp3PdA_JdQ46FRS');
+const statusEl=document.getElementById('status'),player=document.getElementById('player');
+const mime={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',svg:'image/svg+xml',mp3:'audio/mpeg',mp4:'video/mp4',vtt:'text/vtt'};
+const safePath=p=>/^[A-Za-z0-9_./-]+$/.test(p)&&!p.startsWith('/')&&!p.split('/').some(x=>x==='..'||x==='.');
+function inlineScript(code){const s=document.createElement('script');s.textContent=code.replace(/<\/script/gi,'<\\/script');return s}
+async function start(){
+ const au=await db.auth.getUser();const user=au.data?.user;if(au.error||!user)throw Error('Sign in to the Academy first.');
+ const permission=await db.rpc('can_manage_academy');if(permission.error||permission.data!==true)throw Error('Academy access required.');
+ const id=new URLSearchParams(location.search).get('package');if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id||''))throw Error('Invalid package reference.');
+ const base=user.id+'/'+id;const staged=db.storage.from('scorm-extracted-staging');const manifest=await staged.download(base+'/imsmanifest.xml');if(manifest.error||!manifest.data)throw Error('No staged manifest found.');
+ const raw=await db.storage.from('scorm-packages').download(base+'.zip');if(raw.error||!raw.data)throw Error('Original package unavailable.');
+ if(raw.data.size>20*1024*1024)throw Error('Preview package exceeds current limit.');
+ statusEl.textContent='Preparing private multimedia preview…';
+ const zip=await JSZip.loadAsync(raw.data);const files=Object.values(zip.files).filter(x=>!x.dir);let total=0;
+ if(files.length>400)throw Error('Too many files.');for(const f of files){if(!safePath(f.name)||f.unsafeOriginalName&&f.unsafeOriginalName!==f.name)throw Error('Unsafe package path.');const n=f._data?.uncompressedSize;if(!Number.isFinite(n)||n>5*1024*1024)throw Error('Individual asset exceeds preview limit.');total+=n;if(total>40*1024*1024)throw Error('Expanded package exceeds preview limit.')}
+ const read=async name=>{const f=zip.file(name);if(!f)throw Error('Missing '+name);return f.async('string')};
+ const html=await read('index.html');let course=await read('course.js');const data=await read('data.js'),lessons=await read('lessons.js');
+ if(!html.includes('Company-wide edition 8.0')||!course.includes('const lessons=LESSONS;'))throw Error('This preview adapter currently supports RAPID V8 only.');
+ const assets={};for(const f of files){const ext=f.name.split('.').pop().toLowerCase();if(mime[ext])assets[f.name]='data:'+mime[ext]+';base64,'+await f.async('base64')}
+ const replacements=[['esc(m.poster)','esc(rrAsset(m.poster))'],['media/${esc(m.key)}.mp4','${esc(rrAsset("media/"+m.key+".mp4"))}'],['media/${esc(m.key)}.vtt','${esc(rrAsset("media/"+m.key+".vtt"))}'],['esc(n.images[0])','esc(rrAsset(n.images[0]))'],['esc(n.src)','esc(rrAsset(n.src))'],['esc(l.hotspots.image)','esc(rrAsset(l.hotspots.image))'],['esc(l.photo)','esc(rrAsset(l.photo))'],['im.src=l.narration.images[j]','im.src=rrAsset(l.narration.images[j])']];
+ for(const [a,b] of replacements){if(!course.includes(a))throw Error('Preview adapter mismatch: '+a);course=course.split(a).join(b)}
+ course=course.replace("window.open('certificate-preview.html?score='+Math.round(r.score/30*100),'_blank')","alert('Specimen certificate is available in the original ZIP. No official certificate is issued in preview.')");
+ const doc=new DOMParser().parseFromString(html,'text/html');doc.querySelectorAll('script,base,meta[http-equiv],iframe,object,embed,link').forEach(x=>x.remove());
+ const csp=doc.createElement('meta');csp.httpEquiv='Content-Security-Policy';csp.content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; media-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'";doc.head.prepend(csp);
+ for(const el of doc.querySelectorAll('[src],[poster]'))for(const attr of ['src','poster'])if(el.hasAttribute(attr)){const path=el.getAttribute(attr);if(assets[path])el.setAttribute(attr,assets[path]);else el.removeAttribute(attr)}
+ const assetCode='const RR_ASSETS='+JSON.stringify(assets)+';const rrAsset=p=>RR_ASSETS[p]||"";';
+ for(const code of [assetCode,data,lessons,course]){const s=doc.createElement('script');s.textContent=code.replace(/<\/script/gi,'<\\/script');doc.body.appendChild(s)}
+ player.srcdoc='<!doctype html>'+doc.documentElement.outerHTML;player.hidden=false;statusEl.hidden=true;
+}
+start().catch(e=>{statusEl.textContent='Preview unavailable: '+(e.message||String(e))});
+</script></body></html>
