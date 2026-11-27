@@ -24,6 +24,7 @@
 .workspace{min-height:100vh;padding:clamp(80px,10vh,120px) 6vw 7vh;background:linear-gradient(rgba(2,11,19,.46),rgba(2,11,19,.46)),url('assets/portal-choice-background.svg') center/cover no-repeat fixed}.workspace-head{max-width:1120px;margin:0 auto 30px}.workspace-head h1{font-size:clamp(34px,4vw,52px);margin:8px 0}.workspace-head p{margin:0;color:#e1e7ec}.grid{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.portal{display:flex;flex-direction:column;text-decoration:none;color:#17202a;background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(245,247,249,.96));border-radius:16px;padding:28px;min-height:300px;border-top:4px solid var(--red);box-shadow:0 20px 55px rgba(0,0,0,.35);transition:.18s}.portal:hover{transform:translateY(-4px)}.portal .tag{color:#b20f22;text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:900}.portal h2{font-size:24px;margin:8px 0 10px}.portal p,.portal li{color:#66717c;font-size:13px;line-height:1.55}.portal ul{padding-left:18px;margin:12px 0 18px}.portal .go{margin-top:auto;color:#b20f22;font-weight:900;font-size:12px}.workspace-foot{max-width:1120px;margin:18px auto 0;color:#d5dde4;font-size:11px}
 @media(max-width:980px){.login-stage{grid-template-columns:1fr;padding-top:32px}.brand-panel{min-height:620px}.platform-label{display:none}.login-shell{justify-self:center;max-width:600px;margin-bottom:30px}.hero{margin:60px 0 0}.workspace .grid{grid-template-columns:1fr}}
 @media(max-width:620px){.page{background-position:63% center;background-attachment:scroll}.login-stage{padding:20px;gap:26px}.brand-panel{min-height:0}.group-lockup{width:min(265px,72vw)}.hero{margin:80px 0 0}.hero h1{font-size:52px}.hero p{font-size:14px}.brand-strip{grid-template-columns:1fr;gap:9px}.brand-card{aspect-ratio:3/1}.brand-card img{object-position:center}.values{margin-top:24px;gap:12px;font-size:8px}.values span+span:before{margin-right:12px}.login-card{padding:25px 21px}.workspace{padding:80px 18px 30px}}
+@media(max-width:620px){.login-stage{display:flex;flex-direction:column}.login-shell{order:-1;width:100%;margin:12px 0}.brand-panel .hero{margin-top:16px}.hero h1{font-size:32px}.brand-strip,.values{display:none}.login-form input{font-size:16px}.login-form button{min-height:44px}}
 </style>
 </head>
 <body>
@@ -56,7 +57,7 @@
           <button id="platformLoginButton" type="submit">Sign in to platform →</button>
         </form>
         <div id="loginError" class="login-error hidden" role="alert"></div>
-        <div class="trust">Integrity Breeds Trust</div>
+        <p class="sub">Forgot your password? Contact your training administrator to request a reset.</p><div class="trust">Integrity Breeds Trust</div>
       </div>
     </div>
   </section>
@@ -88,13 +89,15 @@ async function loadAccess(user){
   ]);
   const p=results[0].data,pe=results[0].error,a=results[1].data;
   if(pe||!p) throw new Error('Your profile could not be loaded.');
-  if(p.must_change_password===true){location.replace('change-password.html');return}
   const systemRole=String(p.organisational_access_role||p.portal_access_role||'').toLowerCase();
   const noAccess=p.login_enabled===false||p.account_status!=='active';
   const academy=p.permission_level==='super_user'||(a?a.academy_admin===true:['academy_staff','academy','health_safety','operations_manager','administrator'].includes(systemRole));
   const learner=p.permission_level==='super_user'||(a?a.learner_portal===true:true);
   if(noAccess) throw new Error('This account does not currently have platform access.');
+  if(results[1].error) throw new Error('Your access permissions could not be checked.');
+  if(p.must_change_password===true){location.replace('change-password.html');return}
   if(!academy&&!learner)throw new Error('No portal areas have been assigned to this account.');
+  if(learner&&!academy){location.replace('learner-portal.html');return}
   academyCard.classList.toggle('hidden',!academy);
   learnerCard.classList.toggle('hidden',!learner);
   sessionName.textContent=p.full_name||p.email||'Signed In';
