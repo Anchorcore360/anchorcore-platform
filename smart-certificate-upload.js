@@ -9,12 +9,53 @@ function matchQual(text){const cleaned=String(text||'').replace(/\b[Ss][\s-]*[O0
 function parseDate(s){const m=String(s||'').trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})$|^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$|^(\d{1,2})[\s-]+([A-Za-z]{3,9})[\s,-]+(\d{4})$/);if(!m)return'';const y=Number(m[1]||m[6]||m[9]),mo=Number(m[2]||m[5]||(['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf((m[8]||'').slice(0,3).toLowerCase())+1)),d=Number(m[3]||m[4]||m[7]);const dt=new Date(Date.UTC(y,mo-1,d));return y>=1900&&y<=2100&&dt.getUTCFullYear()===y&&dt.getUTCMonth()===mo-1&&dt.getUTCDate()===d?dt.toISOString().slice(0,10):''}
 function labelledDate(t,label){const re=new RegExp('(?:'+label+')\\s*[:\\-]?\\s*(\\d{4}-\\d{1,2}-\\d{1,2}|\\d{1,2}[\\/.-]\\d{1,2}[\\/.-]\\d{4}|\\d{1,2}[\\s-]+[A-Za-z]{3,9}[\\s,-]+\\d{4})','gi');const matches=[...new Set([...t.matchAll(re)].map(m=>parseDate(m[1])).filter(Boolean))];return matches.length===1?matches[0]:''}
 function extract(t){const person=matchPerson(t),qs=matchQual(t),num=t.match(/(?:certificate|certification|accreditation|registration|card)\s*(?:number|no\.?|id|#)\s*[:\-]?\s*([A-Z0-9][A-Z0-9\/-]{2,35})/i);const awarding=['Smart Awards','EUSR','CITB','NRSWA','SWQR','Openreach','IPAF','NPORS','PASMA','ProTrainings','City & Guilds'].filter(x=>contains(t,x));return {person:person?.id||'',qual:qs.length===1?String(qs[0].id):'',suggestions:qs.map(q=>String(q.id)),issue:labelledDate(t,'date of accreditation|accreditation date|accreditation start date|date accredited|issue date|date of issue|issued on|date issued|achievement date|valid from|validity start date|certification date|date of certification'),expiry:labelledDate(t,'accreditation expiry date|expiry date|expiration date|valid until|expires on|expires|date of expiry|valid to|validity end date|expiry|expiration'),number:num?.[1]||'',awarding:awarding.length===1?awarding[0]:(awarding.includes('Openreach')&&awarding.every(x=>['Openreach','Smart Awards'].includes(x))&&/\bS00[5-9]\b/i.test(t)?'Openreach':'')}}
+
+function swqrNumber(t){const m=String(t||'').match(/\bSWQR\s*(?:No\.?|Number|#)\s*[:\-]?\s*(\d{6,10})\b/i);return m?.[1]||''}
+function swqrRows(t){
+ const lines=String(t||'').split(/\r?\n/), units=new Map(), conflicts=new Set();
+ const datePattern=/\b\d{1,2}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{4}\b/g;
+ const codePattern=/^\s*(LA|[O0][1-8]|S[1-7])\b/i;
+ function put(code,date){if(!date)return;if(units.has(code)&&units.get(code)!==date){conflicts.add(code);units.delete(code)}else if(!conflicts.has(code))units.set(code,date)}
+ for(const line of lines){const m=line.match(codePattern);if(!m)continue;const dates=[...line.matchAll(datePattern)].map(x=>parseDate(x[0].replace(/\s/g,''))).filter(Boolean);if(dates.length===1)put(m[1].toUpperCase().replace(/^0/,'O'),dates[0])}
+ // Some OCR engines separate the right-hand expiry column. Only align an entire
+ // ordered block when every unit and every date are present exactly once.
+ if(!units.size){const codes=lines.map(l=>l.match(codePattern)?.[1]?.toUpperCase().replace(/^0/,'O')).filter(Boolean);
+ const dates=lines.filter(l=>!/date of birth|\bdob\b/i.test(l)).flatMap(l=>[...l.matchAll(datePattern)].map(x=>parseDate(x[0].replace(/\s/g,''))).filter(Boolean));
+ const front=['LA','O1','S1'],back=['O2','O3','O4','O5','O6','O7','O8','S2','S3','S4','S5','S6','S7'];
+ if((codes.join(',')===front.join(',')||codes.join(',')===back.join(','))&&dates.length===codes.length)codes.forEach((c,i)=>put(c,dates[i]));
+ }
+ const codes=lines.map(l=>l.match(codePattern)?.[1]?.toUpperCase().replace(/^0/,'O')).filter(Boolean);
+ return {units:[...new Set(codes)].map(code=>({code,expiry:units.get(code)||''})),conflicts:[...conflicts]};
+}
+function swqrQual(code){const qs=state.catalog.filter(q=>norm(q.module_code)===norm(code));return unique(qs)}
+function swqrPerson(t){const names=state.people.filter(p=>p.full_name&&contains(t,p.full_name));return unique(names)}
+function isSwqr(t){return !!swqrNumber(t)||(/\bSWQR\b/i.test(t)&&/key certificates|qualified to monitor|qualified in|expiring/i.test(t))}
+async function swqrEvidence(files,number){
+ if(files.length===1)return files[0];
+ if(files.some(f=>/\.pdf$/i.test(f.name)))throw Error('Pair image files (JPG, PNG or WEBP) to create shared card evidence.');
+ if(!window.jspdf){await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js';script.onload=resolve;script.onerror=()=>reject(Error('PDF library unavailable'));document.head.append(script)})}
+ const doc=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+ for(let i=0;i<files.length;i++){const bitmap=await createImageBitmap(files[i]);const canvas=document.createElement('canvas');const scale=Math.min(1,2200/Math.max(bitmap.width,bitmap.height));canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();if(i)doc.addPage();const ratio=Math.min(277/canvas.width,190/canvas.height),w=canvas.width*ratio,h=canvas.height*ratio;doc.addImage(canvas.toDataURL('image/jpeg',.94),'JPEG',(297-w)/2,(210-h)/2,w,h);canvas.width=0;canvas.height=0}
+ return new File([doc.output('blob')],'SWQR-'+number+'-card.pdf',{type:'application/pdf'});
+}
+async function expandSwqr(cards,report){
+ const groups=new Map();for(const c of cards){const number=swqrNumber(c.text),key=number||'unpaired-'+c.id;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(c)}
+ for(const group of groups.values()){
+ const number=swqrNumber(group[0].text),matches=[...new Set(group.map(c=>swqrPerson(c.text)?.id).filter(Boolean))],person=matches.length===1?matches[0]:'';
+ const readings=group.map(c=>({...c,parsed:swqrRows(c.text)}));let evidence=null;
+ if(number&&group.length===2&&matches.length<=1&&readings.some(c=>c.parsed.units.some(u=>u.code==='LA'))&&readings.some(c=>c.parsed.units.some(u=>/^O[2-8]|^S[2-7]/.test(u.code)))){try{evidence=await swqrEvidence(group.map(c=>c.file),number)}catch(e){report.errors.push('SWQR '+number+' — combined evidence unavailable; using individual sides. '+e.message)}}
+ const merged=new Map();for(const c of readings)for(const u of c.parsed.units){const prev=merged.get(u.code);if(!prev)merged.set(u.code,{...u,file:c.file});else if(prev.expiry!==u.expiry)prev.expiry=''}
+ if(!merged.size){for(const c of group){Object.assign(c,extract(c.text),{person,number,awarding:'SWQR',qual:'',issue:'',expiry:'',note:'SWQR card detected; units could not be read. Review card manually.'});state.rows.push(c);report.added++}continue}
+ for(const u of merged.values()){const q=swqrQual(u.code);state.rows.push({id:++seq,file:evidence||u.file,text:group.map(c=>c.text).join('\n\n'),person,qual:q?String(q.id):'',suggestions:q?[String(q.id)]:[],number,awarding:'SWQR',issue:u.expiry?addYears(u.expiry,-5):'',expiry:u.expiry,issueDerived:u.expiry?-5:null,noExpiry:false,confirmed:false,done:false,error:'',swqrUnit:u.code,note:'SWQR '+u.code+' · '+(u.expiry?'Issue date calculated: expiry minus 5 years':'Check expiry against card')+(evidence?' · both sides attached':' · individual side attached')+(person?'':' · select operative')+(q?'':' · select catalogue unit')});report.added++}
+ }
+}
+
 async function lib(){if(!pdf){pdf=await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.mjs');pdf.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.mjs'}return pdf}
 async function ocr(image){if(!worker){await new Promise((resolve,reject)=>{if(window.Tesseract)return resolve();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';s.onload=resolve;s.onerror=()=>reject(Error('OCR library unavailable'));document.head.append(s)});worker=await window.Tesseract.createWorker('eng',1,{workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js',corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1',langPath:'https://tessdata.projectnaptha.com/4.0.0'})}const r=await worker.recognize(image);return r.data.text||''}
 async function read(file){if(/\.pdf$/i.test(file.name)){const p=await lib(),doc=await p.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false}).promise;let text='';try{for(let n=1;n<=Math.min(doc.numPages,5);n++){const page=await doc.getPage(n),c=await page.getTextContent();const t=c.items.map(x=>x.str+(x.hasEOL?'\n':' ')).join('');const fields=extract(t);if(t.trim().length>=45&&fields.person&&fields.qual&&fields.issue&&fields.expiry)text+=t+'\n';else{const view=page.getViewport({scale:1.7}),canvas=document.createElement('canvas');canvas.width=Math.ceil(view.width);canvas.height=Math.ceil(view.height);await page.render({canvasContext:canvas.getContext('2d'),viewport:view}).promise;try{const scanned=await ocr(canvas);text+=t+'\n'+scanned+'\n'}catch(e){if(!t.trim())throw e;text+=t+'\n'}finally{canvas.width=0;canvas.height=0}}}return {text,note:doc.numPages>5?'First five pages read; review remaining pages.':''}}finally{await doc.destroy()}}return {text:await ocr(file),note:''}}
 function personLabel(p){return [p.full_name,p.learner_reference,p.company].filter(Boolean).join(' · ')}
 const qLabel=q=>[q.module_code,q.description].filter(Boolean).join(' — ');
-function duplicate(r){const p=state.people.find(x=>x.id===r.person),q=state.catalog.find(x=>String(x.id)===r.qual);if(!p||!q)return false;return state.records.some(a=>(a.person_id===p.id||(p.profile_id&&a.learner_id===p.profile_id))&&(String(a.accreditation_catalog_id)===r.qual||norm(a.accreditation_name)===norm(q.module_code)||norm(a.accreditation_name)===norm(q.description))&&((r.number&&norm(a.certificate_number)===norm(r.number))||(r.issue&&a.issue_date===r.issue&&(a.expiry_date||'')===(r.expiry||''))))}
+function duplicate(r){const p=state.people.find(x=>x.id===r.person),q=state.catalog.find(x=>String(x.id)===r.qual);if(!p||!q)return false;return state.records.some(a=>(a.person_id===p.id||(p.profile_id&&a.learner_id===p.profile_id))&&(String(a.accreditation_catalog_id)===r.qual||norm(a.accreditation_name)===norm(q.module_code)||norm(a.accreditation_name)===norm(q.description))&&((r.number&&norm(a.certificate_number)===norm(r.number)&&(!r.swqrUnit||(a.expiry_date||'')===(r.expiry||'')))||(r.issue&&a.issue_date===r.issue&&(a.expiry_date||'')===(r.expiry||''))))}
 function valid(r){return !!(r.person&&r.qual&&parseDate(r.issue)===r.issue&&r.issue&&r.issue<=new Date().toISOString().slice(0,10)&&(r.noExpiry&&!r.expiry||r.expiry&&parseDate(r.expiry)===r.expiry&&r.expiry>=r.issue)&&!duplicate(r)&&!r.error&&!r.done)}
 function addYears(date,years){const [y,m,d]=date.split('-').map(Number);const last=new Date(Date.UTC(y+years,m,0)).getUTCDate();return new Date(Date.UTC(y+years,m-1,Math.min(d,last))).toISOString().slice(0,10)}
 function render(){const filter=E('smartFilter').value,box=E('smartRows');box.innerHTML='';for(const r of state.rows){if(filter==='imported'?!r.done:r.done)continue;if(filter==='review'&&valid(r)&&r.confirmed)continue;if(filter==='duplicates'&&!duplicate(r))continue;const tr=document.createElement('tr');const input=(k,type='text')=>'<input aria-label="'+k+'" data-field="'+k+'" type="'+type+'" value="'+esc(r[k]||'')+'">';
@@ -54,18 +95,18 @@ async function unzip(file,onFile,report){
 }
 async function addFiles(list){
  if(state.busy||!state.ready)return;state.busy=true;render();
- const report={added:0,skipped:0,errors:[]};
+ const report={added:0,skipped:0,errors:[]};const swqrCards=[];
  async function process(f,source=''){
  if(!accepted(f.name)||f.size>max){report.errors.push(f.name+' — unsupported format or over 20 MB');return}
  const r={id:++seq,file:f,text:'',confirmed:false,done:false,error:'',noExpiry:false};state.rows.push(r);report.added++;
  E('smartMessage').textContent='Reading certificate '+report.added+': '+f.name;
- try{const result=await read(f);Object.assign(r,extract(result.text),result);r.note=[source,r.note].filter(Boolean).join(' · ')}
+ try{const result=await read(f);if(isSwqr(result.text)){state.rows=state.rows.filter(x=>x!==r);report.added--;swqrCards.push({...r,...result});return}Object.assign(r,extract(result.text),result);r.note=[source,r.note].filter(Boolean).join(' · ')}
  catch(e){Object.assign(r,extract(''),{note:[source,'Reading failed; enter details manually.'].filter(Boolean).join(' · ')})}
  render();
  }
- try{for(const f of list){try{if(/\.zip$/i.test(f.name))await unzip(f,process,report);else await process(f)}catch(e){report.errors.push(f.name+' — '+(e.message||'Unable to extract ZIP'))}}}
+ try{for(const f of list){try{if(/\.zip$/i.test(f.name))await unzip(f,process,report);else await process(f)}catch(e){report.errors.push(f.name+' — '+(e.message||'Unable to extract ZIP'))}}await expandSwqr(swqrCards,report)}
  finally{if(worker){try{await worker.terminate()}catch{}worker=null}state.busy=false;
- E('smartMessage').textContent=report.added+' certificates added · '+report.skipped+' unsupported/hidden ZIP entries skipped · '+report.errors.length+' files could not be processed. Check suggested details before approving.';
+ E('smartMessage').textContent=report.added+' accreditation rows added · '+report.skipped+' unsupported/hidden ZIP entries skipped · '+report.errors.length+' files could not be processed. Check suggested details before approving.';
  const box=E('smartArchiveErrors');if(box){box.hidden=!report.errors.length;box.textContent=report.errors.join('\n')}render()}
 }
 async function init(){const perm=await db.rpc('is_trainer');if(perm.error||perm.data!==true)throw Error('Academy access required.');const [p,c,a,co]=await Promise.all([db.from('people').select('id,profile_id,full_name,forename,surname,email,employee_number,learner_reference,default_company_id,person_type').eq('status','active').order('full_name'),db.from('accreditation_catalog').select('id,module_code,description').eq('active',true).order('module_code'),db.from('accreditations').select('person_id,learner_id,accreditation_catalog_id,accreditation_name,certificate_number,issue_date,expiry_date').is('archived_at',null).order('id').range(0,999),db.from('external_customers').select('id,company_name,is_internal_rrt,is_rrt_subcontractor')]);for(const x of [p,c,a,co])if(x.error)throw x.error;const companies=new Map(co.data.filter(x=>x.is_internal_rrt||x.is_rrt_subcontractor).map(x=>[x.id,x.company_name]));state.people=p.data.filter(x=>x.person_type!=='external'&&companies.has(x.default_company_id)).map(x=>({...x,company:companies.get(x.default_company_id)}));state.catalog=c.data;state.records=a.data;let offset=a.data.length;while(offset&&offset%1000===0){const r=await db.from('accreditations').select('person_id,learner_id,accreditation_catalog_id,accreditation_name,certificate_number,issue_date,expiry_date').is('archived_at',null).order('id').range(offset,offset+999);if(r.error)throw r.error;state.records.push(...r.data);if(r.data.length<1000)break;offset+=r.data.length}state.ready=true;E('smartMessage').textContent='Ready to select certificates.';render()}
