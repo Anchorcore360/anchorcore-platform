@@ -100,7 +100,7 @@ openAccModal=async function(existing=null){
         </select>
       </label><span id="accDateNote" role="status" style="color:#64748b"></span>
     </div>
-    ${existing?'<div id="profileAccEvidence" style="grid-column:1/-1"></div>':'<label style="grid-column:1/-1">Evidence / certificate file<input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.webp"></label>'}
+    ${existing?'<div id="profileAccEvidence" style="grid-column:1/-1"></div>':'<label style="grid-column:1/-1">Evidence / certificate file (front for cards)<input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.webp"></label><label style="grid-column:1/-1">Second file / card back (optional)<input type="file" name="file_back" accept=".pdf,.jpg,.jpeg,.png,.webp"></label>'}
   </div>`,async f=>{
     const catalogId=String(f.get('catalog_id')||'');
     const batch=existing?[]:[...new Set(f.getAll('nrswa_units').map(String))];
@@ -109,14 +109,19 @@ openAccModal=async function(existing=null){
     if(selections.some(x=>!x)||!selected)throw new Error('Please select an accreditation or course from the catalogue.');
     if(batch.length){const issue=String(f.get('issue')||''),expiry=String(f.get('expiry')||'');if(!issue||!expiry||issue>expiry||issue>new Date().toISOString().slice(0,10))throw Error('Enter valid shared issue and expiry dates.');if(!String(f.get('number')||'').trim()||!f.get('file')?.size)throw Error('Enter the SWQR card number and attach card evidence.');const duplicates=selections.filter(q=>accreditations.some(a=>!a.superseded_by&&(window.RRTAQualificationMaster.matches(q.entry,a.accreditation_name))&&a.issue_date===issue&&a.expiry_date===expiry));if(duplicates.length)throw Error('Already recorded: '+duplicates.map(q=>q.module_code).join(', ')+'. Deselect these units before saving.');}
     let path=existing?.certificate_url||null;
-    let uploadedNewFile=false;
-    const file=f.get('file');
-    if(file&&file.size){
-      path=`${learnerId}/accreditations/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-      const {error}=await db.storage.from('learner-documents').upload(path,file);
-      if(error)throw error;
-      uploadedNewFile=true;
-    }
+    const uploadedPaths=[],supporting=[];
+    const file=f.get('file'),back=f.get('file_back'),bucket=db.storage.from('learner-documents');
+    if(back?.size&&!file?.size)throw Error('Choose the first evidence file before adding a second file.');
+    const evidence=[file,back].filter(x=>x?.size);
+    if(evidence.some(x=>x.size>20*1024*1024||!/\.(pdf|jpe?g|png|webp)$/i.test(x.name)))throw Error('Choose PDF or image files up to 20 MB each.');
+    try{
+      for(const [index,doc] of evidence.entries()){
+        const p=`${learnerId}/accreditations/${crypto.randomUUID()}-${doc.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+        const {error}=await bucket.upload(p,doc);if(error)throw error;
+        uploadedPaths.push(p);
+        if(index===0)path=p;else supporting.push({path:p,kind:selections.every(q=>q.entry?.category==='02 NRSWA')?'Card back':'Additional evidence',name:doc.name,added_at:new Date().toISOString()});
+      }
+    }catch(error){if(uploadedPaths.length)await bucket.remove(uploadedPaths);throw error}
     const payload={
       learner_id:learnerId,
       accreditation_catalog_id:existing&&String(current?.id)===catalogId?existing.accreditation_catalog_id??null:selected.catalogId??null,
@@ -126,13 +131,14 @@ openAccModal=async function(existing=null){
       status:accreditationDbStatus(f.get('expiry')||null),
       issue_date:f.get('issue')||null,
       expiry_date:f.get('expiry')||null,
-      certificate_url:path
+      certificate_url:path,
+      ...(!existing&&supporting.length?{supporting_documents:supporting}:{})
     };
     const rows=selections.map(q=>({...payload,accreditation_catalog_id:q.catalogId??null,accreditation_name:q.module_code,...(batch.length?{awarding_body:f.get('awarding').trim()||'SWQR'}:{})}));
     const q=existing?db.from('accreditations').update(payload).eq('id',existing.id):db.from('accreditations').insert(rows);
     const {error}=await q;
     if(error){
-      if(uploadedNewFile&&path)await db.storage.from('learner-documents').remove([path]);
+      if(uploadedPaths.length)await bucket.remove(uploadedPaths);
       throw error;
     }
   });
