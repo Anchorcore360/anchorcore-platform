@@ -75,7 +75,10 @@
         if(p.data?.account_status!=='active'||p.data?.login_enabled===false||(!team&&!compliance))return;
         const target=team?'staff-access.html#team':'staff-access.html#company';
         const navEl=side.querySelector(':scope > .portal-nav');
-        if(navEl&&!navEl.querySelector('a[href^="staff-access.html"]'))navEl.insertAdjacentHTML('beforeend',link(team?'Manage My Team':'Company Compliance','people',target));if(team){const home=document.getElementById('homeTeamLink');if(home)home.hidden=false;}
+        if(navEl&&!navEl.querySelector('[data-team-nav]')&&!navEl.querySelector('a[href^="staff-access.html"]')){
+          if(team){const group=document.createElement('details');group.dataset.teamNav='true';group.className='rrta-team-nav';group.open=page==='staff-access.html';group.innerHTML='<summary class="portal-nav-parent">'+nav.icon('people')+'<span>Manage My Team</span><span class="portal-nav-chevron">›</span></summary><div class="rrta-team-subnav">'+[['Team Dashboard','dashboard','team'],['My Team Matrix','matrix','matrix'],['Team Learning Matrix','course','learning'],['Training Needs','report','needs'],['New Starters','people','starters']].map(([l,i,h])=>link(l,i,'staff-access.html#'+h)).join('')+'</div>';navEl.appendChild(group);const sync=()=>group.querySelectorAll('a').forEach(a=>a.classList.toggle('active',page==='staff-access.html'&&new URL(a.href).hash===(location.hash||'#team')));sync();window.addEventListener('hashchange',sync);}
+          else navEl.insertAdjacentHTML('beforeend',link('Company Compliance','people',target));
+        }if(team){const home=document.getElementById('homeTeamLink');if(home)home.hidden=false;}
       }catch(e){console.warn('Staff access navigation unavailable',e)}
     })();
   }
