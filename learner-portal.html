@@ -865,7 +865,7 @@
           location.href = "learner.html";
           return;
         }
-        const [{ data: p, error }, { data: access }] = await Promise.all([
+        const [{ data: p, error }, { data: access, error: accessError }] = await Promise.all([
           db.from("profiles").select("*").eq("id", u.user.id).single(),
           db
             .from("portal_access")
@@ -875,10 +875,10 @@
         ]);
         const systemRole=String(p?.organisational_access_role||p?.portal_access_role||"").toLowerCase();
         if (
-          error ||
+          error || accessError ||
           !p ||
           systemRole==="external" ||
-          p.account_status==="archived" ||
+          p.account_status!=="active" || p.login_enabled===false ||
           (!access?.learner_portal &&
             String(p.role).toLowerCase() !== "learner" &&
             p.permission_level !== "super_user")
@@ -886,6 +886,7 @@
           location.href = "portal.html";
           return;
         }
+        if(p.must_change_password===true){location.replace("change-password.html");return;}
         profile = p;
         sideName.textContent = p.full_name || "Learner";
         name.textContent = p.full_name || "Learner";
