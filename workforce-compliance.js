@@ -3,14 +3,15 @@ window.RRTACompliance=function({roles=[],profileRoles=[],items=[],requirements=[
 const norm=v=>String(v||'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();
 const code=v=>{const s=norm(v),m=s.match(/\b(SA\d+[A-Z]?|S\d{3}|Q\d{2,3}|K\d{3}|O\d|LA|EFAW)\b/);return m?m[1]:''};
 const equivalentGroups=[
- {id:2,title:'Abrasive wheels',code:'SA004',names:['Abrasive wheels','Abrasive wheels awareness','Abrasive wheels awareness certified','SA004 Abrasive wheels']},
- {id:4,title:'Asbestos awareness',code:'SA007',names:['Asbestos awareness','Asbestos awareness certified','SA007 Asbestos awareness']},
- {id:48,title:'Manual handling',code:'SA005',names:['Manual handling','Manual handling certified','SA005 Manual handling']},
+ {id:2,title:'Abrasive Wheels',code:'SA004',names:['Abrasive wheels','Abrasive wheels awareness','Abrasive wheels awareness certified','SA004 Abrasive wheels']},
+ {id:4,title:'Asbestos Awareness',code:'SA007',names:['Asbestos awareness','Asbestos awareness certified','SA007 Asbestos awareness']},
+ {id:48,title:'Manual Handling',code:'SA005',names:['Manual handling','Manual handling certified','SA005 Manual handling']},
  {id:47,title:'COSHH',names:['COSHH','COSHH awareness','COSHH awareness for employees certified']},
  {id:54,title:'Confined Space Awareness',names:['Confined space','Confined Space Awareness','Confined spaces level 1','Confined space level 1','Confined space training working in confined spaces','Confined space training working in confined spaces level 1']},
  {id:7,title:'EFAW',code:'EFAW',names:['EFAW','EFAW L3','Emergency First Aid at Work','EFAW LMS','EFAW Practical','First Aid Level 2']}
 ];
 const groupFor=i=>equivalentGroups.find(g=>String(i.id)===String(g.id)||g.names.some(n=>norm(n)===norm(i.name))||i.approvedEntry?.aliases?.includes(g.code)&&g.code);
+const displayQualification=i=>groupFor(i)?.title||(/^SA010\b/i.test(i.name||'')?'Confined Space MR (Medium Risk)':i.name||'Qualification');
 const isOnlineFirstAid=a=>norm(a.accreditation_name)==='EFAW LMS'||/\bFIRST AID LEVEL 2\b/.test(norm(a.certificate_url));
 const groupMatch=(g,a)=>{const n=norm(a.accreditation_name);if(g.id===7)return (g.names.some(v=>norm(v)===n)||n.startsWith('EFAW '))&&!/\bLEVEL 1\b/.test(norm(a.certificate_url));if(g.id===54&&/\b(?:SA010|MEDIUM RISK)\b/.test(n))return false;if(g.id===4&&/POLE CLIMB/.test(n))return false;return g.names.some(v=>norm(v)===n)||(g.code&&(n===g.code||n.startsWith(g.code+' ')))};
 const preferred=(g,a)=>g.id===7?!isOnlineFirstAid(a)&&/^EFAW\b|^EMERGENCY FIRST AID AT WORK\b/.test(norm(a.accreditation_name)):!!g.code&&norm(a.accreditation_name).startsWith(g.code+' ')||!!g.code&&norm(a.accreditation_name)===g.code;
@@ -22,7 +23,7 @@ function safetyCode(i){return String(i.moduleCode||i.name||'').trim().toUpperCas
 function requirementStates(p,roleIds=personRoles(p).map(r=>r.id)){
  const required=items.filter(i=>requirements.some(r=>roleIds.includes(r.job_role_id)&&r.compliance_item_id===i.id&&r.status==='required'));
  const codes=new Set(required.map(safetyCode));const hasCivils=roles.some(r=>roleIds.includes(r.id)&&String(r.division).toLowerCase()==='civils'&&requirements.some(q=>q.job_role_id===r.id&&q.status==='required'&&required.some(i=>i.id===q.compliance_item_id&&['SA002','SA006'].includes(safetyCode(i)))));
- const safety=required.filter(i=>safetyCode(i));const result=required.filter(i=>!safetyCode(i)).map(i=>({...statusFor(p,i),required:true,item:i}));
+ const safety=required.filter(i=>safetyCode(i));const result=required.filter(i=>!safetyCode(i)).map(i=>({...statusFor(p,i),required:true,item:{...i,name:displayQualification(i)}}));
  if(safety.length){const six=codes.has('SA006')||hasCivils;const options=items.filter(i=>safetyCode(i)==='SA006'||(!six&&safetyCode(i)==='SA002')).map(i=>statusFor(p,i));const rank={valid:4,expiring:3,expired:2,missing:1,'not-required':0,conditional:0};options.sort((a,b)=>(rank[b.key]||0)-(rank[a.key]||0));const best=options[0];result.push(best&&best.held?{...best,required:true,item:required.find(i=>safetyCode(i)===(six?'SA006':'SA002'))||safety[0]}:{key:'missing',label:'',required:true,item:required.find(i=>safetyCode(i)===(six?'SA006':'SA002'))||safety[0]})}
  return result;
 }
@@ -37,5 +38,5 @@ function approvedMatch(entry,name,moduleCode=''){const n=norm(name);return Boole
 function personRoles(p){return profileRoles.filter(x=>x.profile_id===p.id).map(x=>roles.find(r=>r.id===x.job_role_id)).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name))}
 
 function summary(p,roleIds){const states=requirementStates(p,roleIds),covered=states.filter(s=>['valid','expiring'].includes(s.key)).length;return {states,required:states.length,covered,missing:states.length-covered,percent:states.length?Math.round(covered/states.length*100):null}}
-return {summary,requirementStates,personRoles,statusFor,currentAccreditation,accreditationRecords};
+return {summary,requirementStates,personRoles,statusFor,currentAccreditation,accreditationRecords,displayQualification};
 };
