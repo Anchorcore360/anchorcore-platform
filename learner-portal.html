@@ -590,7 +590,6 @@
               </section>
             </div>
             <div class="stats" id="overviewStats"></div>
-            <section class="panel" hidden aria-hidden="true"><div id="overviewBookings"></div></section>
           </section>
           <section id="view-profile" class="view">
             <div class="head">
@@ -787,7 +786,6 @@
         assignments = [],
         requirements = [],
         evidenceRows = [],
-        bookingRows = [],
         profileRoleRows = [];
       function initialsFor(n = "") {
         return (
@@ -896,7 +894,7 @@
         department.textContent = p.department || "—";
         location.textContent = p.work_location || "—";
         email.textContent = p.email || "—";
-        const [ar, tr, cr, asr, rr, roles, br] = await Promise.all([
+        const [ar, tr, cr, asr, rr, roles] = await Promise.all([
           db
             .from("accreditations")
             .select("*")
@@ -926,29 +924,12 @@
             .from("profile_job_roles")
             .select("job_role_id,is_primary,job_roles(name)")
             .eq("profile_id", p.id),
-          db
-            .from("booking_attendees")
-            .select(
-              "attendance_status,outcome,joining_instructions_sent_at,joining_instructions_viewed_at,joining_instructions_acknowledged_at,joining_instruction_access_token,bookings(id,course_id,course_title,start_date,end_date,start_time,end_time,location,location_address,location_postcode,status,joining_instructions_sent_at,courses(joining_instructions_path))",
-            )
-            .eq("profile_id", p.id),
         ]);
         accs = ar.data || [];
         records = tr.data || [];
         certs = cr.data || [];
         assignments = asr.data || [];
         evidenceRows = rr.data || [];
-        bookingRows = (br.data || [])
-          .map((x) => ({
-            ...x.bookings,
-            attendance_status: x.attendance_status,
-            outcome: x.outcome,
-            joining_instructions_sent_at: x.joining_instructions_sent_at,
-            joining_instructions_viewed_at: x.joining_instructions_viewed_at,
-            joining_instructions_acknowledged_at: x.joining_instructions_acknowledged_at,
-            joining_instruction_access_token: x.joining_instruction_access_token,
-          }))
-          .filter((x) => x.id);
         const roleRows = roles.data || [];
         profileRoleRows = roleRows;
         const roleIds = roleRows.map((x) => x.job_role_id);
@@ -1062,11 +1043,6 @@
             ? `${missing} requirement${missing === 1 ? "" : "s"} need attention`
             : "Your role requirements are covered"
           : "No job-role requirements assigned yet";
-        const upcoming = bookingRows
-          .filter((b) => String(b.status || "").toLowerCase() === "confirmed")
-          .sort((a, b) =>
-            String(a.start_date).localeCompare(String(b.start_date)),
-          );
         const activeLearning = assignments.filter(
           (a) =>
             !["completed", "passed"].includes(
@@ -1075,19 +1051,6 @@
         );
         overviewStats.innerHTML = `<div class="stat"><span>Valid Accreditations</span><strong>${valid}</strong></div><div class="stat"><span>Expiring Soon</span><strong>${expiring}</strong></div><div class="stat"><span>Online Learning Outstanding</span><strong>${activeLearning.length}</strong></div>`;
         attentionList.innerHTML = `<div class="status-row"><span>Expired accreditations</span><span class="pill ${expired ? "bad" : "good"}">${expired}</span></div><div class="status-row"><span>Expiring within 30 days</span><span class="pill ${expiring ? "warn" : "good"}">${expiring}</span></div><div class="status-row"><span>Evidence awaiting review</span><span class="pill ${evidenceRows.some((x) => x.status === "pending") ? "warn" : "good"}">${evidenceRows.filter((x) => x.status === "pending").length}</span></div>`;
-        overviewBookings.innerHTML = upcoming.length
-          ? upcoming
-              .slice(0, 4)
-              .map((b) => {
-                const confirmed = String(b.status || "").toLowerCase() === "confirmed";
-                const hasCourseInstructions = !!b.courses?.joining_instructions_path;
-                const released = !!(b.joining_instructions_sent_at || b.bookings_joining_instructions_sent_at || hasCourseInstructions);
-                const joiningHref = hasCourseInstructions ? `learner-joining-file.html?booking=${encodeURIComponent(b.id)}` : `joining-instructions-view.html?booking=${encodeURIComponent(b.id)}`;
-                return `<div class="status-row"><div class="course-row-main">${released ? `<a class="btn joining-btn course-row-action" href="${joiningHref}">View Joining Instructions</a>` : ""}<div><strong>${esc(b.course_title || "Training Course")}</strong><div class="muted">${fmt(b.start_date)} · ${esc(b.location || "Location TBC")}</div><div class="muted">${confirmed ? "Booking confirmed" : esc(b.status || "Booked")}${released ? " · Joining instructions ready" : " · Joining instructions not yet released"}</div></div></div><span class="pill good">${confirmed ? "Confirmed" : "Booked"}</span></div>`;
-              })
-              .join("")
-          : '<div class="empty">No upcoming courses booked.</div>';
-        
       }
       async function downloadAccreditationSummary() {
         const button = document.getElementById("downloadSummary");
