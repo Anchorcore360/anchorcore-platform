@@ -42,7 +42,7 @@
 <section id="tab-assignments" class="tab-panel"><article class="panel-card"><div class="panel-head-row"><h2>Course assignments</h2><button class="btn dark small" data-open-modal="assignment">+ Assign course</button></div><div id="assignmentList" class="record-list"></div></article></section>
 <section id="tab-assessments" class="tab-panel"><article class="panel-card"><div class="panel-head-row"><div><h2>Assessment results</h2><p class="muted">Results are created automatically when a learner completes an assessment.</p></div></div><div id="attemptList" class="record-list"></div></article></section>
 <section id="tab-certificates" class="tab-panel"><article class="panel-card"><div class="panel-head-row"><h2>Certificates</h2><button class="btn dark small" data-open-modal="certificate">+ Add certificate</button></div><div id="certificateList" class="record-list"></div></article></section>
-<section id="tab-learning" class="tab-panel"><article class="panel-card"><div class="panel-head-row"><h2>Learning settings</h2><button class="btn secondary small" id="editLearningConfig" hidden>Edit</button></div><div id="learningConfiguration" class="record-list">Loading learning settings…</div></article><article class="panel-card" style="margin-top:12px"><h2>Online learning record</h2><div id="onlineLearningRecord" class="record-list"></div></article></section><section id="tab-documents" class="tab-panel"><article class="panel-card"><div class="panel-head-row"><div><h2>Evidence & documents</h2><p class="muted">Upload evidence, cards, competency documents and supporting files.</p></div><button class="btn dark small" data-open-modal="document">+ Upload document</button></div><div id="documentList" class="record-list"></div></article></section>
+<section id="tab-learning" class="tab-panel"><article class="panel-card"><div class="panel-head-row"><h2>Learning settings</h2><button class="btn secondary small" id="editLearningConfig" hidden>Edit</button></div><div id="learningConfiguration" class="record-list">Loading learning settings…</div></article><article class="panel-card" style="margin-top:12px"><h2>Online learning record</h2><div id="onlineLearningRecord" class="record-list"></div></article></section><section id="tab-documents" class="tab-panel"><article class="panel-card"><div class="panel-head-row"><div><h2>Evidence & documents</h2><p class="muted">Upload evidence, cards, competency documents and supporting files.</p></div><button class="btn dark small" data-open-modal="document">+ Upload document</button></div><div id="documentList" class="record-list"></div><div id="privateDocumentsPanel" hidden style="margin-top:20px;border-top:1px solid #ddd;padding-top:14px"><div class="panel-head-row"><div><h2>🔒 Personal documents</h2><p class="muted">Sensitive · Academy staff only</p></div><button class="btn secondary small" id="privateDocumentUpload">+ Driving licence</button></div><div id="privateDocumentsList" class="record-list"></div></div></article></section>
 <section id="tab-reports" class="tab-panel"><article class="panel-card"><h2>Individual compliance report</h2><div id="profileReportConfiguration" class="record-list">Loading report…</div></article></section><section id="tab-notes" class="tab-panel"><article class="panel-card"><div class="panel-head-row"><h2>Notes & audit history</h2><button class="btn dark small" data-open-modal="note">+ Add note</button></div><div id="noteList" class="record-list"></div></article></section>
 </main></div></div>
 <div id="profileError" class="error-card hidden"></div><div id="modalRoot"></div>
@@ -125,11 +125,30 @@ document.addEventListener("DOMContentLoaded",async()=>{
 });
 </script>
 
-<script src="qualification-master.js?v=20261127"></script><script src="accreditation-catalog.js?v=20261127-master"></script>
+<script src="qualification-master.js?v=20261127-private"></script><script src="accreditation-catalog.js?v=20261127-master"></script>
 <script src="verification-features.js?v=20261127-cert-list"></script>
 
 
 <script src="nrswa-unit-groups.js"></script><script src="certificate-form-layout.js"></script>
 <script src="smart-awards-tab.js?v=20261006-1"></script>
 <script src="smart-awards-profile.js?v=20261006-1"></script>
-<script src="workforce-compliance.js"></script><script src="profile-setup.js?v=20261126-tabs-3"></script></body></html>
+<script src="workforce-compliance.js"></script><script src="profile-setup.js?v=20261126-tabs-3"></script>
+<script>
+(function(){
+const panel=document.getElementById('privateDocumentsPanel'),list=document.getElementById('privateDocumentsList'),button=document.getElementById('privateDocumentUpload');
+let owner=null,allowed=false;
+const originalRender=render;
+async function refreshPrivate(){
+ panel.hidden=true;list.replaceChildren();allowed=false;
+ const access=await db.rpc('can_manage_academy');if(access.error||access.data!==true)return;
+ owner=personRecord?.id||null;if(!owner)return;allowed=true;panel.hidden=false;
+ const result=await db.from('personal_documents').select('id,document_type,file_path,file_name,issue_date,expiry_date').eq('person_id',owner).order('created_at',{ascending:false});
+ if(result.error){list.textContent='Unable to load personal documents: '+result.error.message;return}
+ if(!result.data.length){list.textContent='No personal documents uploaded.';return}
+ for(const d of result.data){const row=document.createElement('div');row.className='record';const info=document.createElement('div');const title=document.createElement('strong');title.textContent=d.document_type;const detail=document.createElement('small');detail.textContent='Expires: '+(d.expiry_date?fmt(d.expiry_date):'Not recorded');info.append(title,detail);row.append(info);const actions=document.createElement('div');for(const download of [false,true]){const b=document.createElement('button');b.className='btn secondary small';b.textContent=download?'Download':'View';b.onclick=async()=>{const tab=window.open('about:blank','_blank');if(tab)tab.opener=null;try{const {data,error}=await db.storage.from('personal-documents').createSignedUrl(d.file_path,60,download?{download:d.file_name}:{});if(error||!data?.signedUrl)throw Error(error?.message||'File unavailable');if(tab)tab.location.href=data.signedUrl;else alert('Allow pop-ups to open the document.')}catch(e){if(tab)tab.close();alert(e.message)}};actions.append(b)}row.append(actions);list.append(row)}
+}
+render=async function(...args){await originalRender.apply(this,args);await refreshPrivate()};
+button.onclick=()=>{if(!allowed||!owner)return;modal('Upload sensitive driving licence', '<div class="form-grid"><label>Issue date<input name="issue" type="date"></label><label>Expiry date<input name="expiry" type="date" required></label><label style="grid-column:1/-1">Licence file<input name="file" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" required></label><p class="muted">Only academy staff can access this file. It will not appear on the training matrix.</p></div>',async f=>{const file=f.get('file'),issue=f.get('issue')||null,expiry=f.get('expiry');if(!file?.size||file.size>20971520||!/\.(pdf|jpe?g|png|webp)$/i.test(file.name))throw Error('Select a PDF or image up to 20 MB.');if(!expiry||issue&&issue>expiry)throw Error('Check the dates.');const path=owner+'/'+crypto.randomUUID()+'-'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_'),bucket=db.storage.from('personal-documents');const up=await bucket.upload(path,file);if(up.error)throw up.error;const res=await db.from('personal_documents').insert({person_id:owner,document_type:'Driving licence',file_path:path,file_name:file.name,issue_date:issue,expiry_date:expiry});if(res.error){await bucket.remove([path]);throw res.error}await refreshPrivate()})};
+refreshPrivate().catch(()=>{panel.hidden=true});
+})();
+</script></body></html>
