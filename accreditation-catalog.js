@@ -63,6 +63,14 @@ function mountProfileEvidence(existing,current){
  try{const up=await bucket.upload(path,f,{upsert:false});if(up.error)throw up.error;stored=true;const result=await db.rpc('append_accreditation_document',{p_id:a.id,p_path:path,p_kind:kind,p_name:f.name});if(result.error)throw result.error;stored=false;a.supporting_documents=[...(a.supporting_documents||[]),{path,name:f.name,kind}];mountProfileEvidence(existing,current);const feedback=host.querySelector('#profileEvidenceFeedback');if(feedback)feedback.textContent='Supporting document saved.';void renderAccreditationRecords().catch(console.warn)}catch(e){if(stored)await bucket.remove([path]);msg.textContent=e.message||'Unable to attach document';add.disabled=false}finally{if(submit)submit.disabled=false}};
 }
 
+function shiftAccreditationYears(value,years){
+ const m=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return '';
+ const y=Number(m[1]),mo=Number(m[2]),d=Number(m[3]),base=new Date(Date.UTC(y,mo-1,d));
+ if(base.getUTCFullYear()!==y||base.getUTCMonth()!==mo-1||base.getUTCDate()!==d)return '';
+ const target=y+years;if(target<1900||target>2100)return '';
+ const last=new Date(Date.UTC(target,mo,0)).getUTCDate();
+ return new Date(Date.UTC(target,mo-1,Math.min(d,last))).toISOString().slice(0,10);
+}
 openAccModal=async function(existing=null){
   try{await loadAccreditationCatalog();}
   catch(err){alert(err.message||'Unable to load accreditation catalogue.');return;}
@@ -82,6 +90,16 @@ openAccModal=async function(existing=null){
     <label>Certificate number<input name="number" value="${esc(existing?.certificate_number||'')}"></label>
     <label>Issue date<input type="date" name="issue" value="${existing?.issue_date||''}"></label>
     <label>Expiry date<input type="date" name="expiry" value="${existing?.expiry_date||''}"></label>
+    <div id="accDateTools" style="grid-column:1/-1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px">
+      <label style="display:inline-flex;align-items:center;gap:6px">Calculate dates
+        <select id="accDatePeriod" style="width:auto;min-height:30px;padding:4px 8px">
+          <option value="">Choose period…</option>
+          ${[1,2,3,4,5].map(n=>'<option value="'+n+'">+ '+n+' year'+(n===1?'':'s')+' (from issue)</option>').join('')}
+          ${[1,2,3,4,5].map(n=>'<option value="-'+n+'">− '+n+' year'+(n===1?'':'s')+' (from expiry)</option>').join('')}
+          <option value="none">No expiry date</option>
+        </select>
+      </label><span id="accDateNote" role="status" style="color:#64748b"></span>
+    </div>
     ${existing?'<div id="profileAccEvidence" style="grid-column:1/-1"></div>':'<label style="grid-column:1/-1">Evidence / certificate file<input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.webp"></label>'}
   </div>`,async f=>{
     const catalogId=String(f.get('catalog_id')||'');
@@ -136,6 +154,14 @@ openAccModal=async function(existing=null){
   const selectLabel=select.closest('label'),searchLabel=search.closest('label');if(selectLabel&&searchLabel){searchLabel.after(selectLabel);selectLabel.style.order='-1';searchLabel.style.order='-2'}
   const batchHost=document.getElementById('nrswaBatch');if(batchHost){const checks=[...batchHost.querySelectorAll('input[type=checkbox]')],sync=()=>{const active=checks.filter(c=>c.checked);select.required=!active.length;select.disabled=!!active.length;search.disabled=!!active.length;if(active.length){description.value=active.map(c=>accreditationCatalog.find(q=>String(q.id)===c.value)?.module_code).join(', ');const awarding=select.closest('form')?.elements.awarding;if(awarding&&!awarding.value)awarding.value='SWQR'}else updateDescription()};checks.forEach(c=>c.addEventListener('change',sync));sync()}
   updateDescription();
+  const datePeriod=document.getElementById('accDatePeriod'),dateNote=document.getElementById('accDateNote'),dateForm=datePeriod.closest('form');
+  const issue=dateForm.elements.issue,expiry=dateForm.elements.expiry;
+  datePeriod.onchange=()=>{const v=datePeriod.value;datePeriod.value='';if(!v)return;if(v==='none'){if(document.querySelector('#nrswaBatch input:checked')){dateNote.textContent='NRSWA units require an expiry date.';return}if(expiry.value&&!confirm('Clear the existing expiry date?'))return;expiry.value='';dateNote.textContent='No expiry date selected.';return}
+  const n=Number(v),from=n>0?issue:expiry,to=n>0?expiry:issue,calculated=shiftAccreditationYears(from.value,n);
+  if(!calculated){dateNote.textContent=n>0?'Enter the issue date first.':'Enter the expiry date first.';return}
+  if(to.value&&to.value!==calculated&&!confirm('Replace the existing '+(n>0?'expiry':'issue')+' date?'))return;
+  to.value=calculated;dateNote.textContent=(n>0?'Expiry':'Issue')+' calculated; check against evidence.';};
+  [issue,expiry].forEach(input=>input.addEventListener('input',()=>{dateNote.textContent=''}));
   if(existing)mountProfileEvidence(existing,current);
 };
 
