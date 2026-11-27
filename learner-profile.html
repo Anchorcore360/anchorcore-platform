@@ -23,7 +23,16 @@
 #profileApp #unifiedProfileForm .form-grid label{margin:0!important;gap:4px}
 #profileApp #unifiedProfileForm .form-grid input,#profileApp #unifiedProfileForm .form-grid select{min-height:34px!important;height:34px!important;padding:4px 8px!important}
 @media(max-width:900px){#profileApp .compact-role-columns{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}}
-</style><style>#profileApp .compact-tab-form .compact-checks label{display:flex!important;align-items:center;gap:7px;padding:3px 0!important;margin:0!important;min-height:24px!important;border:0!important;font-size:12px}#profileApp .compact-tab-form input[type=checkbox]{appearance:auto!important;width:15px!important;height:15px!important;min-height:0!important;padding:0!important;margin:0!important;accent-color:#217343}#profileApp .compact-tab-form [hidden],#profileApp button[hidden]{display:none!important}#profileApp .compact-tab-form .form-grid{gap:8px}#profileApp .compact-tab-form .profile-save-row{position:sticky;bottom:0;background:white;z-index:10;border-top:1px solid #d9dee5}#profileApp #jobRoleConfiguration .detail-grid{margin-bottom:8px}</style><style>#accreditationList .record>div:first-child{min-width:0}#accreditationList .record>div:first-child>strong{line-height:1.35;overflow-wrap:anywhere}#accreditationList.accreditation-grid>.record{min-height:145px!important;height:auto}#accreditationList.accreditation-grid>.record>div:first-child>strong{font-size:15px!important}</style></head>
+</style><style>#profileApp .compact-tab-form .compact-checks label{display:flex!important;align-items:center;gap:7px;padding:3px 0!important;margin:0!important;min-height:24px!important;border:0!important;font-size:12px}#profileApp .compact-tab-form input[type=checkbox]{appearance:auto!important;width:15px!important;height:15px!important;min-height:0!important;padding:0!important;margin:0!important;accent-color:#217343}#profileApp .compact-tab-form [hidden],#profileApp button[hidden]{display:none!important}#profileApp .compact-tab-form .form-grid{gap:8px}#profileApp .compact-tab-form .profile-save-row{position:sticky;bottom:0;background:white;z-index:10;border-top:1px solid #d9dee5}#profileApp #jobRoleConfiguration .detail-grid{margin-bottom:8px}</style><style>#accreditationList .record>div:first-child{min-width:0}#accreditationList .record>div:first-child>strong{line-height:1.35;overflow-wrap:anywhere}#accreditationList.accreditation-grid>.record{min-height:145px!important;height:auto}#accreditationList.accreditation-grid>.record>div:first-child>strong{font-size:15px!important}</style><style>
+#accreditationList .rrta-compact-accreditations th{padding:7px 8px!important;background:#eef0f3!important;border-bottom:1px solid #d9dfe5;white-space:nowrap}
+#accreditationList .rrta-compact-accreditations td{padding:4px 8px!important;height:auto!important;min-height:0!important;line-height:1.25!important;vertical-align:middle!important}
+#accreditationList .rrta-compact-accreditations tr{height:auto!important;min-height:0!important}
+#accreditationList .rrta-compact-accreditations tbody tr:nth-child(even){background:#f5f7f9}
+#accreditationList .rrta-compact-accreditations td:nth-child(n+3){white-space:nowrap}
+#accreditationList .rrta-compact-accreditations td:last-child>*{display:inline-flex!important;vertical-align:middle!important;margin:0 3px 0 0!important}
+#accreditationList .rrta-compact-accreditations .mini-btn{display:inline-flex!important;align-items:center;justify-content:center;min-height:23px!important;height:auto!important;padding:3px 7px!important;margin:0 2px 0 0!important;font-size:11px!important;line-height:1.2!important;border-radius:4px!important}
+#accreditationList .rrta-compact-accreditations td:nth-child(5)>*{padding:3px 8px!important;min-height:0!important;font-size:11px!important;line-height:1.2!important}
+</style></head>
 <body data-portal-nav="academy"><div class="shell portal-shell-standard"><aside class="side portal-side"></aside><div class="main">
 <header class="site-header"><div class="header-inner"><img src="rrta-logo.png" class="brand-logo" alt="Rapid Response Training Academy"><div id="headerUser" class="header-user hidden"></div></div></header>
 <main class="profile-shell" id="profileApp">
@@ -126,7 +135,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
 </script>
 
 <script src="qualification-master.js?v=20261127-private"></script><script src="accreditation-catalog.js?v=20261127-master"></script>
-<script src="verification-features.js?v=20261127-cert-list"></script>
+<script src="verification-features.js?v=20261127-compact-matrix"></script>
 
 
 <script src="nrswa-unit-groups.js"></script><script src="certificate-form-layout.js"></script>
