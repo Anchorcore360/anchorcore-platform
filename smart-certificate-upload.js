@@ -25,17 +25,20 @@ function swqrRows(t){
  const lines=String(t||'').split(/\r?\n/), units=new Map(), conflicts=new Set();
  const datePattern=/\b\d{1,2}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{4}\b/g;
  const codePattern=/^\s*(LA|[O0][1-8]|S[1-7])\b/i;
+ const descriptions=[['O2',/\bexcavation in (?:the )?(?:road|highway)\b/i],['O3',/reinstatement and compaction of backfill/i],['O4',/reinstatement of sub[ -]?base and base in non[ -]?bituminous/i],['O5',/reinstatement in cold[ -]?lay bituminous/i],['O6',/reinstatement in hot[ -]?lay bituminous/i],['O7',/reinstatement of concrete slabs/i],['O8',/reinstatement of modular surfaces and concrete footways/i]];
+ const conflictsByLine=new Set();
+ function readCode(line){if(/\bmonitor(?:ing)?\b/i.test(line))return line.match(codePattern)?.[1]?.toUpperCase().replace(/^0/,'O')||'';const raw=line.match(codePattern)?.[1]?.toUpperCase().replace(/^0/,'O')||'';const found=descriptions.filter(([,re])=>re.test(line));if(raw&&found.length===1&&raw!==found[0][0]){conflictsByLine.add(raw);conflictsByLine.add(found[0][0]);return ''}return raw||(found.length===1?found[0][0]:'')}
  function put(code,date){if(!date)return;if(units.has(code)&&units.get(code)!==date){conflicts.add(code);units.delete(code)}else if(!conflicts.has(code))units.set(code,date)}
- for(const line of lines){const m=line.match(codePattern);if(!m)continue;const dates=[...line.matchAll(datePattern)].map(x=>parseDate(x[0].replace(/\s/g,''))).filter(Boolean);if(dates.length===1)put(m[1].toUpperCase().replace(/^0/,'O'),dates[0])}
+ for(const line of lines){const code=readCode(line);if(!code)continue;const dates=[...line.matchAll(datePattern)].map(x=>parseDate(x[0].replace(/\s/g,''))).filter(Boolean);if(dates.length===1)put(code,dates[0])}
  // Some OCR engines separate the right-hand expiry column. Only align an entire
  // ordered block when every unit and every date are present exactly once.
- if(!units.size){const codes=lines.map(l=>l.match(codePattern)?.[1]?.toUpperCase().replace(/^0/,'O')).filter(Boolean);
+ if(!units.size){const codes=lines.map(readCode).filter(Boolean);
  const dates=lines.filter(l=>!/date of birth|\bdob\b/i.test(l)).flatMap(l=>[...l.matchAll(datePattern)].map(x=>parseDate(x[0].replace(/\s/g,''))).filter(Boolean));
  const front=['LA','O1','S1'],back=['O2','O3','O4','O5','O6','O7','O8','S2','S3','S4','S5','S6','S7'];
  if((codes.join(',')===front.join(',')||codes.join(',')===back.join(','))&&dates.length===codes.length)codes.forEach((c,i)=>put(c,dates[i]));
  }
- const codes=lines.map(l=>l.match(codePattern)?.[1]?.toUpperCase().replace(/^0/,'O')).filter(Boolean);
- return {units:[...new Set(codes)].map(code=>({code,expiry:units.get(code)||''})),conflicts:[...conflicts]};
+ const codes=lines.map(readCode).filter(Boolean);
+ return {units:[...new Set([...codes,...conflictsByLine])].map(code=>({code,expiry:conflictsByLine.has(code)?'':units.get(code)||''})),conflicts:[...new Set([...conflicts,...conflictsByLine])]};
 }
 function swqrQual(code){const qs=state.catalog.filter(q=>norm(q.module_code)===norm(code));return unique(qs)}
 function swqrPerson(t){const names=state.people.filter(p=>p.full_name&&contains(t,p.full_name));return unique(names)}
