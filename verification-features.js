@@ -74,7 +74,7 @@ async function renderAccreditationRecords(){
   for(const a of rows){
     const unit=profileNrswaUnit(a);
     if(!unit){ordered.push({a});continue}
-    const groupKey='nrswa-'+(String(a.certificate_number||'').trim()||'unregistered');
+    const groupKey='nrswa-all';
     if(!groups.has(groupKey)){const g={key:groupKey,rows:[]};groups.set(groupKey,g);ordered.push(g)}
     groups.get(groupKey).rows.push(a);
   }
