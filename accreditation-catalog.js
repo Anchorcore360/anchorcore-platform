@@ -16,12 +16,15 @@ function catalogOptionText(item){
 }
 
 function catalogOptions(selectedId=null,filter=''){
-  const q=String(filter||'').trim().toLowerCase();
-  const list=accreditationCatalog.filter(item=>{
-    if(!q)return true;
-    return `${item.module_code} ${item.description} ${(item.entry?.aliases||[]).join(' ')}`.toLowerCase().includes(q);
-  });
-  return '<option value="">Select accreditation / course…</option>'+list.map(item=>`<option value="${item.id}" ${String(selectedId)===String(item.id)?'selected':''}>${esc(catalogOptionText(item))}</option>`).join('');
+ const q=String(filter||'').trim().toLowerCase(),groups=new Map();
+ for(const item of accreditationCatalog){
+ const category=item.entry?.category||'Other qualifications';
+ const label=category.replace(/^\d+\s*/,'');
+ const hay=[item.module_code,item.description,item.label,category,...(item.entry?.aliases||[])].join(' ').toLowerCase();
+ if(q&&!q.split(/\s+/).every(word=>hay.includes(word))&&String(item.id)!==String(selectedId))continue;
+ if(!groups.has(label))groups.set(label,[]);groups.get(label).push(item);
+ }
+ return '<option value="">Select accreditation / course…</option>'+[...groups].map(([label,rows])=>'<optgroup label="'+esc(label)+'">'+rows.map(item=>'<option value="'+esc(item.id)+'" '+(String(selectedId)===String(item.id)?'selected':'')+'>'+esc(catalogOptionText(item))+'</option>').join('')+'</optgroup>').join('');
 }
 
 function findExistingCatalogItem(existing){
@@ -66,7 +69,7 @@ openAccModal=async function(existing=null){
   const current=findExistingCatalogItem(existing);
   modal(existing?'Edit accreditation':'Add accreditation',`<div class="form-grid compact-accreditation-editor">
     <label style="grid-column:1/-1">Search course / accreditation
-      <input id="catalogSearch" type="search" placeholder="Type code or description, e.g. SA006 or confined space">
+      <input id="catalogSearch" type="search" placeholder="Search by code, name or category (e.g. NRSWA)">
     </label>
     <label style="grid-column:1/-1">Accreditation / course
       <select id="catalogSelect" name="catalog_id" required>${catalogOptions(current?.id||null)}</select>
@@ -125,6 +128,7 @@ openAccModal=async function(existing=null){
     if(selected&&[...select.options].some(o=>o.value===selected))select.value=selected;
     updateDescription();
   });
+  const selectLabel=select.closest('label'),searchLabel=search.closest('label');if(selectLabel&&searchLabel){searchLabel.after(selectLabel);selectLabel.style.order='-1';searchLabel.style.order='-2'}
   updateDescription();
   if(existing)mountProfileEvidence(existing,current);
 };
