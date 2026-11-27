@@ -592,7 +592,7 @@
 #view-profile .my-profile-identity{align-items:center}
 #view-profile .my-profile-identity .avatar{margin:0!important;align-self:center;flex-shrink:0}
 #view-profile .my-profile-identity .avatar img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
-</style></head>
+</style><style>.personal-contact{margin-top:12px;padding:10px;border:1px solid #dce3eb;border-radius:8px;background:#f7f9fb}.contact-title{display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:8px}.contact-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.contact-fields label{display:grid;gap:4px;font-size:11px;color:#536475}.contact-fields input{min-width:0;width:100%;box-sizing:border-box;padding:8px;border:1px solid #ccd5df;border-radius:6px;font-size:12px;background:white;color:#263441}.contact-fields input:disabled{background:transparent;border-color:transparent;padding-left:0;font-weight:650}.personal-contact button{border:1px solid #d3dce5;border-radius:6px;background:white;padding:6px 10px;color:#263441;font-size:11px;font-weight:700;cursor:pointer}.personal-contact button[type=submit]{background:#a31326;color:white}.personal-contact small,#contactMessage{font-size:10px;color:#536475}#contactActions{margin-top:8px}#contactActions[hidden]{display:none}@media(max-width:700px){.contact-fields{grid-template-columns:1fr}}</style></head>
   <body data-portal-nav="learner">
     <div class="shell">
       <aside class="sidebar">
@@ -632,7 +632,7 @@
 <div><span class="profile-field-icon" data-picon="id"></span><span><small>Employee number</small><strong id="employee">—</strong></span></div>
 <div><span class="profile-field-icon" data-picon="team"></span><span><small>Department</small><strong id="department">—</strong></span></div>
 <div><span class="profile-field-icon" data-picon="pin"></span><span><small>Work location</small><strong id="location">—</strong></span></div>
-</div><div class="profile-info-list" id="profileDetails"></div><p class="profile-help">Need to update these details? Contact your manager or the Academy.</p></section>
+</div><div class="profile-info-list" id="profileDetails"></div><form id="personalContactForm" class="personal-contact"><div class="contact-title"><strong>Personal contact details</strong><button type="button" id="editContact">Edit</button></div><div class="contact-fields"><label>Personal email<input id="personalContactEmail" type="email" maxlength="254" autocomplete="email" disabled></label><label>Phone number<input id="personalContactPhone" type="tel" maxlength="40" autocomplete="tel" disabled></label></div><div id="contactActions" hidden><button type="submit">Save changes</button><button type="button" id="cancelContact">Cancel</button></div><p id="contactMessage" role="status"></p><small>Changes notify the Academy. Your sign-in email is managed separately.</small></form><p class="profile-help">Need to update these details? Contact your manager or the Academy.</p></section>
 <section class="panel my-profile-shortcuts"><h2>Your workspace</h2><p class="muted">Everything you need, in one place.</p><button type="button" onclick="show('accreditations')"><span class="profile-field-icon" data-picon="award"></span><span><strong>Qualifications & certificates</strong><small>View your evidence and expiry dates</small></span><b>›</b></button><button type="button" onclick="show('qr')"><span class="profile-field-icon" data-picon="qr"></span><span><strong>Digital competency card</strong><small>Show your live QR verification</small></span><b>›</b></button><a href="online-learning.html"><span class="profile-field-icon" data-picon="course"></span><span><strong>My learning</strong><small>Access your assigned courses</small></span><b>›</b></a><button type="button" onclick="show('requests')"><span class="profile-field-icon" data-picon="upload"></span><span><strong>Submit evidence</strong><small>Upload a qualification for review</small></span><b>›</b></button></section></div></section>
 <section id="view-training" class="view">
             <div class="head">
@@ -847,6 +847,16 @@
         };
         show(map[h] || "overview");
       }
+      async function setupPersonalContact(uid){
+ const form=document.getElementById('personalContactForm'),em=document.getElementById('personalContactEmail'),ph=document.getElementById('personalContactPhone'),edit=document.getElementById('editContact'),actions=document.getElementById('contactActions'),msg=document.getElementById('contactMessage');
+ edit.disabled=true;const result=await db.from('people').select('personal_email,phone,work_email').eq('profile_id',uid).eq('status','active').single();
+ if(result.error){msg.textContent='Personal contact details unavailable.';return}
+ let saved={...result.data};if(saved.work_email)document.getElementById('email').textContent=saved.work_email;
+ const reset=()=>{em.value=saved.personal_email||'';ph.value=saved.phone||'';em.disabled=ph.disabled=true;actions.hidden=true;edit.disabled=false};
+ reset();edit.onclick=()=>{em.disabled=ph.disabled=false;actions.hidden=false;edit.disabled=true;msg.textContent='';em.focus()};
+ document.getElementById('cancelContact').onclick=()=>{reset();msg.textContent=''};
+ form.onsubmit=async e=>{e.preventDefault();const button=form.querySelector('[type=submit]');button.disabled=true;try{const r=await db.rpc('save_own_contact_details',{p_email:em.value.trim(),p_phone:ph.value.trim()});if(r.error)throw r.error;saved={...saved,personal_email:em.value.trim(),phone:ph.value.trim()};reset();msg.textContent='Contact details saved.'}catch(err){msg.textContent=err.message||'Unable to save details.'}finally{button.disabled=false}};
+}
       async function load() {
         const { data: u } = await db.auth.getUser();
         if (!u?.user) {
@@ -944,7 +954,8 @@
         profileStats.innerHTML = `<div class="stat"><span>Accreditations</span><strong>${accs.length}</strong></div><div class="stat"><span>Valid</span><strong>${valid}</strong></div><div class="stat"><span>Expiring</span><strong>${expiring}</strong></div><div class="stat"><span>Completed Training</span><strong>${records.filter((r) => String(r.completion_status).toLowerCase() === "achieved").length}</strong></div>`;
         const profileIcons={mail:'<path d="M3 5h18v14H3zM3 6l9 7 9-7"/>',id:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M5 16h6m3-6h4m-4 4h4"/>',team:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2m1-15a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 5"/>',pin:'<path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',phone:'<path d="M5 3l4 4-2 3c2 3 4 5 7 7l3-2 4 4-2 2C10 22 2 14 3 5z"/>',calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/>',award:'<circle cx="12" cy="8" r="5"/><path d="M9 13l-2 8 5-3 5 3-2-8"/>',qr:'<path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h4v4h-7z"/>',course:'<path d="M4 4h15v16H4zM7 8h9M7 12h9M7 16h6"/>',upload:'<path d="M12 16V3M7 8l5-5 5 5M4 16v5h16v-5"/>',check:'<path d="M5 12l4 4L19 6"/>'};
         const profileIcon=k=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+(profileIcons[k]||profileIcons.id)+'</svg>';
-        const profileFields=[['team','Workforce type',profile.worker_type==='subcontractor'?'Subcontractor':profile.worker_type==='rrt'?'RRT Direct Staff':profile.worker_type||'Not recorded'],['award','Primary job role',roleRows.find(x=>x.is_primary)?.job_roles?.name||'Not assigned'],['phone','Phone',profile.phone||'Not recorded'],['calendar','Continuous service date',fmt(profile.continuous_service_date)]];
+        const profileFields=[['team','Workforce type',profile.worker_type==='subcontractor'?'Subcontractor':['rrt','direct_staff'].includes(profile.worker_type)?'RRT Direct Staff':profile.worker_type||'Not recorded'],['award','Primary job role',roleRows.find(x=>x.is_primary)?.job_roles?.name||'Not assigned'],['calendar','Continuous service date',fmt(profile.continuous_service_date)]];
+        void setupPersonalContact(p.id);
         profileDetails.innerHTML=profileFields.map(([k,l,v])=>'<div><span class="profile-field-icon">'+profileIcon(k)+'</span><span><small>'+esc(l)+'</small><strong>'+esc(v)+'</strong></span></div>').join('');
         document.querySelectorAll('[data-picon]').forEach(el=>el.innerHTML=profileIcon(el.dataset.picon));
         document.getElementById('myProfileCompany').textContent=profile.organisation||'';
