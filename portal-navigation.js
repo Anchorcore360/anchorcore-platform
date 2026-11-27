@@ -67,8 +67,8 @@
         const [p,a]=await Promise.all([db.from('profiles').select('organisational_access_role,portal_access_role,account_status,login_enabled').eq('id',uid).maybeSingle(),db.from('portal_access').select('compliance_all').eq('user_id',uid).maybeSingle()]);
         const role=String(p.data?.organisational_access_role||p.data?.portal_access_role||'').toLowerCase();
         let team=['supervisor','manager','operations_manager'].includes(role);
-        if(!team&&p.data?.account_status==='active'&&p.data?.login_enabled!==false){
-          const checks=await Promise.all([db.from('person_relationships').select('person_id').eq('manager_profile_id',uid).eq('active',true).limit(1),db.from('profiles').select('id').eq('manager_1_id',uid).eq('account_status','active').limit(1),db.from('company_manager_links').select('company_id').eq('manager_profile_id',uid).eq('active',true).limit(1)]);
+        if(!team&&['academy','academy_staff'].includes(role)&&p.data?.account_status==='active'&&p.data?.login_enabled!==false){
+          const checks=await Promise.all([db.from('person_relationships').select('person_id').eq('manager_profile_id',uid).eq('active',true).limit(1),db.from('profiles').select('id').or('manager_1_id.eq.'+uid+',manager_2_id.eq.'+uid+',manager_3_id.eq.'+uid).eq('account_status','active').limit(1),db.from('company_manager_links').select('company_id').eq('manager_profile_id',uid).eq('active',true).limit(1)]);
           team=checks.some(r=>!r.error&&r.data?.length>0);
         }
         const compliance=a.data?.compliance_all===true;
