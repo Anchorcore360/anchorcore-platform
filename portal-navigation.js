@@ -66,12 +66,16 @@
         const au=await db.auth.getUser();const uid=au.data?.user?.id;if(!uid)return;
         const [p,a]=await Promise.all([db.from('profiles').select('organisational_access_role,portal_access_role,account_status,login_enabled').eq('id',uid).maybeSingle(),db.from('portal_access').select('compliance_all').eq('user_id',uid).maybeSingle()]);
         const role=String(p.data?.organisational_access_role||p.data?.portal_access_role||'').toLowerCase();
-        const team=['supervisor','manager','operations_manager'].includes(role);
+        let team=['supervisor','manager','operations_manager'].includes(role);
+        if(!team&&p.data?.account_status==='active'&&p.data?.login_enabled!==false){
+          const checks=await Promise.all([db.from('person_relationships').select('person_id').eq('manager_profile_id',uid).eq('active',true).limit(1),db.from('profiles').select('id').eq('manager_1_id',uid).eq('account_status','active').limit(1),db.from('company_manager_links').select('company_id').eq('manager_profile_id',uid).eq('active',true).limit(1)]);
+          team=checks.some(r=>!r.error&&r.data?.length>0);
+        }
         const compliance=a.data?.compliance_all===true;
         if(p.data?.account_status!=='active'||p.data?.login_enabled===false||(!team&&!compliance))return;
         const target=team?'staff-access.html#team':'staff-access.html#company';
         const navEl=side.querySelector(':scope > .portal-nav');
-        if(navEl&&!navEl.querySelector('a[href^="staff-access.html"]'))navEl.insertAdjacentHTML('beforeend',link('Staff Access','people',target));
+        if(navEl&&!navEl.querySelector('a[href^="staff-access.html"]'))navEl.insertAdjacentHTML('beforeend',link(team?'Manage My Team':'Company Compliance','people',target));if(team){const home=document.getElementById('homeTeamLink');if(home)home.hidden=false;}
       }catch(e){console.warn('Staff access navigation unavailable',e)}
     })();
   }
