@@ -74,7 +74,17 @@ async function saveNops(r,p){const result=await db.from('people').select('smart_
 
 const licenceOption={id:'personal:driving',catalogId:null,module_code:'Driving licence',description:'Driving licence',label:'🔒 Driving licence — personal document',personal:true};
 function isDrivingLicence(t,name=''){return /\b(?:driving licen[cs]e|driver'?s licen[cs]e|driving license)\b/i.test(t)||/\b(?:driving|driver)[ _-]*licen[cs]e\b/i.test(name)||(/\bDVLA\b/i.test(t)&&/\b4[ab]\b/i.test(t))}
-function licenceFields(t){return {person:matchPerson(t)?.id||'',qual:licenceOption.id,suggestions:[],issue:labelledDate(t,'4a\\.?|date of issue|valid from'),expiry:labelledDate(t,'4b\\.?|expiry date|date of expiry|valid until'),number:'',awarding:'',note:'Sensitive personal document — academy staff only; verify name and dates against the licence.'}}
+function licencePerson(t){
+ const text=String(t||'');
+ function field(n,next){const re=new RegExp('(?:^|\\n|\\s)'+n+'\\s*[.\\):]?\\s*([\\p{L}][\\p{L}\\s\\x27’\\-]*?)(?=\\s+'+next+'\\s*[.\\):]?\\s*|\\n\\s*\\d|$)','iu');const m=text.match(re);return m?norm(m[1]):''}
+ const surname=field('1','2'),forenames=field('2','3');
+ if(surname&&forenames){
+ const matches=state.people.filter(p=>{const full=norm(p.full_name).split(' '),last=norm(p.surname||full.at(-1)),first=norm(p.forename||full[0]).split(' ');return last===surname&&first[0]===forenames.split(' ')[0]&&first.every((v,i)=>v===forenames.split(' ')[i])});
+ return unique(matches);
+ }
+ return matchPerson(text)
+}
+function licenceFields(t){return {person:licencePerson(t)?.id||'',qual:licenceOption.id,suggestions:[],issue:labelledDate(t,'4\\s*a\\.?|date of issue|valid from'),expiry:labelledDate(t,'4\\s*b\\.?|expiry date|date of expiry|valid until'),number:'',awarding:'',note:'Sensitive personal document — academy staff only; verify name and dates against the licence.'}}
 async function saveLicence(r,p){if(!state.privateAccess)throw Error('Academy staff access required for personal documents.');const path=p.id+'/'+crypto.randomUUID()+'-'+r.file.name.replace(/[^a-zA-Z0-9._-]/g,'_');const bucket=db.storage.from('personal-documents');const up=await bucket.upload(path,r.file,{upsert:false});if(up.error)throw up.error;const result=await db.from('personal_documents').insert({person_id:p.id,document_type:'Driving licence',file_path:path,file_name:r.file.name,issue_date:r.issue||null,expiry_date:r.expiry||null}).select('id').single();if(result.error){await bucket.remove([path]);throw result.error}}
 
 async function lib(){if(!pdf){pdf=await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.mjs');pdf.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.mjs'}return pdf}
