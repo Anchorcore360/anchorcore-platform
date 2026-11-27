@@ -560,6 +560,22 @@
 #view-overview .myrrt-welcome{min-height:166px;background:radial-gradient(ellipse at 65% 10%,#ffffff12,transparent 60%),linear-gradient(108deg,#151c26 0%,#303d4b 55%,#951126 100%)}
 .myrrt-trust{margin-top:12px;padding-top:9px;border-top:1px solid #ffffff25;display:inline-block;color:#fff;font-size:18px;font-weight:850;letter-spacing:-.035em;line-height:1.15}.myrrt-trust em,.myrrt-profile-trust em{font-style:normal;color:#ffabb6}.myrrt-profile-trust{font-weight:850!important;letter-spacing:-.025em;font-size:25px!important}
 @media(max-width:700px){#view-overview .myrrt-welcome{min-height:0}.myrrt-trust{font-size:15px;margin-top:7px;padding-top:6px}.myrrt-profile-trust{font-size:20px!important}}
+</style><style>
+/* Consistent icon-led dashboard cards: fixed icon column, aligned text, quiet navigation chevron. */
+#view-overview .myrrt-action-grid>*{display:grid!important;grid-template-columns:42px minmax(0,1fr) 14px;grid-template-rows:auto auto;column-gap:12px;row-gap:3px;align-content:center;align-items:center;min-height:76px;padding:12px!important;text-align:left}
+#view-overview .myrrt-action-grid .portal-nav-icon{grid-column:1;grid-row:1/3;width:42px!important;height:42px!important;flex:none!important;align-self:center;justify-self:center;border-radius:10px!important;display:grid!important;place-items:center;line-height:1;background:#f6e9ec}
+#view-overview .myrrt-action-grid .portal-nav-icon svg{width:21px!important;height:21px!important;display:block}
+#view-overview .myrrt-action-grid strong{grid-column:2;grid-row:1;align-self:end;line-height:1.25;margin:0}
+#view-overview .myrrt-action-grid small{grid-column:2;grid-row:2;align-self:start;line-height:1.35;margin:0}
+#view-overview .myrrt-action-grid>*:after{position:static!important;grid-column:3;grid-row:1/3;align-self:center;justify-self:end;font-size:19px;line-height:1;color:#8290a0}
+#view-overview .myrrt-tile{display:grid!important;grid-template-columns:42px minmax(0,1fr) 14px;grid-template-rows:auto auto;gap:4px 12px;align-content:center;align-items:center;min-height:91px;padding:13px!important}
+#view-overview .myrrt-tile-top{display:contents!important}
+#view-overview .myrrt-metric-icon{grid-column:1;grid-row:1/3;width:42px!important;height:42px!important;border-radius:10px;align-self:center;justify-self:center;flex:none!important}
+#view-overview .myrrt-metric-icon svg{width:22px;height:22px;display:block}
+#view-overview .myrrt-tile strong{grid-column:2;grid-row:1;align-self:end;font-size:25px;line-height:1.05}
+#view-overview .myrrt-metric-label{grid-column:2;grid-row:2;align-self:start;font-size:11px;line-height:1.3}
+#view-overview .myrrt-arrow{grid-column:3;grid-row:1/3;align-self:center;justify-self:end;font-size:15px!important;line-height:1}
+@media(max-width:700px){#view-overview .myrrt-action-grid>*{grid-template-columns:34px minmax(0,1fr);column-gap:8px;padding:10px!important;min-height:78px}#view-overview .myrrt-action-grid>*:after{display:none}#view-overview .myrrt-action-grid .portal-nav-icon{width:34px!important;height:34px!important}#view-overview .myrrt-action-grid strong{font-size:12px}#view-overview .myrrt-action-grid small{font-size:10px}#view-overview .myrrt-tile{grid-template-columns:34px minmax(0,1fr);column-gap:8px;min-height:86px;padding:10px!important}#view-overview .myrrt-metric-icon{width:34px!important;height:34px!important}#view-overview .myrrt-arrow{display:none!important}#view-overview .myrrt-metric-label{font-size:10px}}
 </style></head>
   <body data-portal-nav="learner">
     <div class="shell">
