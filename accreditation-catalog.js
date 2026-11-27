@@ -3,34 +3,33 @@ let accreditationCatalog=[];
 async function loadAccreditationCatalog(){
   if(accreditationCatalog.length)return accreditationCatalog;
   const {data,error}=await db.from('accreditation_catalog')
-    .select('id,module_code,description,deliverable_by_rrta,active')
+    .select('id,module_code,description,deliverable_by_rrta,active,source')
     .eq('active',true)
     .order('module_code');
   if(error)throw error;
-  accreditationCatalog=data||[];
+  accreditationCatalog=window.RRTAQualificationMaster?window.RRTAQualificationMaster.options(data||[]):(data||[]).map(x=>({...x,catalogId:x.id}));
   return accreditationCatalog;
 }
 
 function catalogOptionText(item){
-  return `${item.module_code} — ${item.description}`;
+  return item.label||`${item.module_code} — ${item.description}`;
 }
 
 function catalogOptions(selectedId=null,filter=''){
   const q=String(filter||'').trim().toLowerCase();
   const list=accreditationCatalog.filter(item=>{
     if(!q)return true;
-    return `${item.module_code} ${item.description}`.toLowerCase().includes(q);
+    return `${item.module_code} ${item.description} ${(item.entry?.aliases||[]).join(' ')}`.toLowerCase().includes(q);
   });
   return '<option value="">Select accreditation / course…</option>'+list.map(item=>`<option value="${item.id}" ${String(selectedId)===String(item.id)?'selected':''}>${esc(catalogOptionText(item))}</option>`).join('');
 }
 
 function findExistingCatalogItem(existing){
   if(!existing)return null;
-  if(existing.accreditation_catalog_id){
-    const linked=accreditationCatalog.find(x=>String(x.id)===String(existing.accreditation_catalog_id));
-    if(linked)return linked;
-  }
-  return accreditationCatalog.find(x=>String(x.module_code).toLowerCase()===String(existing.accreditation_name||'').toLowerCase())||null;
+  const matched=accreditationCatalog.find(x=>x.entry&&window.RRTAQualificationMaster.matches(x.entry,existing.accreditation_name));
+  if(matched)return matched;
+  const legacy={id:'legacy:'+existing.id,catalogId:existing.accreditation_catalog_id??null,module_code:existing.accreditation_name||'Uncatalogued',description:existing.accreditation_name||'Uncatalogued',label:(existing.accreditation_name||'Uncatalogued')+' (existing record)'};
+  accreditationCatalog=accreditationCatalog.filter(x=>x.id!==legacy.id);accreditationCatalog.push(legacy);return legacy;
 }
 
 function accreditationDbStatus(expiry){
@@ -60,8 +59,8 @@ openAccModal=async function(existing=null){
     <label>Expiry date<input type="date" name="expiry" value="${existing?.expiry_date||''}"></label>
     <label style="grid-column:1/-1">Evidence / certificate file<input type="file" name="file"></label>
   </div>`,async f=>{
-    const catalogId=Number(f.get('catalog_id'));
-    const selected=accreditationCatalog.find(x=>Number(x.id)===catalogId);
+    const catalogId=String(f.get('catalog_id')||'');
+    const selected=accreditationCatalog.find(x=>String(x.id)===catalogId);
     if(!selected)throw new Error('Please select an accreditation or course from the catalogue.');
     let path=existing?.certificate_url||null;
     let uploadedNewFile=false;
@@ -74,8 +73,8 @@ openAccModal=async function(existing=null){
     }
     const payload={
       learner_id:learnerId,
-      accreditation_catalog_id:selected.id,
-      accreditation_name:selected.module_code,
+      accreditation_catalog_id:existing&&String(current?.id)===catalogId?existing.accreditation_catalog_id??null:selected.catalogId??null,
+      accreditation_name:existing&&String(current?.id)===catalogId?existing.accreditation_name:selected.module_code,
       awarding_body:f.get('awarding').trim()||null,
       certificate_number:f.get('number').trim()||null,
       status:accreditationDbStatus(f.get('expiry')||null),
@@ -156,7 +155,7 @@ document.querySelectorAll('[data-open-modal="accreditation"]').forEach(btn=>btn.
   addButton.replaceWith(actionsWrap);
   actionsWrap.append(toggle,addButton);
 
-  const saved=localStorage.getItem('rrtaAccreditationView')||'grid';
+  const saved=localStorage.getItem('rrtaAccreditationView')||'list';
   const apply=view=>{
     const mode=view==='list'?'list':'grid';
     list.classList.toggle('accreditation-grid',mode==='grid');
