@@ -56,16 +56,45 @@ function ensureVerificationActions(){
   }
 }
 
+function profileQualificationLabel(a){
+ const name=a.accreditation_name||'Accreditation',master=window.RRTAQualificationMaster;
+ const entry=master?.entries().find(e=>master.matches(e,name));
+ return entry?master.display(entry):name;
+}
+function profileNrswaUnit(a){
+ const master=window.RRTAQualificationMaster;
+ return master?.entries().find(e=>e.category==='02 NRSWA'&&master.matches(e,a.accreditation_name));
+}
 async function renderAccreditationRecords(){
   const list=document.getElementById('accreditationList');if(!list)return;
   const rows=[...accreditations].sort((a,b)=>String(a.accreditation_name||'').localeCompare(String(b.accreditation_name||''))||String(b.issue_date||'').localeCompare(String(a.issue_date||'')));
   list.classList.remove('accreditation-grid');list.style.display='block';
+  const expanded=new Set([...list.querySelectorAll('[data-nrswa-toggle][aria-expanded="true"]')].map(x=>x.dataset.nrswaToggle));
+  const groups=new Map(),ordered=[];
+  for(const a of rows){
+    const unit=profileNrswaUnit(a);
+    if(!unit){ordered.push({a});continue}
+    const groupKey='nrswa-'+(String(a.certificate_number||'').trim()||'unregistered');
+    if(!groups.has(groupKey)){const g={key:groupKey,rows:[]};groups.set(groupKey,g);ordered.push(g)}
+    groups.get(groupKey).rows.push(a);
+  }
   const cells=await Promise.all(rows.map(async a=>{
     let view='No file attached';if(a.certificate_url){try{const url=await signed('learner-documents',a.certificate_url);if(url)view='<a class="mini-btn" href="'+esc(url)+'" target="_blank" rel="noopener">View</a> <button type="button" class="mini-btn" data-cert-download="'+esc(a.id)+'">Download</button>';else view='Unavailable'}catch(e){view='Unavailable'}}
-    const title=typeof accreditationTitle==='function'?accreditationTitle(a):a.accreditation_name||'Accreditation';
-    return '<tr><td><strong>'+esc(title)+'</strong></td><td>'+esc(a.awarding_body||'—')+'</td><td>'+esc(fmt(a.issue_date))+'</td><td>'+esc(a.expiry_date?fmt(a.expiry_date):'No expiry')+'</td><td>'+accreditationBadge(a.expiry_date)+'</td><td>'+view+'</td><td>'+actions('accreditation',a.id)+' <button type="button" class="mini-btn" data-action="renew" data-type="accreditation" data-id="'+esc(a.id)+'">Renew</button></td></tr>';
+    const title=profileQualificationLabel(a);
+    return '<tr data-profile-acc-row="'+esc(a.id)+'"><td><strong>'+esc(title)+'</strong></td><td>'+esc(a.awarding_body||'—')+'</td><td>'+esc(fmt(a.issue_date))+'</td><td>'+esc(a.expiry_date?fmt(a.expiry_date):'No expiry')+'</td><td>'+accreditationBadge(a.expiry_date)+'</td><td>'+view+'</td><td>'+actions('accreditation',a.id)+' <button type="button" class="mini-btn" data-action="renew" data-type="accreditation" data-id="'+esc(a.id)+'">Renew</button></td></tr>';
   }));
-  list.innerHTML='<div style="font-size:12px;color:#667085;margin-bottom:8px">'+rows.length+' recorded accreditations · includes expired records</div>'+(rows.length?'<div style="overflow-x:auto;min-height:110px"><table class="rrta-uniform-table rrta-compact-accreditations" style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#e6e9ec">'+['Qualification','Awarding body','Issued','Expiry','Status','Evidence','Actions'].map(t=>'<th style="text-align:left;padding:9px 8px;white-space:nowrap">'+t+'</th>').join('')+'</tr></thead><tbody>'+cells.join('')+'</tbody></table></div>':empty('No accreditations recorded yet.'));
+  const byId=new Map(rows.map((a,i)=>[String(a.id),cells[i]]));
+  const visibleRows=ordered.map(g=>{
+    if(g.a)return byId.get(String(g.a.id));
+    const opened=expanded.has(g.key),units=[...new Set(g.rows.map(a=>profileNrswaUnit(a).code))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+    const statuses=g.rows.map(a=>accreditationStatus(a.expiry_date).cls);
+    const dates=[...new Set(g.rows.map(a=>a.expiry_date||''))];
+    const status=statuses.every(x=>x===statuses[0])?accreditationBadge(g.rows[0].expiry_date):'<span style="color:#64748b;font-weight:600">Mixed validity</span>';
+    const summary='<tr style="background:#e8edf2"><td><button type="button" class="mini-btn" data-nrswa-toggle="'+esc(g.key)+'" aria-expanded="'+opened+'" style="white-space:normal;text-align:left"><span aria-hidden="true">'+(opened?'▾':'▸')+'</span> <strong>NRSWA Street Works</strong> · '+units.length+' units</button><div style="font-size:11px;color:#64748b;margin-top:3px">'+esc(units.join(', '))+'</div></td><td>'+esc([...new Set(g.rows.map(a=>a.awarding_body||'—'))].join(', '))+'</td><td>'+esc(new Set(g.rows.map(a=>a.issue_date||'')).size===1?fmt(g.rows[0].issue_date):'Various')+'</td><td>'+esc(dates.length===1?(dates[0]?fmt(dates[0]):'No expiry'):'Various')+'</td><td>'+status+'</td><td colspan="2"><span style="color:#64748b">Expand to view individual units and evidence</span></td></tr>';
+    return summary+g.rows.map(a=>byId.get(String(a.id)).replace('<tr data-profile-acc-row=', '<tr '+(opened?'':'hidden ' )+'data-nrswa-group="'+esc(g.key)+'" data-profile-acc-row=')).join('');
+  }).join('');
+  list.innerHTML='<div style="font-size:12px;color:#667085;margin-bottom:8px">'+rows.length+' recorded accreditations · includes expired records</div>'+(rows.length?'<div style="overflow-x:auto;min-height:110px"><table class="rrta-uniform-table rrta-compact-accreditations" style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#e6e9ec">'+['Qualification','Awarding body','Issued','Expiry','Status','Evidence','Actions'].map(t=>'<th style="text-align:left;padding:9px 8px;white-space:nowrap">'+t+'</th>').join('')+'</tr></thead><tbody>'+visibleRows+'</tbody></table></div>':empty('No accreditations recorded yet.'));
+  list.querySelectorAll('[data-nrswa-toggle]').forEach(btn=>btn.onclick=()=>{const open=btn.getAttribute('aria-expanded')!=='true';btn.setAttribute('aria-expanded',String(open));btn.querySelector('span').textContent=open?'▾':'▸';list.querySelectorAll('[data-nrswa-group]').forEach(tr=>{if(tr.dataset.nrswaGroup===btn.dataset.nrswaToggle)tr.hidden=!open})});
   list.querySelectorAll('td').forEach(td=>{td.style.padding='4px 8px';td.style.borderBottom='1px solid #dfe3e7';td.style.verticalAlign='middle'});
   list.querySelectorAll('[data-cert-download]').forEach(b=>b.onclick=async()=>{const a=accreditations.find(x=>String(x.id)===b.dataset.certDownload);if(!a?.certificate_url)return;b.disabled=true;try{const url=await signed('learner-documents',a.certificate_url);if(!url)throw Error('Certificate unavailable');const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw Error('Certificate download failed');const objectUrl=URL.createObjectURL(await res.blob());const link=document.createElement('a');link.href=objectUrl;link.download=safeZipName(a.accreditation_name)+' - '+safeZipName(learner?.full_name||'Learner')+fileExtensionFromPath(a.certificate_url);document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(objectUrl),30000)}catch(e){alert(e.message||'Unable to download certificate')}finally{b.disabled=false}});const downloadAll=document.getElementById('downloadAllAccreditationsBtn');if(downloadAll)downloadAll.onclick=downloadAllAccreditationsZip;bindActions();
 }
