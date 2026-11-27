@@ -39,6 +39,24 @@ function accreditationDbStatus(expiry){
   return 'current';
 }
 
+function profileEvidenceFiles(existing,current){
+ const matching=a=>String(a.id)===String(existing.id)||(existing.accreditation_catalog_id!=null&&String(a.accreditation_catalog_id)===String(existing.accreditation_catalog_id))|| (current?.entry&&window.RRTAQualificationMaster.matches(current.entry,a.accreditation_name))||String(a.accreditation_name||'').trim().toLowerCase()===String(existing.accreditation_name||'').trim().toLowerCase();
+ const records=[existing,...accreditations.filter(a=>String(a.id)!==String(existing.id)&&matching(a))].sort((a,b)=>String(a.id)===String(existing.id)?-1:String(b.id)===String(existing.id)?1:String(b.issue_date||'').localeCompare(String(a.issue_date||'')));
+ const files=[];for(const a of records){if(a.certificate_url)files.push({a,path:a.certificate_url,name:a.certificate_url.split('/').pop(),kind:String(a.id)===String(existing.id)?'Primary certificate':'Previous / legacy certificate'});for(const d of a.supporting_documents||[])if(d.path)files.push({a,path:d.path,name:d.name||d.path.split('/').pop(),kind:d.kind||'Additional evidence'})}
+ return {records,files}
+}
+function mountProfileEvidence(existing,current){
+ const host=document.getElementById('profileAccEvidence');if(!host)return;
+ const {records,files}=profileEvidenceFiles(existing,current);
+ host.innerHTML='<div style="font-weight:700;margin-bottom:6px">Files ('+files.length+')</div>'+(files.length?'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#eef0f3"><th>Document</th><th>Type</th><th>Expiry</th><th>Actions</th></tr></thead><tbody>'+files.map((f,j)=>'<tr><td style="overflow-wrap:anywhere">'+esc(f.name)+'</td><td>'+esc(f.kind)+'</td><td>'+esc(fmt(f.a.expiry_date))+'</td><td style="white-space:nowrap"><button type="button" class="mini-btn" data-evidence-index="'+j+'" data-evidence-mode="view">View</button> <button type="button" class="mini-btn" data-evidence-index="'+j+'" data-evidence-mode="download">Download</button></td></tr>').join('')+'</tbody></table></div>':'<p class="muted">No files linked.</p>')+'<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">+ Add supporting document</summary><div class="form-grid" style="margin-top:8px"><label>Accreditation record<select id="profileEvidenceTarget">'+records.map(a=>'<option value="'+esc(a.id)+'" '+(String(a.id)===String(existing.id)?'selected':'')+'>'+esc((String(a.id)===String(existing.id)?'Selected':'Previous')+' · '+(a.certificate_number||'No number')+' · '+(a.expiry_date?fmt(a.expiry_date):'No expiry'))+'</option>').join('')+'</select></label><label>Document type<select id="profileEvidenceKind">'+['Additional evidence','Legacy evidence','Certificate','Card front','Card back'].map(k=>'<option>'+k+'</option>').join('')+'</select></label><label style="grid-column:1/-1">File<input type="file" id="profileEvidenceFile" accept=".pdf,.jpg,.jpeg,.png,.webp"></label></div><button class="btn secondary small" type="button" id="profileEvidenceUpload">Attach file</button><p class="muted" id="profileEvidenceFeedback" role="status"></p></details>';
+ host.querySelectorAll('th,td').forEach(c=>{c.style.padding='5px 6px';c.style.textAlign='left';c.style.borderBottom='1px solid #dfe3e7'});
+ host.querySelectorAll('[data-evidence-index]').forEach(b=>b.onclick=async()=>{const f=files[Number(b.dataset.evidenceIndex)],w=window.open('about:blank','_blank');if(w)w.opener=null;try{const result=await db.storage.from('learner-documents').createSignedUrl(f.path,300,b.dataset.evidenceMode==='download'?{download:f.name}:{});if(result.error||!result.data?.signedUrl)throw Error(result.error?.message||'File unavailable');if(w)w.location.href=result.data.signedUrl;else alert('Allow pop-ups to open evidence.')}catch(e){if(w)w.close();alert(e.message)}});
+ const add=host.querySelector('#profileEvidenceUpload');add.onclick=async()=>{const a=records.find(a=>String(a.id)===host.querySelector('#profileEvidenceTarget').value),f=host.querySelector('#profileEvidenceFile').files[0],kind=host.querySelector('#profileEvidenceKind').value,msg=host.querySelector('#profileEvidenceFeedback');if(!a||!f){msg.textContent='Choose an accreditation and file.';return}if(!/\.(pdf|jpe?g|png|webp)$/i.test(f.name)||f.size>20*1024*1024){msg.textContent='Choose a PDF or image up to 20 MB.';return}
+ if(!confirm('Attach this supporting document now? This saves the file independently of other edits.'))return;
+ const owner=a.learner_id||a.person_id;if(!owner){msg.textContent='Accreditation owner not found.';return}const path=owner+'/accreditations/'+a.id+'/'+crypto.randomUUID()+'-'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_'),bucket=db.storage.from('learner-documents');let stored=false;add.disabled=true;const submit=host.closest('form')?.querySelector('[type=submit]');if(submit)submit.disabled=true;msg.textContent='Uploading…';
+ try{const up=await bucket.upload(path,f,{upsert:false});if(up.error)throw up.error;stored=true;const result=await db.rpc('append_accreditation_document',{p_id:a.id,p_path:path,p_kind:kind,p_name:f.name});if(result.error)throw result.error;stored=false;a.supporting_documents=[...(a.supporting_documents||[]),{path,name:f.name,kind}];mountProfileEvidence(existing,current);const feedback=host.querySelector('#profileEvidenceFeedback');if(feedback)feedback.textContent='Supporting document saved.';void renderAccreditationRecords().catch(console.warn)}catch(e){if(stored)await bucket.remove([path]);msg.textContent=e.message||'Unable to attach document';add.disabled=false}finally{if(submit)submit.disabled=false}};
+}
+
 openAccModal=async function(existing=null){
   try{await loadAccreditationCatalog();}
   catch(err){alert(err.message||'Unable to load accreditation catalogue.');return;}
@@ -57,7 +75,7 @@ openAccModal=async function(existing=null){
     <label>Certificate number<input name="number" value="${esc(existing?.certificate_number||'')}"></label>
     <label>Issue date<input type="date" name="issue" value="${existing?.issue_date||''}"></label>
     <label>Expiry date<input type="date" name="expiry" value="${existing?.expiry_date||''}"></label>
-    <label style="grid-column:1/-1">Evidence / certificate file<input type="file" name="file"></label>
+    ${existing?'<div id="profileAccEvidence" style="grid-column:1/-1"></div>':'<label style="grid-column:1/-1">Evidence / certificate file<input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.webp"></label>'}
   </div>`,async f=>{
     const catalogId=String(f.get('catalog_id')||'');
     const selected=accreditationCatalog.find(x=>String(x.id)===catalogId);
@@ -105,6 +123,7 @@ openAccModal=async function(existing=null){
     updateDescription();
   });
   updateDescription();
+  if(existing)mountProfileEvidence(existing,current);
 };
 
 document.querySelectorAll('[data-open-modal="accreditation"]').forEach(btn=>btn.onclick=()=>openAccModal());
